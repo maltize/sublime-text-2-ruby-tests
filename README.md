@@ -28,6 +28,8 @@ Usage
  - Run all ruby tests from current file: Command-R
  - Show test panel: Command-Shift-A
 
+ ![ruby_tests screenshot](https://github.com/maltize/sublime-text-2-ruby-tests/raw/master/ruby_tests.png)
+
 Note
 ----
 If you having trouble running tests try to run Sublime Text 2 from command line.
