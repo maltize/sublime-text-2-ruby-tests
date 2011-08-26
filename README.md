@@ -4,6 +4,7 @@ Sublime Text 2 Ruby Tests
 Overview
 --------
 Running ruby tests in Sublime Text 2.
+Maciej Gajek & Grzegorz Smajdor (https://github.com/gs) project.
 
 Installation
 ------------
@@ -35,5 +36,4 @@ Note
 If you having trouble running tests try to run Sublime Text 2 from command line.
 
 This is a work in progress so expect bugs.
-
 Please open an issue at https://github.com/maltize/sublime-text-2-ruby-tests if you discover a problem or would like to see a feature/change implemented.
