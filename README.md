@@ -1,4 +1,3 @@
-=========================
 Sublime Text 2 Ruby Tests
 =========================
 
@@ -17,7 +16,9 @@ Installation
 2. Add this to your User Key Bindings:
 
      { "keys": ["super+shift+r"], "command": "run_single_ruby_test" },
+
      { "keys": ["super+r"], "command": "run_all_ruby_test" },
+
      { "keys": ["super+shift+a"], "command": "show_test_panel" }
 
 Usage
@@ -30,5 +31,7 @@ Usage
 Note
 ----
 If you having trouble running tests try to run Sublime Text 2 from command line.
+
 This is a work in progress so expect bugs.
+
 Please open an issue at https://github.com/maltize/sublime-text-2-ruby-tests if you discover a problem or would like to see a feature/change implemented.
