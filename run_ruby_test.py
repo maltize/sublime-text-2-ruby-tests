@@ -14,6 +14,7 @@ class AsyncProcess(object):
     thread.start_new_thread(self.read_stdout, ())
 
   def read_stdout(self):
+    # print self.cmd # Debug
     self.proc = subprocess.Popen([self.cmd], shell=True, stdout=subprocess.PIPE)
     while True:
       data = os.read(self.proc.stdout.fileno(), 2**15)
@@ -50,10 +51,19 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
   def show_tests_panel(self):
     if not hasattr(self, 'output_view'):
       self.output_view = self.window.get_output_panel("tests")
+    self.clear_test_view()
     self.window.run_command("show_panel", {"panel": "output.tests"})
+
+  def clear_test_view(self):
+    self.output_view.set_read_only(False)
+    edit = self.output_view.begin_edit()
+    self.output_view.erase(edit, sublime.Region(0, self.output_view.size()))
+    self.output_view.end_edit(edit)
+    self.output_view.set_read_only(True)
 
   def append_data(self, proc, data):
     str = data.decode("utf-8")
+    str = str.replace('\r\n', '\n').replace('\r', '\n')
 
     selection_was_at_end = (len(self.output_view.sel()) == 1
       and self.output_view.sel()[0]
