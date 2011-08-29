@@ -8,28 +8,29 @@ Maciej Gajek & Grzegorz Smajdor (https://github.com/gs) project.
 
 Installation
 ------------
-1. Copy **[run_ruby_test.py](https://github.com/maltize/sublime-text-2-ruby-tests/raw/master/run_ruby_test.py)** into your Sublime Text 2 User packages folder:
 
- - OS X: ~/Library/Application Support/Sublime Text 2/Packages/User/
- - Windows: %APPDATA%/Sublime Text 2/Packages/User/
- - Linux: ~/.Sublime Text 2/Packages/User/
+Go to your Sublime Text 2 `Packages` directory
 
-2. Add this to your User Key Bindings:
+ - OS X: ~/Library/Application Support/Sublime Text 2/Packages/
+ - Windows: %APPDATA%/Sublime Text 2/Packages/
+ - Linux: ~/.Sublime Text 2/Packages/
 
-     { "keys": ["super+shift+r"], "command": "run_single_ruby_test" },
+and clone the repository using the command below:
 
-     { "keys": ["super+r"], "command": "run_all_ruby_test" },
-
-     { "keys": ["super+shift+a"], "command": "show_test_panel" }
+git clone https://github.com/maltize/sublime-text-2-ruby-tests.git RubyTest
 
 Usage
 -----
 
  - Run single ruby test: Command-Shift-R
- - Run all ruby tests from current file: Command-R
+ - Run all ruby tests from current file: Command-r
  - Show test panel: Command-Shift-A
 
  ![ruby_tests screenshot](https://github.com/maltize/sublime-text-2-ruby-tests/raw/master/ruby_tests.png)
+
+Caution
+-------
+Default mapping of Command-r has been mapped to Command-Shift-T (textmate like behavior)
 
 Note
 ----
