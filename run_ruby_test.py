@@ -43,6 +43,10 @@ class StatusProcess(object):
         break
 
 class RunSingleRubyTest(sublime_plugin.WindowCommand):
+
+  global RUBY_UNIT
+  RUBY_UNIT = "ruby -Itest "
+
   def show_tests_panel(self):
     if not hasattr(self, 'output_view'):
       self.output_view = self.window.get_output_panel("tests")
@@ -85,7 +89,7 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
       self.show_tests_panel()
 
       test_name = match_obj.group(1)[::-1]
-      ex = self.project_path(folder_name, "ruby " + view.file_name() + " -n " + test_name)
+      ex = self.project_path(folder_name, RUBY_UNIT + view.file_name() + " -n " + test_name)
 
       self.is_running = True
       self.proc = AsyncProcess(ex, self)
@@ -100,7 +104,7 @@ class RunAllRubyTest(RunSingleRubyTest):
 
     self.show_tests_panel()
 
-    ex = self.project_path(folder_name, "ruby " + view.file_name())
+    ex = self.project_path(folder_name, RUBY_UNIT + view.file_name())
 
     self.is_running = True
     self.proc = AsyncProcess(ex, self)
