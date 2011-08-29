@@ -1,0 +1,8 @@
+[
+    { "keys": ["super+shift+t"], "command": "show_overlay", "args": {"overlay": "goto", "text": "@"} }, // remap super+r 
+
+	{ "keys": ["super+shift+r"], "command": "run_single_ruby_test" }, // single test
+	{ "keys": ["super+r"], "command": "run_all_ruby_test" }, // test file
+	
+    { "keys": ["super+shift+a"], "command": "show_test_panel" } // show test panel
+]
