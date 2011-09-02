@@ -6,52 +6,36 @@
   <string>72174d10-bb12-11e0-962b-112233445566</string>
   <key>name</key>
   <string>TestConsole</string>
-  <key>settings</key>
-  <array>
-    <dict>
-      <key>name</key>
-      <string>Test</string>
-      <key>scope</key>
-      <string>test.pass</string>
-      <key>settings</key>
-      <dict>
-        <key>foreground</key>
-        <string>#00FF00</string>
-      </dict>
-    </dict>
-    <dict>
-      <key>name</key>
-      <string>Test</string>
-      <key>scope</key>
-      <string>test.error</string>
-      <key>settings</key>
-      <dict>
-        <key>error</key>
-        <string>#FF0000</string>
-      </dict>
-    </dict>
-    <dict>
-      <key>name</key>
-      <string>Test</string>
-      <key>scope</key>
-      <string>test.fail</string>
-      <key>settings</key>
-      <dict>
-        <key>fail</key>
-        <string>#0000FF</string>
-      </dict>
-    </dict>
-  </array>
   <key>patterns</key>
   <array>
     <dict>
       <key>comment</key>
-      <string>work in progress - testing</string>
+      <string>test pass</string>
       <key>match</key>
-      <string>\b(Finished)\b</string>
+      <string>\d+ (tests|assertions)</string>
       <key>name</key>
       <string>test.pass</string>
     </dict>
+    <dict>
+      <key>comment</key>
+      <string>test error</string>
+      <key>match</key>
+      <string>(\d+ errors)|(\d+\) Error:)</string>
+      <key>name</key>
+      <string>test.error</string>
+    </dict>
+    <dict>
+      <key>comment</key>
+      <string>test fail</string>
+      <key>match</key>
+      <string>(\d+ failures)|(\d+\) Failure:)</string>
+      <key>name</key>
+      <string>test.fail</string>
+    </dict>
   </array>
+  <key>scopeName</key>
+  <string>tests.ruby</string>
+  <key>uuid</key>
+  <string>72174d10-bb12-11e0-962b-112233445566</string>
 </dict>
 </plist>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>name</key>
+  <string>TestConsoleTheme</string>
+  <key>settings</key>
+  <array>
+    <dict>
+      <key>settings</key>
+      <dict>
+        <key>background</key>
+        <string>#000000</string>
+        <key>caret</key>
+        <string>#A7A7A7</string>
+        <key>foreground</key>
+        <string>#F8F8F8</string>
+        <key>invisibles</key>
+        <string>#CAE2FB3D</string>
+        <key>lineHighlight</key>
+        <string>#FFFFFF0D</string>
+        <key>selection</key>
+        <string>#DDF0FF33</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Test</string>
+      <key>scope</key>
+      <string>test.pass</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#00FF00</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Test</string>
+      <key>scope</key>
+      <string>test.error</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#FF0000</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Test</string>
+      <key>scope</key>
+      <string>test.fail</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#FF1493</string>
+      </dict>
+    </dict>
+  </array>
+  <key>uuid</key>
+  <string>72174d10-bb12-11e0-962b-112233445577</string>
+</dict>
+</plist>
