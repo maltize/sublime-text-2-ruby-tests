@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>bundleUUID</key>
+  <string>72174d10-bb12-11e0-962b-112233445566</string>
+  <key>name</key>
+  <string>TestConsole</string>
+  <key>settings</key>
+  <array>
+    <dict>
+      <key>name</key>
+      <string>Test</string>
+      <key>scope</key>
+      <string>test.pass</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#00FF00</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Test</string>
+      <key>scope</key>
+      <string>test.error</string>
+      <key>settings</key>
+      <dict>
+        <key>error</key>
+        <string>#FF0000</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Test</string>
+      <key>scope</key>
+      <string>test.fail</string>
+      <key>settings</key>
+      <dict>
+        <key>fail</key>
+        <string>#0000FF</string>
+      </dict>
+    </dict>
+  </array>
+  <key>patterns</key>
+  <array>
+    <dict>
+      <key>comment</key>
+      <string>work in progress - testing</string>
+      <key>match</key>
+      <string>\b(Finished)\b</string>
+      <key>name</key>
+      <string>test.pass</string>
+    </dict>
+  </array>
+</dict>
+</plist>
