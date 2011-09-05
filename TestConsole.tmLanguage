@@ -32,6 +32,35 @@
       <key>name</key>
       <string>test.fail</string>
     </dict>
+    <dict>
+      <key>comment</key>
+      <string>dots painting</string>
+      <key>begin</key>
+      <string>Started</string>
+      <key>patterns</key>
+      <array>
+        <dict>
+          <key>match</key>
+          <string>\.+</string>
+          <key>name</key>
+          <string>test.pass</string>
+        </dict>
+        <dict>
+          <key>match</key>
+          <string>E+</string>
+          <key>name</key>
+          <string>test.error</string>
+        </dict>
+        <dict>
+          <key>match</key>
+          <string>F+</string>
+          <key>name</key>
+          <string>test.fail</string>
+        </dict>
+      </array>
+      <key>end</key>
+      <string>Finished</string>
+    </dict>
   </array>
   <key>scopeName</key>
   <string>tests.ruby</string>

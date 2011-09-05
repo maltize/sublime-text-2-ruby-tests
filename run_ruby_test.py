@@ -14,7 +14,7 @@ class AsyncProcess(object):
     thread.start_new_thread(self.read_stdout, ())
 
   def read_stdout(self):
-    # print self.cmd # Debug
+    print "DEBUG_EXEC: " + self.cmd
     self.proc = subprocess.Popen([self.cmd], shell=True, stdout=subprocess.PIPE)
     while True:
       data = os.read(self.proc.stdout.fileno(), 2**15)
@@ -83,7 +83,6 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
     return "cd " + path + " && cd ../.." + " && " + command
 
   def run(self):
-    test_regexp = re.compile("test_*", re.IGNORECASE)
     view = self.window.active_view()
     folder_name, file_name = os.path.split(view.file_name())
 
@@ -93,12 +92,15 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
     text_string = view.substr(sublime.Region(region.begin() - 2000, line_region.end()))
     text_string = text_string.replace("\n", " ")
     text_string = text_string[::-1]
-    match_obj = re.search('\s?([a-zA-Z_]+tset)\s+fed', text_string)
+    match_obj = re.search('\s?([a-zA-Z_]+tset)\s+fed', text_string) # 1st search for 'def test_name'
+    if not match_obj:
+      match_obj = re.search('\s?(\"[a-zA-Z_\s]+\"\s+tset)', text_string) # 2nd search for 'test "name"'
 
     if match_obj:
       self.show_tests_panel()
 
       test_name = match_obj.group(1)[::-1]
+      test_name = test_name.replace("\"", "").replace(" ", "_") # if test name in 2nd format
       ex = self.project_path(folder_name, RUBY_UNIT + view.file_name() + " -n " + test_name)
 
       self.is_running = True
