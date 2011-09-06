@@ -14,19 +14,16 @@ class AsyncProcess(object):
     thread.start_new_thread(self.read_stdout, ())
 
   def read_stdout(self):
-    try:
-      print "DEBUG_EXEC: " + self.cmd
-      self.proc = subprocess.Popen([self.cmd], shell=True, stdout=subprocess.PIPE)
-      while True:
-        data = os.read(self.proc.stdout.fileno(), 2**15)
-        if data != "":
-          sublime.set_timeout(functools.partial(self.listener.append_data, self.proc, data), 0)
-        else:
-          self.proc.stdout.close()
-          self.listener.is_running = False
-          break
-    except Exception, errtxt:
-      print errtxt
+    print "DEBUG_EXEC: " + self.cmd
+    self.proc = subprocess.Popen([self.cmd], shell=True, stdout=subprocess.PIPE)
+    while True:
+      data = os.read(self.proc.stdout.fileno(), 2**15)
+      if data != "":
+        sublime.set_timeout(functools.partial(self.listener.append_data, self.proc, data), 0)
+      else:
+        self.proc.stdout.close()
+        self.listener.is_running = False
+        break
 
 class StatusProcess(object):
   def __init__(self, msg, listener):
