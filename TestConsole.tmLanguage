@@ -61,6 +61,14 @@
       <key>end</key>
       <string>Finished</string>
     </dict>
+    <dict>
+      <key>comment</key>
+      <string>color syntax response</string>
+      <key>match</key>
+      <string>Syntax OK</string>
+      <key>name</key>
+      <string>test.pass</string>
+    </dict>
   </array>
   <key>scopeName</key>
   <string>tests.ruby</string>
