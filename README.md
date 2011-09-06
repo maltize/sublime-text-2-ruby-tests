@@ -25,6 +25,7 @@ Usage
  - Run single ruby test: Command-Shift-R
  - Run all ruby tests from current file: Command-r
  - Show test panel: Command-Shift-X
+ - Check RB, ERB file syntax: Alt+Shift+V
 
  ![ruby_tests screenshot](https://github.com/maltize/sublime-text-2-ruby-tests/raw/master/ruby_tests.png)
 

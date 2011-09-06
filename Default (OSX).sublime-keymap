@@ -4,5 +4,7 @@
 	{ "keys": ["super+shift+r"], "command": "run_single_ruby_test" }, // single test
 	{ "keys": ["super+r"], "command": "run_all_ruby_test" }, // test file
 	
-  { "keys": ["super+shift+x"], "command": "show_test_panel" } // show test panel
+  { "keys": ["super+shift+x"], "command": "show_test_panel" }, // show test panel
+
+  { "keys": ["alt+shift+v"], "command": "verify_ruby_file" } // verify ruby syntax
 ]

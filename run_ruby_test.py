@@ -14,16 +14,19 @@ class AsyncProcess(object):
     thread.start_new_thread(self.read_stdout, ())
 
   def read_stdout(self):
-    print "DEBUG_EXEC: " + self.cmd
-    self.proc = subprocess.Popen([self.cmd], shell=True, stdout=subprocess.PIPE)
-    while True:
-      data = os.read(self.proc.stdout.fileno(), 2**15)
-      if data != "":
-        sublime.set_timeout(functools.partial(self.listener.append_data, self.proc, data), 0)
-      else:
-        self.proc.stdout.close()
-        self.listener.is_running = False
-        break
+    try:
+      print "DEBUG_EXEC: " + self.cmd
+      self.proc = subprocess.Popen([self.cmd], shell=True, stdout=subprocess.PIPE)
+      while True:
+        data = os.read(self.proc.stdout.fileno(), 2**15)
+        if data != "":
+          sublime.set_timeout(functools.partial(self.listener.append_data, self.proc, data), 0)
+        else:
+          self.proc.stdout.close()
+          self.listener.is_running = False
+          break
+    except Exception, errtxt:
+      print errtxt
 
 class StatusProcess(object):
   def __init__(self, msg, listener):
@@ -125,3 +128,24 @@ class RunAllRubyTest(RunSingleRubyTest):
 class ShowTestPanel(sublime_plugin.WindowCommand):
   def run(self):
     self.window.run_command("show_panel", {"panel": "output.tests"})
+
+class VerifyRubyFile(RunSingleRubyTest):
+  def run(self):
+    view = self.window.active_view()
+    folder_name, file_name = os.path.split(view.file_name())
+    self.show_tests_panel()
+
+    if re.search('\w+\.rb', file_name):
+      ex = self.project_path(folder_name, "ruby -c " + view.file_name())
+      self.is_running = True
+      self.proc = AsyncProcess(ex, self)
+      StatusProcess("Checking syntax of : " + file_name, self)
+
+    elif re.search('\w+\.erb', file_name):
+      ex = self.project_path(folder_name, "erb -xT - " + view.file_name() + " |ruby -c")
+      self.is_running = True
+      self.proc = AsyncProcess(ex, self)
+      StatusProcess("Checking syntax of : " + file_name, self)
+
+    else:
+      sublime.error_message("only .rb or .erb file")
