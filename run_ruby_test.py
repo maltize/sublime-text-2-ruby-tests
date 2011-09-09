@@ -139,8 +139,7 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
       self.proc = AsyncProcess(ex, self)
       StatusProcess("Starting test " + test_name, self)
     else:
-      sublime.error_message(match_obj)
-      # sublime.error_message("No test name!")
+      sublime.error_message("No test name!")
 
 class RunAllRubyTest(RunSingleRubyTest):
   def run(self):
