@@ -108,19 +108,17 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
     line_region = view.line(region)
 
     text_string = view.substr(sublime.Region(region.begin() - 2000, line_region.end()))
-    text_string = text_string.replace("\n", " ")
+    text_string = text_string.replace("\n", "\\N")
     text_string = text_string[::-1]
     if re.search('\w+\.feature', file_name):
       #need to get the line number from matched regexp
-      match_obj = re.search('\s?([a-zA-Z ]+:oiranecS)', text_string) # Scenario
-      scenario = match_obj.group(1)[::-1]
-      o = re.search('\w*\:(\s\w*)+\ \ ', str(scenario))
-      o = o.group(0)
-      print o
-      view.line(view.find_all(o)[0])
-      line, col = view.rowcol(view.sel()[0].begin())
-      test_name = str(line + 1)
-      ex = self.cucumber_project_path(folder_name, CUCUMBER_UNIT + "features/" + file_name + " -l " + test_name)
+      text_string = text_string.encode( "utf-8" )
+      match_obj = re.search('\s?([a-zA-Z_ ]+:oiranecS)', text_string) # Scenario
+      test_name = match_obj.group(1)[::-1]
+      find = view.find(test_name, 0)
+      row, col = view.rowcol(find.a)
+      line = str(row + 1) 
+      ex = self.cucumber_project_path(folder_name, CUCUMBER_UNIT + "features/" + file_name + " -l " + line)
       
     elif re.search('\w+\.rb', file_name):
       match_obj = re.search('\s?([a-zA-Z_\d]+tset)\s+fed', text_string) # 1st search for 'def test_name'
