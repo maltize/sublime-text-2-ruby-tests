@@ -123,9 +123,9 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
       ex = self.cucumber_project_path(folder_name, CUCUMBER_UNIT + "features/" + file_name + " -l " + test_name)
       
     elif re.search('\w+\.rb', file_name):
-      match_obj = re.search('\s?([a-zA-Z_]+tset)\s+fed', text_string) # 1st search for 'def test_name'
+      match_obj = re.search('\s?([a-zA-Z_\d]+tset)\s+fed', text_string) # 1st search for 'def test_name'
       if not match_obj:
-        match_obj = re.search('\s?(\"[a-zA-Z_\s]+\"\s+tset)', text_string) # 2nd search for 'test "name"'
+        match_obj = re.search('\s?(\"[a-zA-Z_\s\d]+\"\s+tset)', text_string) # 2nd search for 'test "name"'
 
       test_name = match_obj.group(1)[::-1]
       test_name = test_name.replace("\"", "").replace(" ", "_") # if test name in 2nd format
