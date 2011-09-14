@@ -3,7 +3,12 @@ Sublime Text 2 Ruby Tests
 
 Overview
 --------
-Running ruby tests in Sublime Text 2.
+Running:
+
+  - ruby unit tests (all tests from file / single test)
+  - cucumber tests (feature / scenario)
+  - rspec # coming soon
+
 Maciej Gajek & Grzegorz Smajdor (https://github.com/gs) project.
 
 Installation
