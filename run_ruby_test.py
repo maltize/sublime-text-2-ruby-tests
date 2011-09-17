@@ -139,7 +139,7 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
       text_string = text_string.encode( "utf-8" )
       match_obj = re.search('\s?(\"[a-zA-Z_\s\d]+\"\s+ti)', text_string) # tests starts from it "
       test_name = match_obj.group(1)[::-1]
-      test_name = test_name.replace("it ","")
+      test_name = test_name.replace("it \"","\"")
       ex = self.rspec_project_path(folder_name, RSPEC_UNIT + file_name + " -e " + test_name)
 
     if match_obj:
