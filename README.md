@@ -7,7 +7,7 @@ Running:
 
   - ruby unit tests (all tests from file / single test)
   - cucumber tests (feature / scenario)
-  - rspec # coming soon
+  - rspec (full spec, single spec)
 
 Maciej Gajek & Grzegorz Smajdor (https://github.com/gs) project.
 
