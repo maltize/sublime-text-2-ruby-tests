@@ -12,7 +12,7 @@
       <key>comment</key>
       <string>test pass</string>
       <key>match</key>
-      <string>\d+ (tests|assertions)</string>
+      <string>\d+ (tests|assertions|examples?)</string>
       <key>name</key>
       <string>test.pass</string>
     </dict>

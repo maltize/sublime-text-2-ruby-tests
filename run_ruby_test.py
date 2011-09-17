@@ -62,6 +62,8 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
   RUBY_UNIT = "ruby -Itest "
   global CUCUMBER_UNIT
   CUCUMBER_UNIT = "cucumber "
+  global RSPEC_UNIT
+  RSPEC_UNIT = "rspec "
 
   def show_tests_panel(self):
     if not hasattr(self, 'output_view'):
@@ -100,6 +102,10 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
   def cucumber_project_path(self, path, command):
     return 'cd ' + path + " && cd .. " +" && " + command
 
+  def rspec_project_path(self, path, command):
+    return "cd " + path + " && " + command
+
+
   def run(self):
     view = self.window.active_view()
     folder_name, file_name = os.path.split(view.file_name())
@@ -120,7 +126,7 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
       line = str(row + 1) 
       ex = self.cucumber_project_path(folder_name, CUCUMBER_UNIT + "features/" + file_name + " -l " + line)
       
-    elif re.search('\w+\.rb', file_name):
+    elif re.search('\w+\_test.rb', file_name):
       match_obj = re.search('\s?([a-zA-Z_\d]+tset)\s+fed', text_string) # 1st search for 'def test_name'
       if not match_obj:
         match_obj = re.search('\s?(\"[a-zA-Z_\s\d]+\"\s+tset)', text_string) # 2nd search for 'test "name"'
@@ -128,6 +134,13 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
       test_name = match_obj.group(1)[::-1]
       test_name = test_name.replace("\"", "").replace(" ", "_") # if test name in 2nd format
       ex = self.project_path(folder_name, RUBY_UNIT + view.file_name() + " -n " + test_name)
+
+    elif re.search('\w+\_spec.rb', file_name):
+      text_string = text_string.encode( "utf-8" )
+      match_obj = re.search('\s?(\"[a-zA-Z_\s\d]+\"\s+ti)', text_string) # tests starts from it "
+      test_name = match_obj.group(1)[::-1]
+      test_name = test_name.replace("it ","")
+      ex = self.rspec_project_path(folder_name, RSPEC_UNIT + file_name + " -e " + test_name)
 
     if match_obj:
       self.show_tests_panel()
@@ -145,8 +158,10 @@ class RunAllRubyTest(RunSingleRubyTest):
     folder_name, file_name = os.path.split(view.file_name())
 
     self.show_tests_panel()
-    if re.search('\w+\.rb', file_name):
+    if re.search('\w+_test\.rb', file_name):
       ex = self.project_path(folder_name, RUBY_UNIT + view.file_name())
+    elif re.search('\w+_spec\.rb', file_name):
+      ex = self.rspec_project_path(folder_name, RSPEC_UNIT + file_name)
     elif re.search('\w+\.feature', file_name):
       ex = self.cucumber_project_path(folder_name, CUCUMBER_UNIT + "features/" + file_name)
 
