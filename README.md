@@ -32,6 +32,10 @@ Usage
  - Show test panel: Command-Shift-X
  - Check RB, ERB file syntax: Alt+Shift+V
 
+Keys:
+ 'Command' (OSX)
+ 'Ctrl' (Linux / Windows)
+
  ![ruby_tests screenshot](https://github.com/maltize/sublime-text-2-ruby-tests/raw/master/ruby_tests.png)
 
 Caution
