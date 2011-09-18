@@ -1,0 +1,6 @@
+Congratulation! You have installed awesome plugin for running ruby tests!
+Documentation can be found on  https://github.com/maltize/sublime-text-2-ruby-tests.
+Also feel free to report issues/suggestions there.
+
+Have fun !
+Maciej Gajek & Grzegorz Smajdor

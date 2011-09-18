@@ -1,0 +1,7 @@
+{
+  "url": "https://github.com/maltize/sublime-text-2-ruby-tests",
+  "version": "1.0.0",
+  "description": "Sublime Text 2 plugin for running ruby tests! (Unit, RSpec, Cucumber)",
+  "author": "Maciej Gajek & Grzegorz Smajdor",
+  "homepage": "https://github.com/maltize/sublime-text-2-ruby-tests"
+}
