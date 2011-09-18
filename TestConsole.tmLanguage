@@ -28,7 +28,7 @@
       <key>comment</key>
       <string>test fail</string>
       <key>match</key>
-      <string>(\d+ failures)|(\d+\) Failure:)</string>
+      <string>(\d+ failures?)|(\d+\) Failure:)</string>
       <key>name</key>
       <string>test.fail</string>
     </dict>
