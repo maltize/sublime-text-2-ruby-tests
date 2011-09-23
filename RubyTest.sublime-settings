@@ -1,0 +1,5 @@
+{
+  "ruby_unit_exec": "ruby -Itest",
+  "ruby_cucumber_exec": "cucumber",
+  "ruby_rspec_exec": "rspec"
+}
