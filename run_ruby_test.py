@@ -104,6 +104,14 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
   def rspec_project_path(self, path, command):
     return "cd " + path + " && " + command
 
+  def is_unit(self, file_name):
+    return re.search('\w+\_test.rb', file_name)
+
+  def is_cucumber(self, file_name):
+    return re.search('\w+\.feature', file_name)
+
+  def is_rspec(self, file_name):
+    return re.search('\w+\_spec.rb', file_name)
 
   def run(self):
     self.load_config()
@@ -117,26 +125,26 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
     text_string = view.substr(sublime.Region(region.begin() - 2000, line_region.end()))
     text_string = text_string.replace("\n", "\\N")
     text_string = text_string[::-1]
-    if re.search('\w+\.feature', file_name):
-      #need to get the line number from matched regexp
+
+    if self.is_cucumber(file_name):
       text_string = text_string.encode( "utf-8" )
       match_obj = re.search('\s?([a-zA-Z_ ]+:oiranecS)', text_string) # Scenario
       test_name = match_obj.group(1)[::-1]
       find = view.find(test_name, 0)
       row, col = view.rowcol(find.a)
-      line = str(row + 1) 
-      ex = self.cucumber_project_path(folder_name, CUCUMBER_UNIT + " " + "features/" + file_name + " -l " + line)
-      
-    elif re.search('\w+\_test.rb', file_name):
+      test_name = str(row + 1) 
+      ex = self.cucumber_project_path(folder_name, CUCUMBER_UNIT + " " + "features/" + file_name + " -l " + test_name)
+
+    elif self.is_unit(file_name):
       match_obj = re.search('\s?([a-zA-Z_\d]+tset)\s+fed', text_string) # 1st search for 'def test_name'
       if not match_obj:
         match_obj = re.search('\s?(\"[a-zA-Z_\s\d]+\"\s+tset)', text_string) # 2nd search for 'test "name"'
-
+      
       test_name = match_obj.group(1)[::-1]
       test_name = test_name.replace("\"", "").replace(" ", "_") # if test name in 2nd format
       ex = self.project_path(folder_name, RUBY_UNIT + " " + view.file_name() + " -n " + test_name)
 
-    elif re.search('\w+\_spec.rb', file_name):
+    elif self.is_rspec(file_name):
       text_string = text_string.encode( "utf-8" )
       match_obj = re.search('\s?(\"[a-zA-Z_\s\d]+\"\s+ti)', text_string) # tests starts from it "
       test_name = match_obj.group(1)[::-1]
@@ -145,7 +153,6 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
 
     if match_obj:
       self.show_tests_panel()
-
 
       self.is_running = True
       self.proc = AsyncProcess(ex, self)
@@ -161,12 +168,15 @@ class RunAllRubyTest(RunSingleRubyTest):
     folder_name, file_name = os.path.split(view.file_name())
 
     self.show_tests_panel()
-    if re.search('\w+_test\.rb', file_name):
+    if self.is_unit(file_name):
       ex = self.project_path(folder_name, RUBY_UNIT + " " + view.file_name())
-    elif re.search('\w+_spec\.rb', file_name):
+    elif self.is_rspec(file_name):
       ex = self.rspec_project_path(folder_name, RSPEC_UNIT + " " + file_name)
-    elif re.search('\w+\.feature', file_name):
+    elif self.is_cucumber(file_name):
       ex = self.cucumber_project_path(folder_name, CUCUMBER_UNIT + " " + "features/" + file_name)
+    else:
+      sublime.error_message("Only *_test.rb, *_spec.rb, *.feature files supported!")
+      return
 
     self.is_running = True
     self.proc = AsyncProcess(ex, self)
@@ -177,22 +187,25 @@ class ShowTestPanel(sublime_plugin.WindowCommand):
     self.window.run_command("show_panel", {"panel": "output.tests"})
 
 class VerifyRubyFile(RunSingleRubyTest):
+  def is_rb(self, file_name):
+    return re.search('\w+\.rb', file_name)
+
+  def is_erb(self, file_name):
+    return re.search('\w+\.erb', file_name)
+
   def run(self):
     view = self.window.active_view()
     folder_name, file_name = os.path.split(view.file_name())
     self.show_tests_panel()
 
-    if re.search('\w+\.rb', file_name):
+    if self.is_rb(file_name):
       ex = self.project_path(folder_name, "ruby -c " + view.file_name())
-      self.is_running = True
-      self.proc = AsyncProcess(ex, self)
-      StatusProcess("Checking syntax of : " + file_name, self)
-
-    elif re.search('\w+\.erb', file_name):
+    elif self.is_erb(file_name):
       ex = self.project_path(folder_name, "erb -xT - " + view.file_name() + " |ruby -c")
-      self.is_running = True
-      self.proc = AsyncProcess(ex, self)
-      StatusProcess("Checking syntax of : " + file_name, self)
-
     else:
-      sublime.error_message("only .rb or .erb file")
+      sublime.error_message("Only .rb or .erb files supported!")
+      return
+
+    self.is_running = True
+    self.proc = AsyncProcess(ex, self)
+    StatusProcess("Checking syntax of : " + file_name, self)
