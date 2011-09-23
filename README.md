@@ -24,6 +24,13 @@ and clone the repository using the command below:
 
 git clone https://github.com/maltize/sublime-text-2-ruby-tests.git RubyTest
 
+Settings
+--------
+
+You can specify different binary for each type of test to use.
+
+Make a copy of RubyTest.sublime-settings to Packages/User and make your changes.
+
 Usage
 -----
 
