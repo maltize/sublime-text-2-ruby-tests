@@ -35,7 +35,7 @@ Usage
 -----
 
  - Run single ruby test: Command-Shift-R
- - Run all ruby tests from current file: Command-r
+ - Run all ruby tests from current file: Command-Shift-T
  - Show test panel: Command-Shift-X
  - Check RB, ERB file syntax: Alt+Shift+V
 
@@ -44,10 +44,6 @@ Keys:
  'Ctrl' (Linux / Windows)
 
  ![ruby_tests screenshot](https://github.com/maltize/sublime-text-2-ruby-tests/raw/master/ruby_tests.png)
-
-Caution
--------
-Default mapping of Command-r has been mapped to Command-Shift-T (textmate like behavior)
 
 Note
 ----
