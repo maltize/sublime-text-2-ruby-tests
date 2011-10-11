@@ -48,9 +48,9 @@ class StatusProcess(object):
     progress = ""
     while True:
       if self.listener.is_running:
-        if len(progress) > 10 * 3:
+        if len(progress) >= 10:
           progress = ""
-        progress += " :)"
+        progress += "."
         sublime.set_timeout(functools.partial(self.listener.update_status, self.msg, progress), 0)
         time.sleep(1)
       else:
