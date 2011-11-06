@@ -67,6 +67,13 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
     global CUCUMBER_UNIT_FOLDER; CUCUMBER_UNIT_FOLDER = s.get("ruby_cucumber_folder")
     global RSPEC_UNIT_FOLDER; RSPEC_UNIT_FOLDER = s.get("ruby_rspec_folder")
 
+  def save_test_run(self, ex, file_name):
+    s = sublime.load_settings("RubyTest.last-run")
+    s.set("last_test_run", ex)
+    s.set("last_test_file", file_name)
+
+    sublime.save_settings("RubyTest.last-run")
+
   def show_tests_panel(self):
     if not hasattr(self, 'output_view'):
       self.output_view = self.window.get_output_panel("tests")
@@ -152,6 +159,8 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
       ex = self.project_path(folder_name , RSPEC_UNIT + " " + rspec_folder + file_name + " -e " + test_name)
 
     if match_obj:
+      self.save_test_run(ex, file_name)
+      
       self.show_tests_panel()
 
       self.is_running = True
@@ -181,9 +190,24 @@ class RunAllRubyTest(RunSingleRubyTest):
       sublime.error_message("Only *_test.rb, *_spec.rb, *.feature files supported!")
       return
 
+    self.save_test_run(ex, file_name)
+
     self.is_running = True
     self.proc = AsyncProcess(ex, self)
     StatusProcess("Starting tests from file " + file_name, self)
+
+class RunLastRubyTest(RunSingleRubyTest):
+  def load_last_run(self):
+    s = sublime.load_settings("RubyTest.last-run")
+    global LAST_TEST_RUN; LAST_TEST_RUN = s.get("last_test_run")
+    global LAST_TEST_FILE; LAST_TEST_FILE = s.get("last_test_file")
+
+  def run(self):
+    self.load_last_run()
+    self.show_tests_panel()
+    self.is_running = True
+    self.proc = AsyncProcess(LAST_TEST_RUN, self)
+    StatusProcess("Starting tests from file " + LAST_TEST_FILE, self)
 
 class ShowTestPanel(sublime_plugin.WindowCommand):
   def run(self):

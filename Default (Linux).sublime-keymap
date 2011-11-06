@@ -1,6 +1,7 @@
 [
   { "keys": ["ctrl+shift+r"], "command": "run_single_ruby_test" }, // single test
   { "keys": ["ctrl+shift+t"], "command": "run_all_ruby_test" }, // test file
+  { "keys": ["ctrl+shift+e"], "command": "run_last_ruby_test" }, // test file
 
   { "keys": ["ctrl+shift+x"], "command": "show_test_panel" }, // show test panel
 
