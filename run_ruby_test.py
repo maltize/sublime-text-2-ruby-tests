@@ -132,7 +132,7 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
 
     if self.is_cucumber(file_name):
       text_string = text_string.encode( "utf-8" )
-      match_obj = re.search('\s?([a-zA-Z_ ]+:oiranecS)', text_string) # Scenario
+      match_obj = re.search('\s?([a-zA-Z_ ]+:(eniltuO )?oiranecS)', text_string) # Scenario
       test_name = match_obj.group(1)[::-1]
       find = view.find(test_name, 0)
       row, col = view.rowcol(find.a)
