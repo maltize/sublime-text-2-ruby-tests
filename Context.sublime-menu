@@ -6,6 +6,7 @@
       [
         { "caption": "Run single test / scenario / spec", "command": "run_single_ruby_test" },
         { "caption": "Run all tests / feature / full spec", "command": "run_all_ruby_test" },
+        { "caption": "Run last test(s) / feature / spec", "command": "run_last_ruby_test" },
         { "caption": "-" },
         { "caption": "Show test panel", "command": "show_test_panel" },
         { "caption": "-" },

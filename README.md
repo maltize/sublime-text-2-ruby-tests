@@ -36,6 +36,7 @@ Usage
 
  - Run single ruby test: Command-Shift-R
  - Run all ruby tests from current file: Command-Shift-T
+ - Run last ruby test(s): Command-Shift-E
  - Show test panel: Command-Shift-X
  - Check RB, ERB file syntax: Alt+Shift+V
 
