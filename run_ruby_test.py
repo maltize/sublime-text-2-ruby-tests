@@ -179,7 +179,9 @@ class RunAllRubyTest(RunSingleRubyTest):
     self.show_tests_panel()
     if self.is_unit(file_name):
       folder_name, test_folder, file_name = view.file_name().partition(RUBY_UNIT_FOLDER)
-      ex = self.project_path(folder_name, RUBY_UNIT + " " + test_folder + file_name )
+      # ex = self.project_path(folder_name, RUBY_UNIT + " " + test_folder + file_name )
+      ex = self.project_path(folder_name, 'spin push' + " " + test_folder + file_name )
+
     elif self.is_rspec(file_name):
       folder_name, rspec_folder, file_name = view.file_name().partition(RSPEC_UNIT_FOLDER)
       ex = self.project_path(folder_name , RSPEC_UNIT + " " + rspec_folder + file_name)
@@ -236,3 +238,12 @@ class VerifyRubyFile(RunSingleRubyTest):
     self.is_running = True
     self.proc = AsyncProcess(ex, self)
     StatusProcess("Checking syntax of : " + file_name, self)
+
+class StartSpinner(RunSingleRubyTest):
+  def run(self):
+    view = self.window.active_view()
+    folder_name, file_name = os.path.split(view.file_name())
+    self.show_tests_panel()
+    print folder_name
+    ex = self.project_path(folder_name, "spin serve -i ../../config/environment.rb -t test")
+    self.proc = AsyncProcess(ex, self)
