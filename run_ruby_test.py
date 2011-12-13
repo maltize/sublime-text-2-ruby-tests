@@ -144,7 +144,7 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
       match_obj = re.search('\s?([a-zA-Z_\d]+tset)\s+fed', text_string) # 1st search for 'def test_name'
       if not match_obj:
         match_obj = re.search('\s?(\"[a-zA-Z_\s\d]+\"\s+tset)', text_string) # 2nd search for 'test "name"'
-      
+
       test_name = match_obj.group(1)[::-1]
       test_name = test_name.replace("\"", "").replace(" ", "_") # if test name in 2nd format
       folder_name, test_folder, file_name = view.file_name().partition(RUBY_UNIT_FOLDER)
@@ -160,7 +160,7 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
 
     if match_obj:
       self.save_test_run(ex, file_name)
-      
+
       self.show_tests_panel()
 
       self.is_running = True
@@ -236,3 +236,31 @@ class VerifyRubyFile(RunSingleRubyTest):
     self.is_running = True
     self.proc = AsyncProcess(ex, self)
     StatusProcess("Checking syntax of : " + file_name, self)
+
+class SwitchBetweenCodeAndTest(RunSingleRubyTest):
+  def run(self):
+    _, file_name = os.path.split(self.window.active_view().file_name())
+    possible_alternates = self.possible_alternate_files(file_name)
+    matcher = lambda(x): x in possible_alternates
+    alternates = self.project_files(self.walk_through_directory, matcher)
+    if alternates:
+      self.window.open_file(alternates.pop())
+    else:
+      sublime.error_message("could not find " + str(possible_alternates))
+
+  def possible_alternate_files(self, file_name):
+    if self.is_rspec(file_name):
+      return [file_name.replace("_spec.rb", ".rb")]
+    elif self.is_unit(file_name):
+      return [file_name.replace("_test.rb", ".rb")]
+    elif self.is_cucumber(file_name):
+      return [file_name.replace(".feature", ".rb")]
+    else:
+      return [file_name.replace(".rb", "_spec.rb"), file_name.replace(".rb", "_test.rb"), file_name.replace(".rb", ".feature")]
+
+  def walk_through_directory(self, directory):
+    return ".git" not in directory
+
+  def project_files(self, directory_matcher, file_matcher):
+    directories = self.window.folders()
+    return [os.path.join(dirname, file) for directory in directories for dirname, _, files in os.walk(directory) if directory_matcher(dirname) for file in files if file_matcher(file)]
