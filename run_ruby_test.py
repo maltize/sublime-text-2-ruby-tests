@@ -113,17 +113,18 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
     return "cd " + path + " && " + command
 
   class BaseFile:
-    def __init__(self, file_name): self.file_name = file_name
+    def __init__(self, file_name): self.folder_name, self.file_name = os.path.split(file_name)
     def is_unit(self): return False
     def is_cucumber(self): return False
     def is_rspec(self): return False
     def is_rb(self): return False
     def is_erb(self): return False
     def verify_syntax_command(self): return None
+    def wrap_in_cd(self, path, command): return "cd " + path + " && " + command
 
   class RubyFile(BaseFile):
     def is_rb(self): return True
-    def verify_syntax_command(self): return "ruby -c " + self.file_name
+    def verify_syntax_command(self): return self.wrap_in_cd(self.folder_name, "ruby -c " + self.file_name)
 
   class UnitFile(RubyFile):
     def is_unit(self): return True
@@ -136,7 +137,7 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
 
   class ErbFile(BaseFile):
     def is_erb(self): return True
-    def verify_syntax_command(self): return "erb -xT - " + self.file_name + " | ruby -c"
+    def verify_syntax_command(self): return self.wrap_in_cd(self.folder_name, "erb -xT - " + self.file_name + " | ruby -c")
 
   def file_type(self, file_name):
     if re.search('\w+\_test.rb', file_name):
@@ -260,11 +261,11 @@ class ShowTestPanel(BaseRubyTask):
 class VerifyRubyFile(BaseRubyTask):
   def run(self):
     view = self.window.active_view()
-    folder_name, file_name = os.path.split(view.file_name())
-    command = self.file_type(file_name).verify_syntax_command()
+    file = self.file_type(view.file_name())
+    command = file.verify_syntax_command()
 
     if command:
       self.show_tests_panel()
-      self.start_async("Checking syntax of : " + file_name, self.project_path(folder_name, command))
+      self.start_async("Checking syntax of : " + file.file_name, command)
     else:
       sublime.error_message("Only .rb or .erb files supported!")
