@@ -101,6 +101,11 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
     self.output_view.end_edit(edit)
     self.output_view.set_read_only(True)
 
+  def start_async(self, caption, executable):
+    self.is_running = True
+    self.proc = AsyncProcess(executable, self)
+    StatusProcess(caption, self)
+
   def update_status(self, msg, progress):
     sublime.status_message(msg + " " + progress)
 
@@ -114,9 +119,11 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
     def is_rspec(self): return False
     def is_rb(self): return False
     def is_erb(self): return False
+    def verify_syntax_command(self): return None
 
   class RubyFile(BaseFile):
     def is_rb(self): return True
+    def verify_syntax_command(self): return "ruby -c " + self.file_name
 
   class UnitFile(RubyFile):
     def is_unit(self): return True
@@ -129,6 +136,7 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
 
   class ErbFile(BaseFile):
     def is_erb(self): return True
+    def verify_syntax_command(self): return "erb -xT - " + self.file_name + " | ruby -c"
 
   def file_type(self, file_name):
     if re.search('\w+\_test.rb', file_name):
@@ -253,16 +261,10 @@ class VerifyRubyFile(BaseRubyTask):
   def run(self):
     view = self.window.active_view()
     folder_name, file_name = os.path.split(view.file_name())
-    self.show_tests_panel()
+    command = self.file_type(file_name).verify_syntax_command()
 
-    if self.is_rb(file_name):
-      ex = self.project_path(folder_name, "ruby -c " + view.file_name())
-    elif self.is_erb(file_name):
-      ex = self.project_path(folder_name, "erb -xT - " + view.file_name() + " |ruby -c")
+    if command:
+      self.show_tests_panel()
+      self.start_async("Checking syntax of : " + file_name, self.project_path(folder_name, command))
     else:
       sublime.error_message("Only .rb or .erb files supported!")
-      return
-
-    self.is_running = True
-    self.proc = AsyncProcess(ex, self)
-    StatusProcess("Checking syntax of : " + file_name, self)
