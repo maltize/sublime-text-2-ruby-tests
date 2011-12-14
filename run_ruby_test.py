@@ -56,8 +56,7 @@ class StatusProcess(object):
       else:
         break
 
-class RunSingleRubyTest(sublime_plugin.WindowCommand):
-
+class BaseRubyTask(sublime_plugin.WindowCommand):
   def load_config(self):
     s = sublime.load_settings("RubyTest.sublime-settings")
     global RUBY_UNIT; RUBY_UNIT = s.get("ruby_unit_exec")
@@ -117,6 +116,14 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
   def is_rspec(self, file_name):
     return re.search('\w+\_spec.rb', file_name)
 
+  def is_rb(self, file_name):
+    return re.search('\w+\.rb', file_name)
+
+  def is_erb(self, file_name):
+    return re.search('\w+\.erb', file_name)
+
+class RunSingleRubyTest(BaseRubyTask):
+
   def run(self):
     self.load_config()
 
@@ -169,7 +176,7 @@ class RunSingleRubyTest(sublime_plugin.WindowCommand):
     else:
       sublime.error_message("No test name!")
 
-class RunAllRubyTest(RunSingleRubyTest):
+class RunAllRubyTest(BaseRubyTask):
   def run(self):
     self.load_config()
 
@@ -196,7 +203,7 @@ class RunAllRubyTest(RunSingleRubyTest):
     self.proc = AsyncProcess(ex, self)
     StatusProcess("Starting tests from file " + file_name, self)
 
-class RunLastRubyTest(RunSingleRubyTest):
+class RunLastRubyTest(BaseRubyTask):
   def load_last_run(self):
     s = sublime.load_settings("RubyTest.last-run")
     global LAST_TEST_RUN; LAST_TEST_RUN = s.get("last_test_run")
@@ -209,17 +216,11 @@ class RunLastRubyTest(RunSingleRubyTest):
     self.proc = AsyncProcess(LAST_TEST_RUN, self)
     StatusProcess("Starting tests from file " + LAST_TEST_FILE, self)
 
-class ShowTestPanel(sublime_plugin.WindowCommand):
+class ShowTestPanel(BaseRubyTask):
   def run(self):
     self.window.run_command("show_panel", {"panel": "output.tests"})
 
-class VerifyRubyFile(RunSingleRubyTest):
-  def is_rb(self, file_name):
-    return re.search('\w+\.rb', file_name)
-
-  def is_erb(self, file_name):
-    return re.search('\w+\.erb', file_name)
-
+class VerifyRubyFile(BaseRubyTask):
   def run(self):
     view = self.window.active_view()
     folder_name, file_name = os.path.split(view.file_name())
