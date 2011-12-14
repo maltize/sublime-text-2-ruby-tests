@@ -107,20 +107,49 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
   def project_path(self, path, command):
     return "cd " + path + " && " + command
 
-  def is_unit(self, file_name):
-    return re.search('\w+\_test.rb', file_name)
+  class BaseFile:
+    def __init__(self, file_name): self.file_name = file_name
+    def is_unit(self): return False
+    def is_cucumber(self): return False
+    def is_rspec(self): return False
+    def is_rb(self): return False
+    def is_erb(self): return False
 
-  def is_cucumber(self, file_name):
-    return re.search('\w+\.feature', file_name)
+  class RubyFile(BaseFile):
+    def is_rb(self): return True
 
-  def is_rspec(self, file_name):
-    return re.search('\w+\_spec.rb', file_name)
+  class UnitFile(RubyFile):
+    def is_unit(self): return True
 
-  def is_rb(self, file_name):
-    return re.search('\w+\.rb', file_name)
+  class CucumberFile(BaseFile):
+    def is_cucumber(self): return True
 
-  def is_erb(self, file_name):
-    return re.search('\w+\.erb', file_name)
+  class RSpecFile(RubyFile):
+    def is_rspec(self): return True
+
+  class ErbFile(BaseFile):
+    def is_erb(self): return True
+
+  def file_type(self, file_name):
+    if re.search('\w+\_test.rb', file_name):
+      return BaseRubyTask.UnitFile(file_name)
+    elif re.search('\w+\_spec.rb', file_name):
+      return BaseRubyTask.RSpecFile(file_name)
+    elif re.search('\w+\.feature', file_name):
+      return BaseRubyTask.CucumberFile(file_name)
+    elif re.search('\w+\.rb', file_name):
+      return BaseRubyTask.RubyFile(file_name)
+    elif re.search('\w+\.erb', file_name):
+      return BaseRubyTask.ErbFile(file_name)
+    else:
+      return BaseRubyTask.OtherFile(file_name)
+
+# These will all go away
+  def is_unit(self, file_name): return self.file_type(file_name).is_unit()
+  def is_cucumber(self, file_name): return self.file_type(file_name).is_cucumber()
+  def is_rspec(self, file_name): return self.file_type(file_name).is_rspec()
+  def is_rb(self, file_name): return self.file_type(file_name).is_rb()
+  def is_erb(self, file_name): return self.file_type(file_name).is_erb()
 
 class RunSingleRubyTest(BaseRubyTask):
 
