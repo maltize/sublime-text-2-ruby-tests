@@ -114,11 +114,6 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
 
   class BaseFile:
     def __init__(self, file_name): self.folder_name, self.file_name = os.path.split(file_name)
-    def is_unit(self): return False
-    def is_cucumber(self): return False
-    def is_rspec(self): return False
-    def is_rb(self): return False
-    def is_erb(self): return False
     def verify_syntax_command(self): return None
     def wrap_in_cd(self, path, command): return "cd " + path + " && " + command
     def possible_alternate_files(self): return []
@@ -131,12 +126,10 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
       return view.rowcol(char_under_cursor)[0] + 1
 
   class RubyFile(BaseFile):
-    def is_rb(self): return True
     def verify_syntax_command(self): return self.wrap_in_cd(self.folder_name, "ruby -c " + self.file_name)
     def possible_alternate_files(self): return [self.file_name.replace(".rb", "_spec.rb"), self.file_name.replace(".rb", "_test.rb"), self.file_name.replace(".rb", ".feature")]
 
   class UnitFile(RubyFile):
-    def is_unit(self): return True
     def possible_alternate_files(self): return [self.file_name.replace("_test.rb", ".rb")]
     def run_all_tests_command(self): return self.run_from_project_root(RUBY_UNIT_FOLDER, RUBY_UNIT)
     def run_single_test_command(self, view):
@@ -156,19 +149,16 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
       return self.run_from_project_root(RUBY_UNIT_FOLDER, RUBY_UNIT, " -n " + test_name)
 
   class CucumberFile(BaseFile):
-    def is_cucumber(self): return True
     def possible_alternate_files(self): return [self.file_name.replace(".feature", ".rb")]
     def run_all_tests_command(self): return self.run_from_project_root(CUCUMBER_UNIT_FOLDER, CUCUMBER_UNIT)
     def run_single_test_command(self, view): return self.run_from_project_root(CUCUMBER_UNIT_FOLDER, CUCUMBER_UNIT, " -l " + str(self.get_current_line_number(view)))
 
   class RSpecFile(RubyFile):
-    def is_rspec(self): return True
     def possible_alternate_files(self): return [self.file_name.replace("_spec.rb", ".rb")]
     def run_all_tests_command(self): return self.run_from_project_root(RSPEC_UNIT_FOLDER, RSPEC_UNIT)
     def run_single_test_command(self, view): return self.run_from_project_root(RSPEC_UNIT_FOLDER, RSPEC_UNIT, " -l " + str(self.get_current_line_number(view)))
 
   class ErbFile(BaseFile):
-    def is_erb(self): return True
     def verify_syntax_command(self): return self.wrap_in_cd(self.folder_name, "erb -xT - " + self.file_name + " | ruby -c")
 
   def file_type(self, file_name):
@@ -185,13 +175,6 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
     else:
       return BaseRubyTask.OtherFile(file_name)
 
-# These will all go away
-  def is_unit(self, file_name): return self.file_type(file_name).is_unit()
-  def is_cucumber(self, file_name): return self.file_type(file_name).is_cucumber()
-  def is_rspec(self, file_name): return self.file_type(file_name).is_rspec()
-  def is_rb(self, file_name): return self.file_type(file_name).is_rb()
-  def is_erb(self, file_name): return self.file_type(file_name).is_erb()
-
 class RunSingleRubyTest(BaseRubyTask):
 
   def run(self):
@@ -204,7 +187,7 @@ class RunSingleRubyTest(BaseRubyTask):
       self.show_tests_panel()
       self.is_running = True
       self.proc = AsyncProcess(command, self)
-      StatusProcess("Starting test " + file.file_name, self)
+      StatusProcess("Starting tests from file " + file_name, self)
 
 class RunAllRubyTest(BaseRubyTask):
   def run(self):
