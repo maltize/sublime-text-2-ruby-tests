@@ -234,7 +234,7 @@ class VerifyRubyFile(BaseRubyTask):
     else:
       sublime.error_message("Only .rb or .erb files supported!")
 
-class SwitchBetweenCodeAndTest(RunSingleRubyTest):
+class SwitchBetweenCodeAndTest(BaseRubyTask):
   def run(self):
     _, file_name = os.path.split(self.window.active_view().file_name())
     possible_alternates = self.file_type(file_name).possible_alternate_files()
