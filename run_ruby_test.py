@@ -114,34 +114,51 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
 
   class BaseFile:
     def __init__(self, file_name): self.folder_name, self.file_name = os.path.split(file_name)
-    def is_unit(self): return False
-    def is_cucumber(self): return False
-    def is_rspec(self): return False
-    def is_rb(self): return False
-    def is_erb(self): return False
     def verify_syntax_command(self): return None
     def wrap_in_cd(self, path, command): return "cd " + path + " && " + command
     def possible_alternate_files(self): return []
+    def run_all_tests_command(self): return None
+    def run_from_project_root(self, partition_folder, command, options = ""):
+      folder_name, test_folder, file_name = os.path.join(self.folder_name, self.file_name).partition(partition_folder)
+      return self.wrap_in_cd(folder_name, command + " " + test_folder + file_name + options)
+    def get_current_line_number(self, view):
+      char_under_cursor = view.sel()[0].a
+      return view.rowcol(char_under_cursor)[0] + 1
 
   class RubyFile(BaseFile):
-    def is_rb(self): return True
     def verify_syntax_command(self): return self.wrap_in_cd(self.folder_name, "ruby -c " + self.file_name)
     def possible_alternate_files(self): return [self.file_name.replace(".rb", "_spec.rb"), self.file_name.replace(".rb", "_test.rb"), self.file_name.replace(".rb", ".feature")]
 
   class UnitFile(RubyFile):
-    def is_unit(self): return True
     def possible_alternate_files(self): return [self.file_name.replace("_test.rb", ".rb")]
+    def run_all_tests_command(self): return self.run_from_project_root(RUBY_UNIT_FOLDER, RUBY_UNIT)
+    def run_single_test_command(self, view):
+      region = view.sel()[0]
+      line_region = view.line(region)
+      text_string = view.substr(sublime.Region(region.begin() - 2000, line_region.end()))
+      text_string = text_string.replace("\n", "\\N")
+      text_string = text_string[::-1]
+      match_obj = re.search('\s?([a-zA-Z_\d]+tset)\s+fed', text_string) # 1st search for 'def test_name'
+      if not match_obj:
+        match_obj = re.search('\s?(\"[a-zA-Z_\s\d]+\"\s+tset)', text_string) # 2nd search for 'test "name"'
+      if not match_obj:
+        sublime.error_message("No test name!")
+        return
+      test_name = match_obj.group(1)[::-1]
+      test_name = test_name.replace("\"", "").replace(" ", "_") # if test name in 2nd format
+      return self.run_from_project_root(RUBY_UNIT_FOLDER, RUBY_UNIT, " -n " + test_name)
 
   class CucumberFile(BaseFile):
-    def is_cucumber(self): return True
     def possible_alternate_files(self): return [self.file_name.replace(".feature", ".rb")]
+    def run_all_tests_command(self): return self.run_from_project_root(CUCUMBER_UNIT_FOLDER, CUCUMBER_UNIT)
+    def run_single_test_command(self, view): return self.run_from_project_root(CUCUMBER_UNIT_FOLDER, CUCUMBER_UNIT, " -l " + str(self.get_current_line_number(view)))
 
   class RSpecFile(RubyFile):
-    def is_rspec(self): return True
     def possible_alternate_files(self): return [self.file_name.replace("_spec.rb", ".rb")]
+    def run_all_tests_command(self): return self.run_from_project_root(RSPEC_UNIT_FOLDER, RSPEC_UNIT)
+    def run_single_test_command(self, view): return self.run_from_project_root(RSPEC_UNIT_FOLDER, RSPEC_UNIT, " -l " + str(self.get_current_line_number(view)))
 
   class ErbFile(BaseFile):
-    def is_erb(self): return True
     def verify_syntax_command(self): return self.wrap_in_cd(self.folder_name, "erb -xT - " + self.file_name + " | ruby -c")
 
   def file_type(self, file_name):
@@ -158,93 +175,36 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
     else:
       return BaseRubyTask.OtherFile(file_name)
 
-# These will all go away
-  def is_unit(self, file_name): return self.file_type(file_name).is_unit()
-  def is_cucumber(self, file_name): return self.file_type(file_name).is_cucumber()
-  def is_rspec(self, file_name): return self.file_type(file_name).is_rspec()
-  def is_rb(self, file_name): return self.file_type(file_name).is_rb()
-  def is_erb(self, file_name): return self.file_type(file_name).is_erb()
-
 class RunSingleRubyTest(BaseRubyTask):
 
   def run(self):
     self.load_config()
-
     view = self.window.active_view()
-    folder_name, file_name = os.path.split(view.file_name())
-
-    region = view.sel()[0]
-    line_region = view.line(region)
-
-    text_string = view.substr(sublime.Region(region.begin() - 2000, line_region.end()))
-    text_string = text_string.replace("\n", "\\N")
-    text_string = text_string[::-1]
-
-    if self.is_cucumber(file_name):
-      text_string = text_string.encode( "utf-8" )
-      match_obj = re.search('\s?([a-zA-Z_ ]+:(eniltuO )?oiranecS)', text_string) # Scenario
-      test_name = match_obj.group(1)[::-1]
-      find = view.find(test_name, 0)
-      row, col = view.rowcol(find.a)
-      test_name = str(row + 1)
-      folder_name, feature_folder, file_name = view.file_name().partition(CUCUMBER_UNIT_FOLDER)
-      ex = self.project_path(folder_name, CUCUMBER_UNIT + " " + feature_folder + file_name + " -l " + test_name)
-
-    elif self.is_unit(file_name):
-      match_obj = re.search('\s?([a-zA-Z_\d]+tset)\s+fed', text_string) # 1st search for 'def test_name'
-      if not match_obj:
-        match_obj = re.search('\s?(\"[a-zA-Z_\s\d]+\"\s+tset)', text_string) # 2nd search for 'test "name"'
-
-      test_name = match_obj.group(1)[::-1]
-      test_name = test_name.replace("\"", "").replace(" ", "_") # if test name in 2nd format
-      folder_name, test_folder, file_name = view.file_name().partition(RUBY_UNIT_FOLDER)
-      ex = self.project_path(folder_name, RUBY_UNIT + " " + test_folder + file_name + " -n " + test_name)
-
-    elif self.is_rspec(file_name):
-      text_string = text_string.encode( "utf-8" )
-      match_obj = re.search('\s?(\"[a-zA-Z_\s\d]+\"\s+ti)', text_string) # tests starts from it "
-      test_name = match_obj.group(1)[::-1]
-      test_name = test_name.replace("it \"","\"")
-      folder_name, rspec_folder, file_name = view.file_name().partition(RSPEC_UNIT_FOLDER)
-      ex = self.project_path(folder_name , RSPEC_UNIT + " " + rspec_folder + file_name + " -e " + test_name)
-
-    if match_obj:
-      self.save_test_run(ex, file_name)
-
+    file = self.file_type(view.file_name())
+    command = file.run_single_test_command(view)
+    if command:
+      self.save_test_run(command, file.file_name)
       self.show_tests_panel()
-
       self.is_running = True
-      self.proc = AsyncProcess(ex, self)
-      StatusProcess("Starting test " + test_name, self)
-    else:
-      sublime.error_message("No test name!")
+      self.proc = AsyncProcess(command, self)
+      StatusProcess("Starting tests from file " + file_name, self)
 
 class RunAllRubyTest(BaseRubyTask):
   def run(self):
     self.load_config()
-
     view = self.window.active_view()
     folder_name, file_name = os.path.split(view.file_name())
-
-    self.show_tests_panel()
-    if self.is_unit(file_name):
-      folder_name, test_folder, file_name = view.file_name().partition(RUBY_UNIT_FOLDER)
-      ex = self.project_path(folder_name, RUBY_UNIT + " " + test_folder + file_name )
-    elif self.is_rspec(file_name):
-      folder_name, rspec_folder, file_name = view.file_name().partition(RSPEC_UNIT_FOLDER)
-      ex = self.project_path(folder_name , RSPEC_UNIT + " " + rspec_folder + file_name)
-    elif self.is_cucumber(file_name):
-      folder_name, feature_folder, file_name = view.file_name().partition(CUCUMBER_UNIT_FOLDER)
-      ex = self.project_path(folder_name, CUCUMBER_UNIT + " " + feature_folder + file_name)
+    file = self.file_type(view.file_name())
+    command = file.run_all_tests_command()
+    if command:
+      self.show_tests_panel()
+      self.save_test_run(command, file_name)
+      self.is_running = True
+      self.proc = AsyncProcess(command, self)
+      StatusProcess("Starting tests from file " + file_name, self)
     else:
       sublime.error_message("Only *_test.rb, *_spec.rb, *.feature files supported!")
-      return
 
-    self.save_test_run(ex, file_name)
-
-    self.is_running = True
-    self.proc = AsyncProcess(ex, self)
-    StatusProcess("Starting tests from file " + file_name, self)
 
 class RunLastRubyTest(BaseRubyTask):
   def load_last_run(self):
@@ -268,14 +228,13 @@ class VerifyRubyFile(BaseRubyTask):
     view = self.window.active_view()
     file = self.file_type(view.file_name())
     command = file.verify_syntax_command()
-
     if command:
       self.show_tests_panel()
       self.start_async("Checking syntax of : " + file.file_name, command)
     else:
       sublime.error_message("Only .rb or .erb files supported!")
 
-class SwitchBetweenCodeAndTest(RunSingleRubyTest):
+class SwitchBetweenCodeAndTest(BaseRubyTask):
   def run(self):
     _, file_name = os.path.split(self.window.active_view().file_name())
     possible_alternates = self.file_type(file_name).possible_alternate_files()
@@ -285,9 +244,10 @@ class SwitchBetweenCodeAndTest(RunSingleRubyTest):
     else:
       sublime.error_message("could not find " + str(possible_alternates))
 
-  def walk(self, directory):
+  def walk(self, directory, ignored_directories = []):
+    ignored_directories = ['.git', 'vendor']  # Move this into config
     for dir, dirnames, files in os.walk(directory):
-      dirnames[:] = filter(lambda(dirname): dirname != '.git', dirnames)
+      dirnames[:] = [dirname for dirname in dirnames if dirname not in ignored_directories]
       yield dir, dirnames, files
 
   def project_files(self, file_matcher):
