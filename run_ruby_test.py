@@ -126,6 +126,9 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
     def run_from_project_root(self, partition_folder, command):
       folder_name, test_folder, file_name = os.path.join(self.folder_name, self.file_name).partition(partition_folder)
       return self.wrap_in_cd(folder_name, command + " " + test_folder + file_name)
+    def get_current_line_number(self, view):
+      char_under_cursor = view.sel()[0].a
+      return view.rowcol(char_under_cursor)[0] + 1
 
   class RubyFile(BaseFile):
     def is_rb(self): return True
@@ -137,20 +140,17 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
     def possible_alternate_files(self): return [self.file_name.replace("_test.rb", ".rb")]
     def run_all_tests_command(self): return self.run_from_project_root(RUBY_UNIT_FOLDER, RUBY_UNIT)
 
-
   class CucumberFile(BaseFile):
     def is_cucumber(self): return True
     def possible_alternate_files(self): return [self.file_name.replace(".feature", ".rb")]
     def run_all_tests_command(self): return self.run_from_project_root(CUCUMBER_UNIT_FOLDER, CUCUMBER_UNIT)
+    def run_single_test_command(self, view): return self.run_from_project_root(CUCUMBER_UNIT_FOLDER, CUCUMBER_UNIT + " -l " + str(self.get_current_line_number(view)))
 
   class RSpecFile(RubyFile):
     def is_rspec(self): return True
     def possible_alternate_files(self): return [self.file_name.replace("_spec.rb", ".rb")]
     def run_all_tests_command(self): return self.run_from_project_root(RSPEC_UNIT_FOLDER, RSPEC_UNIT)
-    def run_single_test_command(self, view):
-      char_under_cursor = view.sel()[0].a
-      line_number = view.rowcol(char_under_cursor)[0] + 1
-      return self.run_from_project_root(RSPEC_UNIT_FOLDER, RSPEC_UNIT + " -l " + str(line_number))
+    def run_single_test_command(self, view): return self.run_from_project_root(RSPEC_UNIT_FOLDER, RSPEC_UNIT + " -l " + str(self.get_current_line_number(view)))
 
   class ErbFile(BaseFile):
     def is_erb(self): return True
@@ -193,14 +193,8 @@ class RunSingleRubyTest(BaseRubyTask):
     text_string = text_string[::-1]
 
     if self.is_cucumber(file_name):
-      text_string = text_string.encode( "utf-8" )
-      match_obj = re.search('\s?([a-zA-Z_ ]+:(eniltuO )?oiranecS)', text_string) # Scenario
-      test_name = match_obj.group(1)[::-1]
-      find = view.find(test_name, 0)
-      row, col = view.rowcol(find.a)
-      test_name = str(row + 1)
-      folder_name, feature_folder, file_name = view.file_name().partition(CUCUMBER_UNIT_FOLDER)
-      ex = self.project_path(folder_name, CUCUMBER_UNIT + " " + feature_folder + file_name + " -l " + test_name)
+      ex = self.file_type(view.file_name()).run_single_test_command(view)
+      match_obj = ex
 
     elif self.is_unit(file_name):
       match_obj = re.search('\s?([a-zA-Z_\d]+tset)\s+fed', text_string) # 1st search for 'def test_name'
