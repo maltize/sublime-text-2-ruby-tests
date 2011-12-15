@@ -147,6 +147,10 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
     def is_rspec(self): return True
     def possible_alternate_files(self): return [self.file_name.replace("_spec.rb", ".rb")]
     def run_all_tests_command(self): return self.run_from_project_root(RSPEC_UNIT_FOLDER, RSPEC_UNIT)
+    def run_single_test_command(self, view):
+      char_under_cursor = view.sel()[0].a
+      line_number = view.rowcol(char_under_cursor)[0] + 1
+      return self.run_from_project_root(RSPEC_UNIT_FOLDER, RSPEC_UNIT + " -l " + str(line_number))
 
   class ErbFile(BaseFile):
     def is_erb(self): return True
@@ -209,18 +213,12 @@ class RunSingleRubyTest(BaseRubyTask):
       ex = self.project_path(folder_name, RUBY_UNIT + " " + test_folder + file_name + " -n " + test_name)
 
     elif self.is_rspec(file_name):
-      text_string = text_string.encode( "utf-8" )
-      match_obj = re.search('\s?(\"[a-zA-Z_\s\d]+\"\s+ti)', text_string) # tests starts from it "
-      test_name = match_obj.group(1)[::-1]
-      test_name = test_name.replace("it \"","\"")
-      folder_name, rspec_folder, file_name = view.file_name().partition(RSPEC_UNIT_FOLDER)
-      ex = self.project_path(folder_name , RSPEC_UNIT + " " + rspec_folder + file_name + " -e " + test_name)
+      ex = self.file_type(view.file_name()).run_single_test_command(view)
+      match_obj = ex
 
     if match_obj:
       self.save_test_run(ex, file_name)
-
       self.show_tests_panel()
-
       self.is_running = True
       self.proc = AsyncProcess(ex, self)
       StatusProcess("Starting test " + test_name, self)
