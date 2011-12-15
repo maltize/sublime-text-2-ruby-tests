@@ -285,9 +285,10 @@ class SwitchBetweenCodeAndTest(RunSingleRubyTest):
     else:
       sublime.error_message("could not find " + str(possible_alternates))
 
-  def walk(self, directory):
+  def walk(self, directory, ignored_directories = []):
+    ignored_directories = ['.git', 'vendor']  # Move this into config
     for dir, dirnames, files in os.walk(directory):
-      dirnames[:] = filter(lambda(dirname): dirname != '.git', dirnames)
+      dirnames[:] = [dirname for dirname in dirnames if dirname not in ignored_directories]
       yield dir, dirnames, files
 
   def project_files(self, file_matcher):
