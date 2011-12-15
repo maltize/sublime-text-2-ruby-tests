@@ -121,19 +121,24 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
     def is_erb(self): return False
     def verify_syntax_command(self): return None
     def wrap_in_cd(self, path, command): return "cd " + path + " && " + command
+    def possible_alternate_files(self): return []
 
   class RubyFile(BaseFile):
     def is_rb(self): return True
     def verify_syntax_command(self): return self.wrap_in_cd(self.folder_name, "ruby -c " + self.file_name)
+    def possible_alternate_files(self): return [self.file_name.replace(".rb", "_spec.rb"), self.file_name.replace(".rb", "_test.rb"), self.file_name.replace(".rb", ".feature")]
 
   class UnitFile(RubyFile):
     def is_unit(self): return True
+    def possible_alternate_files(self): return [self.file_name.replace("_test.rb", ".rb")]
 
   class CucumberFile(BaseFile):
     def is_cucumber(self): return True
+    def possible_alternate_files(self): return [self.file_name.replace(".feature", ".rb")]
 
   class RSpecFile(RubyFile):
     def is_rspec(self): return True
+    def possible_alternate_files(self): return [self.file_name.replace("_spec.rb", ".rb")]
 
   class ErbFile(BaseFile):
     def is_erb(self): return True
@@ -273,27 +278,18 @@ class VerifyRubyFile(BaseRubyTask):
 class SwitchBetweenCodeAndTest(RunSingleRubyTest):
   def run(self):
     _, file_name = os.path.split(self.window.active_view().file_name())
-    possible_alternates = self.possible_alternate_files(file_name)
-    matcher = lambda(x): x in possible_alternates
-    alternates = self.project_files(self.walk_through_directory, matcher)
+    possible_alternates = self.file_type(file_name).possible_alternate_files()
+    alternates = self.project_files(lambda(file): file in possible_alternates)
     if alternates:
       self.window.open_file(alternates.pop())
     else:
       sublime.error_message("could not find " + str(possible_alternates))
 
-  def possible_alternate_files(self, file_name):
-    if self.is_rspec(file_name):
-      return [file_name.replace("_spec.rb", ".rb")]
-    elif self.is_unit(file_name):
-      return [file_name.replace("_test.rb", ".rb")]
-    elif self.is_cucumber(file_name):
-      return [file_name.replace(".feature", ".rb")]
-    else:
-      return [file_name.replace(".rb", "_spec.rb"), file_name.replace(".rb", "_test.rb"), file_name.replace(".rb", ".feature")]
+  def walk(self, directory):
+    for dir, dirnames, files in os.walk(directory):
+      dirnames[:] = filter(lambda(dirname): dirname != '.git', dirnames)
+      yield dir, dirnames, files
 
-  def walk_through_directory(self, directory):
-    return ".git" not in directory
-
-  def project_files(self, directory_matcher, file_matcher):
+  def project_files(self, file_matcher):
     directories = self.window.folders()
-    return [os.path.join(dirname, file) for directory in directories for dirname, _, files in os.walk(directory) if directory_matcher(dirname) for file in files if file_matcher(file)]
+    return [os.path.join(dirname, file) for directory in directories for dirname, _, files in self.walk(directory) for file in filter(file_matcher, files)]
