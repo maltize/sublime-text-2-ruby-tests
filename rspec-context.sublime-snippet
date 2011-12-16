@@ -1,6 +1,6 @@
 <snippet>
     <content><![CDATA[context "${1:something}" do
-  $0
+	$0
 end]]></content>
     <tabTrigger>cont</tabTrigger>
     <scope>source.ruby.rspec</scope>
