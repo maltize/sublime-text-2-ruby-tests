@@ -187,7 +187,7 @@ class RunSingleRubyTest(BaseRubyTask):
       self.show_tests_panel()
       self.is_running = True
       self.proc = AsyncProcess(command, self)
-      StatusProcess("Starting tests from file " + file_name, self)
+      StatusProcess("Starting tests from file " + file.file_name, self)
 
 class RunAllRubyTest(BaseRubyTask):
   def run(self):
@@ -201,7 +201,7 @@ class RunAllRubyTest(BaseRubyTask):
       self.save_test_run(command, file_name)
       self.is_running = True
       self.proc = AsyncProcess(command, self)
-      StatusProcess("Starting tests from file " + file_name, self)
+      StatusProcess("Starting tests from file " + file.file_name, self)
     else:
       sublime.error_message("Only *_test.rb, *_spec.rb, *.feature files supported!")
 
