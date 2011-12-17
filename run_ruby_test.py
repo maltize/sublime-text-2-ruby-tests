@@ -115,7 +115,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
   def project_path(self, path, command):
     return "cd " + path + " && " + command
 
-  class BaseFile:
+  class BaseFile(object):
     def __init__(self, file_name): self.folder_name, self.file_name = os.path.split(file_name)
     def verify_syntax_command(self): return None
     def wrap_in_cd(self, path, command): return "cd " + path + " && " + command
@@ -127,13 +127,12 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     def get_current_line_number(self, view):
       char_under_cursor = view.sel()[0].a
       return view.rowcol(char_under_cursor)[0] + 1
-    def can_run_test(self): return False
-    def can_verify_syntax(self): return False
+    def features(self): return []
 
   class RubyFile(BaseFile):
     def verify_syntax_command(self): return self.wrap_in_cd(self.folder_name, "ruby -c " + self.file_name)
     def possible_alternate_files(self): return [self.file_name.replace(".rb", "_spec.rb"), self.file_name.replace(".rb", "_test.rb"), self.file_name.replace(".rb", ".feature")]
-    def can_verify_syntax(self): return True
+    def features(self): return ["verify_syntax", "switch_to_test"]
 
   class UnitFile(RubyFile):
     def possible_alternate_files(self): return [self.file_name.replace("_test.rb", ".rb")]
@@ -153,23 +152,24 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       test_name = match_obj.group(1)[::-1]
       test_name = test_name.replace("\"", "").replace(" ", "_") # if test name in 2nd format
       return self.run_from_project_root(RUBY_UNIT_FOLDER, RUBY_UNIT, " -n " + test_name)
-    def can_run_test(self): return True
+    def features(self): return super(BaseRubyTask.UnitFile, self).features() + ["run_test"]
 
   class CucumberFile(BaseFile):
     def possible_alternate_files(self): return [self.file_name.replace(".feature", ".rb")]
     def run_all_tests_command(self): return self.run_from_project_root(CUCUMBER_UNIT_FOLDER, CUCUMBER_UNIT)
     def run_single_test_command(self, view): return self.run_from_project_root(CUCUMBER_UNIT_FOLDER, CUCUMBER_UNIT, " -l " + str(self.get_current_line_number(view)))
-    def can_run_test(self): return True
+    def features(self): return ["run_test"]
 
   class RSpecFile(RubyFile):
     def possible_alternate_files(self): return [self.file_name.replace("_spec.rb", ".rb")]
     def run_all_tests_command(self): return self.run_from_project_root(RSPEC_UNIT_FOLDER, RSPEC_UNIT)
     def run_single_test_command(self, view): return self.run_from_project_root(RSPEC_UNIT_FOLDER, RSPEC_UNIT, " -l " + str(self.get_current_line_number(view)))
-    def can_run_test(self): return True
+    def features(self): return super(BaseRubyTask.RSpecFile, self).features() + ["run_test"]
 
   class ErbFile(BaseFile):
     def verify_syntax_command(self): return self.wrap_in_cd(self.folder_name, "erb -xT - " + self.file_name + " | ruby -c")
     def can_verify_syntax(self): return True
+    def features(self): return ["verify_syntax"]
 
   def file_type(self, file_name = None):
     file_name = file_name or self.view.file_name()
@@ -187,6 +187,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       return BaseRubyTask.BaseFile(file_name)
 
 class RunSingleRubyTest(BaseRubyTask):
+  def is_enabled(self): return 'run_test' in self.file_type().features()
   def run(self, args):
     self.load_config()
     file = self.file_type()
@@ -199,6 +200,7 @@ class RunSingleRubyTest(BaseRubyTask):
       StatusProcess("Starting tests from file " + file.file_name, self)
 
 class RunAllRubyTest(BaseRubyTask):
+  def is_enabled(self): return 'run_test' in self.file_type().features()
   def run(self, args):
     self.load_config()
     view = self.view
@@ -233,6 +235,7 @@ class ShowTestPanel(BaseRubyTask):
     self.window().run_command("show_panel", {"panel": "output.tests"})
 
 class VerifyRubyFile(BaseRubyTask):
+  def is_enabled(self): return 'verify_syntax' in self.file_type().features()
   def run(self, args):
     file = self.file_type()
     command = file.verify_syntax_command()
@@ -243,6 +246,7 @@ class VerifyRubyFile(BaseRubyTask):
       sublime.error_message("Only .rb or .erb files supported!")
 
 class SwitchBetweenCodeAndTest(BaseRubyTask):
+  def is_enabled(self): return 'switch_to_test' in self.file_type().features()
   def run(self, args):
     possible_alternates = self.file_type().possible_alternate_files()
     alternates = self.project_files(lambda(file): file in possible_alternates)
