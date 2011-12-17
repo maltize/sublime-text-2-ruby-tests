@@ -6,5 +6,7 @@
   { "keys": ["super+shift+x"], "command": "show_test_panel" }, // show test panel
 
   { "keys": ["alt+shift+v"], "command": "verify_ruby_file" }, // verify ruby syntax
-  { "keys": ["super+period"], "command": "switch_between_code_and_test" } // switch between code and test
+  { "keys": ["super+period"], "command": "switch_between_code_and_test", "context" : [
+    { "key": "selector", "operator": "equal", "operand": "source.ruby", "match_all": true }
+  ]} // switch between code and test
 ]
