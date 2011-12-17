@@ -2,7 +2,7 @@
     <content><![CDATA[describe ${1:${TM_FILENAME/(?:\A|_)([A-Za-z0-9]+)_spec(?:\.rb)?/(?2::\u$1)/g}} do
 	$0
 end]]></content>
-    <tabTrigger>desc</tabTrigger>
+    <tabTrigger>des</tabTrigger>
     <scope>source.ruby.rspec</scope>
     <description>describe block</description>
 </snippet>
