@@ -56,7 +56,7 @@ class StatusProcess(object):
       else:
         break
 
-class BaseRubyTask(sublime_plugin.WindowCommand):
+class BaseRubyTask(sublime_plugin.TextCommand):
   def load_config(self):
     s = sublime.load_settings("RubyTest.sublime-settings")
     global RUBY_UNIT; RUBY_UNIT = s.get("ruby_unit_exec")
@@ -73,11 +73,14 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
 
     sublime.save_settings("RubyTest.last-run")
 
+  def window(self):
+    return self.view.window()
+
   def show_tests_panel(self):
     if not hasattr(self, 'output_view'):
-      self.output_view = self.window.get_output_panel("tests")
+      self.output_view = self.window().get_output_panel("tests")
     self.clear_test_view()
-    self.window.run_command("show_panel", {"panel": "output.tests"})
+    self.window().run_command("show_panel", {"panel": "output.tests"})
 
   def clear_test_view(self):
     self.output_view.set_read_only(False)
@@ -124,10 +127,13 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
     def get_current_line_number(self, view):
       char_under_cursor = view.sel()[0].a
       return view.rowcol(char_under_cursor)[0] + 1
+    def can_run_test(self): return False
+    def can_verify_syntax(self): return False
 
   class RubyFile(BaseFile):
     def verify_syntax_command(self): return self.wrap_in_cd(self.folder_name, "ruby -c " + self.file_name)
     def possible_alternate_files(self): return [self.file_name.replace(".rb", "_spec.rb"), self.file_name.replace(".rb", "_test.rb"), self.file_name.replace(".rb", ".feature")]
+    def can_verify_syntax(self): return True
 
   class UnitFile(RubyFile):
     def possible_alternate_files(self): return [self.file_name.replace("_test.rb", ".rb")]
@@ -147,21 +153,26 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
       test_name = match_obj.group(1)[::-1]
       test_name = test_name.replace("\"", "").replace(" ", "_") # if test name in 2nd format
       return self.run_from_project_root(RUBY_UNIT_FOLDER, RUBY_UNIT, " -n " + test_name)
+    def can_run_test(self): return True
 
   class CucumberFile(BaseFile):
     def possible_alternate_files(self): return [self.file_name.replace(".feature", ".rb")]
     def run_all_tests_command(self): return self.run_from_project_root(CUCUMBER_UNIT_FOLDER, CUCUMBER_UNIT)
     def run_single_test_command(self, view): return self.run_from_project_root(CUCUMBER_UNIT_FOLDER, CUCUMBER_UNIT, " -l " + str(self.get_current_line_number(view)))
+    def can_run_test(self): return True
 
   class RSpecFile(RubyFile):
     def possible_alternate_files(self): return [self.file_name.replace("_spec.rb", ".rb")]
     def run_all_tests_command(self): return self.run_from_project_root(RSPEC_UNIT_FOLDER, RSPEC_UNIT)
     def run_single_test_command(self, view): return self.run_from_project_root(RSPEC_UNIT_FOLDER, RSPEC_UNIT, " -l " + str(self.get_current_line_number(view)))
+    def can_run_test(self): return True
 
   class ErbFile(BaseFile):
     def verify_syntax_command(self): return self.wrap_in_cd(self.folder_name, "erb -xT - " + self.file_name + " | ruby -c")
+    def can_verify_syntax(self): return True
 
-  def file_type(self, file_name):
+  def file_type(self, file_name = None):
+    file_name = file_name or self.view.file_name()
     if re.search('\w+\_test.rb', file_name):
       return BaseRubyTask.UnitFile(file_name)
     elif re.search('\w+\_spec.rb', file_name):
@@ -176,12 +187,10 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
       return BaseRubyTask.BaseFile(file_name)
 
 class RunSingleRubyTest(BaseRubyTask):
-
-  def run(self):
+  def run(self, args):
     self.load_config()
-    view = self.window.active_view()
-    file = self.file_type(view.file_name())
-    command = file.run_single_test_command(view)
+    file = self.file_type()
+    command = file.run_single_test_command(self.view)
     if command:
       self.save_test_run(command, file.file_name)
       self.show_tests_panel()
@@ -190,9 +199,9 @@ class RunSingleRubyTest(BaseRubyTask):
       StatusProcess("Starting tests from file " + file.file_name, self)
 
 class RunAllRubyTest(BaseRubyTask):
-  def run(self):
+  def run(self, args):
     self.load_config()
-    view = self.window.active_view()
+    view = self.view
     folder_name, file_name = os.path.split(view.file_name())
     file = self.file_type(view.file_name())
     command = file.run_all_tests_command()
@@ -212,7 +221,7 @@ class RunLastRubyTest(BaseRubyTask):
     global LAST_TEST_RUN; LAST_TEST_RUN = s.get("last_test_run")
     global LAST_TEST_FILE; LAST_TEST_FILE = s.get("last_test_file")
 
-  def run(self):
+  def run(self, args):
     self.load_last_run()
     self.show_tests_panel()
     self.is_running = True
@@ -220,13 +229,12 @@ class RunLastRubyTest(BaseRubyTask):
     StatusProcess("Starting tests from file " + LAST_TEST_FILE, self)
 
 class ShowTestPanel(BaseRubyTask):
-  def run(self):
-    self.window.run_command("show_panel", {"panel": "output.tests"})
+  def run(self, args):
+    self.window().run_command("show_panel", {"panel": "output.tests"})
 
 class VerifyRubyFile(BaseRubyTask):
-  def run(self):
-    view = self.window.active_view()
-    file = self.file_type(view.file_name())
+  def run(self, args):
+    file = self.file_type()
     command = file.verify_syntax_command()
     if command:
       self.show_tests_panel()
@@ -235,12 +243,11 @@ class VerifyRubyFile(BaseRubyTask):
       sublime.error_message("Only .rb or .erb files supported!")
 
 class SwitchBetweenCodeAndTest(BaseRubyTask):
-  def run(self):
-    _, file_name = os.path.split(self.window.active_view().file_name())
-    possible_alternates = self.file_type(file_name).possible_alternate_files()
+  def run(self, args):
+    possible_alternates = self.file_type().possible_alternate_files()
     alternates = self.project_files(lambda(file): file in possible_alternates)
     if alternates:
-      self.window.open_file(alternates.pop())
+      self.window().open_file(alternates.pop())
     else:
       sublime.error_message("could not find " + str(possible_alternates))
 
@@ -251,5 +258,5 @@ class SwitchBetweenCodeAndTest(BaseRubyTask):
       yield dir, dirnames, files
 
   def project_files(self, file_matcher):
-    directories = self.window.folders()
+    directories = self.window().folders()
     return [os.path.join(dirname, file) for directory in directories for dirname, _, files in self.walk(directory) for file in filter(file_matcher, files)]
