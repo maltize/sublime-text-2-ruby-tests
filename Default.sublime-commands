@@ -1,0 +1,8 @@
+[
+  { "caption": "RubyTest: Run Single Test", "command": "run_single_ruby_test" },
+  { "caption": "RubyTest: Run All Ruby Tests", "command": "run_all_ruby_test" },
+  { "caption": "RubyTest: Run Last Ruby Test", "command": "run_last_ruby_test" },
+  { "caption": "RubyTest: Show Test Panel", "command": "show_test_panel" },
+  { "caption": "RubyTest: Verify Syntax", "command": "verify_ruby_file" },
+  { "caption": "RubyTest: Switch between code and test", "command": "switch_between_code_and_test" }
+]
