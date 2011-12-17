@@ -173,7 +173,7 @@ class BaseRubyTask(sublime_plugin.WindowCommand):
     elif re.search('\w+\.erb', file_name):
       return BaseRubyTask.ErbFile(file_name)
     else:
-      return BaseRubyTask.OtherFile(file_name)
+      return BaseRubyTask.BaseFile(file_name)
 
 class RunSingleRubyTest(BaseRubyTask):
 
