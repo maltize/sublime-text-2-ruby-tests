@@ -129,6 +129,10 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       return view.rowcol(char_under_cursor)[0] + 1
     def features(self): return []
 
+  class AnonymousFile(BaseFile):
+    def __init__(self):
+      True
+
   class RubyFile(BaseFile):
     def verify_syntax_command(self): return self.wrap_in_cd(self.folder_name, "ruby -c " + self.file_name)
     def possible_alternate_files(self): return [self.file_name.replace(".rb", "_spec.rb"), self.file_name.replace(".rb", "_test.rb"), self.file_name.replace(".rb", ".feature")]
@@ -173,6 +177,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
 
   def file_type(self, file_name = None):
     file_name = file_name or self.view.file_name()
+    if not file_name: return BaseRubyTask.AnonymousFile()
     if re.search('\w+\_test.rb', file_name):
       return BaseRubyTask.UnitFile(file_name)
     elif re.search('\w+\_spec.rb', file_name):
