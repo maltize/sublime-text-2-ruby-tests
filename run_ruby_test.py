@@ -135,7 +135,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
   class RubyFile(BaseFile):
     def verify_syntax_command(self): return wrap_in_cd(self.folder_name, "ruby -c " + self.file_name)
     def possible_alternate_files(self): return [self.file_name.replace(".rb", "_spec.rb"), self.file_name.replace(".rb", "_test.rb"), self.file_name.replace(".rb", ".feature")]
-    def features(self): return ["verify_syntax", "switch_to_test", "rails_generate"]
+    def features(self): return ["verify_syntax", "switch_to_test", "rails_generate", "extract_variable"]
 
   class UnitFile(RubyFile):
     def possible_alternate_files(self): return [self.file_name.replace("_test.rb", ".rb")]
@@ -279,3 +279,20 @@ class RubyRailsGenerate(BaseRubyTask):
     command = wrap_in_cd(self.window().folders()[0], "rails generate " + argument)
     self.show_tests_panel()
     self.start_async("Generating " + argument, command)
+
+class RubyExtractVariable(BaseRubyTask):
+  def is_enabled(self): return 'extract_variable' in self.file_type().features()
+  def run(self, args):
+    for selection in self.view.sel():
+      self.window().show_input_panel("Variable Name: ", '', lambda name: self.generate(selection, name), None, None)
+
+  def generate(self, selection, name):
+    extracted = self.view.substr(selection)
+    line = self.view.line(selection)
+    white_space = re.match("\s*", self.view.substr(line)).group()
+    edit = self.view.begin_edit()
+    try:
+      self.view.replace(edit, selection, name)
+      self.view.insert(edit, line.begin(), white_space + name + " = " + extracted + "\n")
+    finally:
+      self.view.end_edit(edit)

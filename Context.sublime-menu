@@ -12,6 +12,10 @@
         { "caption": "-" },
         { "caption": "Verify ruby syntax", "command": "verify_ruby_file" },
         { "caption": "-" },
+        { "caption": "Refactoring", "children": [
+          { "caption": "Extract Local Variable", "command": "ruby_extract_variable" }
+        ]},
+        { "caption": "-" },
         { "caption": "Switch Between Code and Test", "command": "switch_between_code_and_test" }
       ]
   }
