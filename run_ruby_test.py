@@ -56,6 +56,9 @@ class StatusProcess(object):
       else:
         break
 
+def wrap_in_cd(path, command):
+  return "cd " + path + " && " + command
+
 class BaseRubyTask(sublime_plugin.TextCommand):
   def load_config(self):
     s = sublime.load_settings("RubyTest.sublime-settings")
@@ -112,18 +115,14 @@ class BaseRubyTask(sublime_plugin.TextCommand):
   def update_status(self, msg, progress):
     sublime.status_message(msg + " " + progress)
 
-  def project_path(self, path, command):
-    return "cd " + path + " && " + command
-
   class BaseFile(object):
     def __init__(self, file_name): self.folder_name, self.file_name = os.path.split(file_name)
     def verify_syntax_command(self): return None
-    def wrap_in_cd(self, path, command): return "cd " + path + " && " + command
     def possible_alternate_files(self): return []
     def run_all_tests_command(self): return None
     def run_from_project_root(self, partition_folder, command, options = ""):
       folder_name, test_folder, file_name = os.path.join(self.folder_name, self.file_name).partition(partition_folder)
-      return self.wrap_in_cd(folder_name, command + " " + test_folder + file_name + options)
+      return wrap_in_cd(folder_name, command + " " + test_folder + file_name + options)
     def get_current_line_number(self, view):
       char_under_cursor = view.sel()[0].a
       return view.rowcol(char_under_cursor)[0] + 1
@@ -134,9 +133,9 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       True
 
   class RubyFile(BaseFile):
-    def verify_syntax_command(self): return self.wrap_in_cd(self.folder_name, "ruby -c " + self.file_name)
+    def verify_syntax_command(self): return wrap_in_cd(self.folder_name, "ruby -c " + self.file_name)
     def possible_alternate_files(self): return [self.file_name.replace(".rb", "_spec.rb"), self.file_name.replace(".rb", "_test.rb"), self.file_name.replace(".rb", ".feature")]
-    def features(self): return ["verify_syntax", "switch_to_test"]
+    def features(self): return ["verify_syntax", "switch_to_test", "rails_generate"]
 
   class UnitFile(RubyFile):
     def possible_alternate_files(self): return [self.file_name.replace("_test.rb", ".rb")]
@@ -171,7 +170,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     def features(self): return super(BaseRubyTask.RSpecFile, self).features() + ["run_test"]
 
   class ErbFile(BaseFile):
-    def verify_syntax_command(self): return self.wrap_in_cd(self.folder_name, "erb -xT - " + self.file_name + " | ruby -c")
+    def verify_syntax_command(self): return wrap_in_cd(self.folder_name, "erb -xT - " + self.file_name + " | ruby -c")
     def can_verify_syntax(self): return True
     def features(self): return ["verify_syntax"]
 
@@ -254,7 +253,7 @@ class SwitchBetweenCodeAndTest(BaseRubyTask):
   def is_enabled(self): return 'switch_to_test' in self.file_type().features()
   def run(self, args):
     possible_alternates = self.file_type().possible_alternate_files()
-    alternates = self.project_files(lambda(file): file in possible_alternates)
+    alternates = self.project_files(lambda file: file in possible_alternates)
     if alternates:
       self.window().open_file(alternates.pop())
     else:
@@ -269,3 +268,14 @@ class SwitchBetweenCodeAndTest(BaseRubyTask):
   def project_files(self, file_matcher):
     directories = self.window().folders()
     return [os.path.join(dirname, file) for directory in directories for dirname, _, files in self.walk(directory) for file in filter(file_matcher, files)]
+
+class RubyRailsGenerate(BaseRubyTask):
+  def is_enabled(self): return 'rails_generate' in self.file_type().features()
+
+  def run(self, args, type = "migration"):
+    self.window().show_input_panel("rails generate", type + " ", lambda s: self.generate(s), None, None)
+
+  def generate(self, argument):
+    command = wrap_in_cd(self.window().folders()[0], "rails generate " + argument)
+    self.show_tests_panel()
+    self.start_async("Generating " + argument, command)

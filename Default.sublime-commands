@@ -4,5 +4,8 @@
   { "caption": "RubyTest: Run Last Ruby Test", "command": "run_last_ruby_test" },
   { "caption": "RubyTest: Show Test Panel", "command": "show_test_panel" },
   { "caption": "RubyTest: Verify Syntax", "command": "verify_ruby_file" },
+  { "caption": "RubyTest: Generate Rails Migration", "command": "ruby_rails_generate", "args" : {"type" : "migration"} },
+  { "caption": "RubyTest: Generate Rails Model", "command": "ruby_rails_generate", "args" : {"type" : "model"} },
+  { "caption": "RubyTest: Generate Rails Controller", "command": "ruby_rails_generate", "args" : {"type" : "controller"} },
   { "caption": "RubyTest: Switch between code and test", "command": "switch_between_code_and_test" }
 ]
