@@ -269,6 +269,11 @@ class SwitchBetweenCodeAndTest(BaseRubyTask):
     directories = self.window().folders()
     return [os.path.join(dirname, file) for directory in directories for dirname, _, files in self.walk(directory) for file in filter(file_matcher, files)]
 
+class RubyRunShell(BaseRubyTask):
+  def run(self, args, command, caption = "Running shell command"):
+    self.show_tests_panel()
+    self.start_async(caption, wrap_in_cd(self.window().folders()[0], command))
+
 class RubyRailsGenerate(BaseRubyTask):
   def is_enabled(self): return 'rails_generate' in self.file_type().features()
 
@@ -276,9 +281,8 @@ class RubyRailsGenerate(BaseRubyTask):
     self.window().show_input_panel("rails generate", type + " ", lambda s: self.generate(s), None, None)
 
   def generate(self, argument):
-    command = wrap_in_cd(self.window().folders()[0], "rails generate " + argument)
-    self.show_tests_panel()
-    self.start_async("Generating " + argument, command)
+    command = "rails generate " + argument
+    self.view.run_command("ruby_run_shell", {"command": command, "caption": "Generating" + argument})
 
 class RubyExtractVariable(BaseRubyTask):
   def is_enabled(self): return 'extract_variable' in self.file_type().features()
