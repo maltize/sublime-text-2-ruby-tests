@@ -209,12 +209,12 @@ def push
   # We put the filenames on the socket for the server to read and then load.
   socket.puts f
 
-  while line = socket.readpartial(100)
-    break if line[-1,1] == "\0"
+   while line = socket.readline
     print line
   end
 rescue Errno::ECONNREFUSED
   abort "Connection was refused. Have you started up `spin serve` yet?"
+rescue EOFError
 end
 
 force_rspec = false
