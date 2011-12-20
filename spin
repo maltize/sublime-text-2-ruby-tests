@@ -13,7 +13,6 @@ require 'digest/md5'
 # environment.
 require 'benchmark'
 require 'optparse'
-require 'ruby-growl'
 
 SEPARATOR = '|'
 def usage
@@ -105,7 +104,6 @@ def serve(force_rspec, force_testunit, time, push_results)
         fork_and_run(@last_files_ran, push_results, test_framework, nil)
         # See WAIT below
         Process.wait
-        notify(@last_files_ran)
       end
     end
 
@@ -131,11 +129,9 @@ def serve(force_rspec, force_testunit, time, push_results)
     # that destroys the idea of being simple to use. So we wait(2) until the
     # child process has finished running the test.
     Process.wait
-    notify(files)
     # If we are tracking time we will output it here after everything has
     # finished running
     puts "Total execution time was #{Time.now - start} seconds" if start
-
     # Tests have now run. If we were pushing results to a push process, we can
     # now disconnect it.
     begin
@@ -143,16 +139,6 @@ def serve(force_rspec, force_testunit, time, push_results)
     rescue Errno::EPIPE
       # Don't abort if the client already disconnected
     end
-  end
-end
-
-def notify(files)
-  growl = Growl.new "localhost", "ruby-growl", ["Tests output"]
-  case $?
-  when 0
-    growl.notify "Tests output", 'Tests finished', "Well done!"
-  else
-    growl.notify "Tests output", 'Tests Failed',  "ERROR: #{files.join('\n')}"
   end
 end
 
@@ -208,8 +194,7 @@ def push
   socket = UNIXSocket.open(socket_file)
   # We put the filenames on the socket for the server to read and then load.
   socket.puts f
-
-   while line = socket.readline
+  while line = socket.readline
     print line
   end
 rescue Errno::ECONNREFUSED
