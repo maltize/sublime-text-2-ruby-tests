@@ -57,7 +57,7 @@ class StatusProcess(object):
         break
 
 def wrap_in_cd(path, command):
-  return "cd " + path + " && " + command
+  return "cd '" + path + "' && " + command
 
 class BaseRubyTask(sublime_plugin.TextCommand):
   def load_config(self):
