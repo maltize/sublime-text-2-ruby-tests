@@ -39,8 +39,9 @@ Usage
  - Run last ruby test(s): Command-Shift-E
  - Show test panel: Command-Shift-X
  - Check RB, ERB file syntax: Alt-Shift-V
- - Switching between code and test: Command-.
-
+ - Switching between code and test:
+        - Single View: Command-.
+        - Split View:  Command+Ctrl+.
 Keys:
  'Command' (OSX)
  'Ctrl' (Linux / Windows)

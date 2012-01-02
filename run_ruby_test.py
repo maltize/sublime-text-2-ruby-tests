@@ -251,10 +251,17 @@ class VerifyRubyFile(BaseRubyTask):
 
 class SwitchBetweenCodeAndTest(BaseRubyTask):
   def is_enabled(self): return 'switch_to_test' in self.file_type().features()
-  def run(self, args):
+  def run(self, args, split_view):
     possible_alternates = self.file_type().possible_alternate_files()
     alternates = self.project_files(lambda file: file in possible_alternates)
     if alternates:
+      if split_view:
+        self.window().run_command('set_layout', {
+                              "cols": [0.0, 0.5, 1.0],
+                              "rows": [0.0, 1.0],
+                              "cells": [[0, 0, 1, 1], [1, 0, 2, 1]]
+                          })
+        self.window().focus_group(1)
       self.window().open_file(alternates.pop())
     else:
       sublime.error_message("could not find " + str(possible_alternates))
