@@ -148,7 +148,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       text_string = text_string[::-1]
       match_obj = re.search('\s?([a-zA-Z_\d]+tset)\s+fed', text_string) # 1st search for 'def test_name'
       if not match_obj:
-        match_obj = re.search('\s?(\"[a-zA-Z_\s\d]+\"\s+tset)', text_string) # 2nd search for 'test "name"'
+        match_obj = re.search('\s?([\"\'][a-zA-Z_\s\d]+[\"\']\s+tset)', text_string) # 2nd search for 'test "name"'
       if not match_obj:
         sublime.error_message("No test name!")
         return
