@@ -59,6 +59,36 @@ class StatusProcess(object):
 def wrap_in_cd(path, command):
   return "cd '" + path + "' && " + command
 
+class TestMethodMatcher(object):
+  def __init__(self):
+    self.matchers = [TestMethodMatcher.UnitTest, TestMethodMatcher.ShouldaTest]
+  def find_first_match_in(self, test_file_content):
+    for matcher in self.matchers:
+      test_name = matcher.find_first_match(test_file_content)
+      if test_name:
+        return test_name
+
+  class UnitTest(object):
+    @staticmethod
+    def find_first_match(test_file_content):
+      match_obj = re.search('\s?([a-zA-Z_\d]+tset)\s+fed', test_file_content) # 1st search for 'def test_name'
+      if not match_obj:
+        match_obj = re.search('\s?([\"\'][a-zA-Z_\s\d]+[\"\']\s+tset)', test_file_content) # 2nd search for 'test "name"'
+      if not match_obj:
+        return None
+      test_name = match_obj.group(1)[::-1]
+      return test_name.replace("\"", "").replace(" ", "_")
+
+  class ShouldaTest(object):
+    @staticmethod
+    def find_first_match(test_file_content):
+      match_obj = re.search('\s?([\"\'][a-zA-Z_\s\d]+[\"\']\s+dluohs)', test_file_content) # search for 'should "name"'
+      if not match_obj:
+        return None
+      test_name = match_obj.group(1)[::-1]
+      return "%s%s%s" % ("/", test_name.replace("should", "").strip(), "/")
+
+
 class BaseRubyTask(sublime_plugin.TextCommand):
   def load_config(self):
     s = sublime.load_settings("RubyTest.sublime-settings")
@@ -146,14 +176,10 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       text_string = view.substr(sublime.Region(region.begin() - 2000, line_region.end()))
       text_string = text_string.replace("\n", "\\N")
       text_string = text_string[::-1]
-      match_obj = re.search('\s?([a-zA-Z_\d]+tset)\s+fed', text_string) # 1st search for 'def test_name'
-      if not match_obj:
-        match_obj = re.search('\s?([\"\'][a-zA-Z_\s\d]+[\"\']\s+tset)', text_string) # 2nd search for 'test "name"'
-      if not match_obj:
+      test_name = TestMethodMatcher().find_first_match_in(text_string)
+      if test_name is not None:
         sublime.error_message("No test name!")
         return
-      test_name = match_obj.group(1)[::-1]
-      test_name = test_name.replace("\"", "").replace(" ", "_") # if test name in 2nd format
       return self.run_from_project_root(RUBY_UNIT_FOLDER, RUBY_UNIT, " -n " + test_name)
     def features(self): return super(BaseRubyTask.UnitFile, self).features() + ["run_test"]
 
