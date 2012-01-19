@@ -177,7 +177,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       text_string = text_string.replace("\n", "\\N")
       text_string = text_string[::-1]
       test_name = TestMethodMatcher().find_first_match_in(text_string)
-      if test_name is not None:
+      if test_name is None:
         sublime.error_message("No test name!")
         return
       return self.run_from_project_root(RUBY_UNIT_FOLDER, RUBY_UNIT, " -n " + test_name)
