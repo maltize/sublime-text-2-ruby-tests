@@ -40,13 +40,19 @@ Usage
  - Show test panel: Command-Shift-X
  - Check RB, ERB file syntax: Alt-Shift-V
  - Switching between code and test:
-        - Single View: Command-.
-        - Split View:  Command+Ctrl+.
+    - Single View: Command-.
+    - Split View:  Command+Ctrl+.
+
 Keys:
  'Command' (OSX)
  'Ctrl' (Linux / Windows)
 
  ![ruby_tests screenshot](https://github.com/maltize/sublime-text-2-ruby-tests/raw/master/ruby_tests.png)
+
+
+Colors Issue:
+------------
+We have known colors issue. Please check [this thread](https://github.com/maltize/sublime-text-2-ruby-tests/issues/33#issuecomment-3553701) for temporary solution.
 
 Note
 ----
