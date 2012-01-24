@@ -82,7 +82,7 @@ class TestMethodMatcher(object):
   class ShouldaTest(object):
     @staticmethod
     def find_first_match(test_file_content):
-      match_obj = re.search('\s?([\"\'][a-zA-Z_\s\d]+[\"\']\s+dluohs)', test_file_content) # search for 'should "name"'
+      match_obj = re.search('\s?(([\"][^\"]*[\"]|[\'][^\']*[\'])\s+dluohs)', test_file_content) # search for 'should "name"'
       if not match_obj:
         return None
       test_name = match_obj.group(1)[::-1]
