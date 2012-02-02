@@ -16,13 +16,15 @@ Installation
 
 Go to your Sublime Text 2 `Packages` directory
 
- - OS X: ~/Library/Application Support/Sublime Text 2/Packages/
- - Windows: %APPDATA%/Sublime Text 2/Packages/
- - Linux: ~/.Sublime Text 2/Packages/
+ - OS X: `~/Library/Application Support/Sublime Text 2/Packages/`
+ - Windows: `%APPDATA%/Sublime Text 2/Packages/`
+ - Linux: `~/.Sublime Text 2/Packages/`
 
 and clone the repository using the command below:
 
+``` shell
 git clone https://github.com/maltize/sublime-text-2-ruby-tests.git RubyTest
+```
 
 Settings
 --------
@@ -34,14 +36,14 @@ Make a copy of RubyTest.sublime-settings to Packages/User and make your changes.
 Usage
 -----
 
- - Run single ruby test: Command-Shift-R
- - Run all ruby tests from current file: Command-Shift-T
- - Run last ruby test(s): Command-Shift-E
- - Show test panel: Command-Shift-X
- - Check RB, ERB file syntax: Alt-Shift-V
+ - Run single ruby test: `Command-Shift-R`
+ - Run all ruby tests from current file: `Command-Shift-T`
+ - Run last ruby test(s): `Command-Shift-E`
+ - Show test panel: `Command-Shift-X`
+ - Check RB, ERB file syntax: `Alt-Shift-V`
  - Switching between code and test:
-    - Single View: Command-.
-    - Split View:  Command+Ctrl+.
+    - Single View: `Command-`.
+    - Split View:  `Command+Ctrl+`.
 
 Keys:
  'Command' (OSX)
