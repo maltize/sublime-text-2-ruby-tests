@@ -58,7 +58,9 @@ We have known colors issue. Please check [this thread](https://github.com/maltiz
 
 Note
 ----
-If you having trouble running tests try to run Sublime Text 2 from command line.
+Before reporting an issue be sure to :
+- Run Sublime Text 2 from [command line](http://www.sublimetext.com/docs/2/osx_command_line.html)
 
-This is a work in progress so expect bugs.
+If this will not help provide to us debug informations using (CTRL + ` )
+
 Please open an issue at https://github.com/maltize/sublime-text-2-ruby-tests if you discover a problem or would like to see a feature/change implemented.
