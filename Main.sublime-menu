@@ -14,7 +14,7 @@
               { "caption": "Show test panel", "command": "show_test_panel" },
               { "caption": "-" },
               { "caption": "Verify ruby syntax", "command": "verify_ruby_file" },
-              { "caption": "Switch Between Code and Test", "command": "switch_between_code_and_test" },
+              { "caption": "Switch Between Code and Test", "command": "switch_between_code_and_test", "args": {"split_view": false} },
               { "caption": "-" }
             ]
         }
