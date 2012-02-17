@@ -8,5 +8,5 @@
   { "caption": "RubyTest: Generate Rails Model", "command": "ruby_rails_generate", "args" : {"type" : "model"} },
   { "caption": "RubyTest: Generate Rails Controller", "command": "ruby_rails_generate", "args" : {"type" : "controller"} },
   { "caption": "RubyTest: Extract Local Variable", "command": "ruby_extract_variable" },
-  { "caption": "RubyTest: Switch between code and test", "command": "switch_between_code_and_test" }
+  { "caption": "RubyTest: Switch between code and test", "command": "switch_between_code_and_test", "args": {"split_view": false} }
 ]
