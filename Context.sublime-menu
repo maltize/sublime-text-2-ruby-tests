@@ -16,7 +16,7 @@
           { "caption": "Extract Local Variable", "command": "ruby_extract_variable" }
         ]},
         { "caption": "-" },
-        { "caption": "Switch Between Code and Test", "command": "switch_between_code_and_test" }
+        { "caption": "Switch Between Code and Test", "command": "switch_between_code_and_test", "args": {"split_view": false} }
       ]
   }
 ]
