@@ -57,7 +57,7 @@ class StatusProcess(object):
         break
 
 def wrap_in_cd(path, command):
-  return "cd '" + path + "' && " + command
+  return 'cd ' + path.replace("\\", "/") + ' && ' + command
 
 class TestMethodMatcher(object):
   def __init__(self):
