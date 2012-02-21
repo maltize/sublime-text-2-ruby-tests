@@ -12,7 +12,7 @@
       <key>comment</key>
       <string>test pass</string>
       <key>match</key>
-      <string>(^|\s)\d+ (tests|assertions|examples?)</string>
+      <string>(^|\s)\d+ (tests|assertions|examples?|passed)</string>
       <key>name</key>
       <string>test.pass</string>
     </dict>
@@ -20,7 +20,7 @@
       <key>comment</key>
       <string>test error</string>
       <key>match</key>
-      <string>(\d+ errors)|(\d+\) Error:)</string>
+      <string>(\d+ errors)|(\d+\) Error:|Failing \w*:|cucumber(\s\S*)|\d failed)</string>
       <key>name</key>
       <string>test.error</string>
     </dict>
@@ -28,7 +28,7 @@
       <key>comment</key>
       <string>test fail</string>
       <key>match</key>
-      <string>(\d+ failures?)|(\d+\) Failure:)</string>
+      <string>(\d+ failures?)|(\d+\) Failure:)|\d+ skipped</string>
       <key>name</key>
       <string>test.fail</string>
     </dict>
@@ -41,7 +41,7 @@
       <array>
         <dict>
           <key>match</key>
-          <string>\.+</string>
+          <string>\.+|passed</string>
           <key>name</key>
           <string>test.pass</string>
         </dict>
