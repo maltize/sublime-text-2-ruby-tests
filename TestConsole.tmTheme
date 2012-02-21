@@ -56,6 +56,17 @@
         <string>#FF1493</string>
       </dict>
     </dict>
+    <dict>
+      <key>name</key>
+      <string>Test</string>
+      <key>scope</key>
+      <string>test.cucumber</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#FFcc66</string>
+      </dict>
+    </dict>
   </array>
   <key>uuid</key>
   <string>72174d10-bb12-11e0-962b-112233445577</string>

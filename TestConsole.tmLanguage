@@ -28,9 +28,17 @@
       <key>comment</key>
       <string>test fail</string>
       <key>match</key>
-      <string>(\d+ failures?)|(\d+\) Failure:)|\d+ skipped</string>
+      <string>(\d+ failures?)|(\d+\) Failure:)|\d+ undefined</string>
       <key>name</key>
       <string>test.fail</string>
+    </dict>
+    <dict>
+      <key>comment</key>
+      <string>test cucumber</string>
+      <key>match</key>
+      <string>Feature|Scenario|Given|And|When|Then|\d+ skipped</string>
+      <key>name</key>
+      <string>test.cucumber</string>
     </dict>
     <dict>
       <key>comment</key>
