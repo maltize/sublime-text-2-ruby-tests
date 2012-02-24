@@ -20,7 +20,7 @@
       <key>comment</key>
       <string>test error</string>
       <key>match</key>
-      <string>(\d+ errors)|(\d+\) Error:|Failing \w*:|cucumber(\s\S*)|\d failed)</string>
+      <string>(\d+ errors)|(\d+\) Error:|Failing \w*:|cucumber(\s\S*)|\d+ failed)</string>
       <key>name</key>
       <string>test.error</string>
     </dict>
@@ -36,9 +36,33 @@
       <key>comment</key>
       <string>test cucumber</string>
       <key>match</key>
-      <string>Feature|Scenario|Given|And|When|Then|\d+ skipped</string>
+      <string>Feature|Scenario|Given|And|When|Then</string>
       <key>name</key>
       <string>test.cucumber</string>
+    </dict>
+    <dict>
+      <key>skipped</key>
+      <string>test cucumber skipped</string>
+      <key>match</key>
+      <string>\d+ skipped</string>
+      <key>name</key>
+      <string>test.skipped</string>
+    </dict>
+    <dict>
+      <key>pending</key>
+      <string>test cucumber pending</string>
+      <key>match</key>
+      <string>\d+ pending</string>
+      <key>name</key>
+      <string>test.pending</string>
+    </dict>
+    <dict>
+      <key>comment</key>
+      <string>test cucumber comment</string>
+      <key>match</key>
+      <string>\s#\s.+</string>
+      <key>name</key>
+      <string>test.comment</string>
     </dict>
     <dict>
       <key>comment</key>
