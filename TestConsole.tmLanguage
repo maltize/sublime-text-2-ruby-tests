@@ -78,7 +78,7 @@
         </dict>
       </dict>
       <key>end</key>
-      <string>(\d\sscenario)</string>
+      <string>(^\s+$)</string>
       <key>patterns</key>
       <array>
         <dict>
