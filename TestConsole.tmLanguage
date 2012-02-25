@@ -36,10 +36,137 @@
       <key>comment</key>
       <string>test cucumber</string>
       <key>match</key>
-      <string>Feature|Scenario|Given|And|When|Then</string>
+      <string>Given|When|Then|But</string>
       <key>name</key>
       <string>test.cucumber</string>
     </dict>
+    <dict>
+      <key>comment</key>
+      <string>test cucumber comment</string>
+      <key>match</key>
+      <string>\s#\s{1}.+</string>
+      <key>name</key>
+      <string>test.comment</string>
+    </dict>
+    
+    <!-- Pending -->
+    <dict>
+      <key>begin</key>
+      <string>TODO</string>
+      <key>beginCaptures</key>
+      <dict>
+        <key>0</key>
+        <dict>
+          <key>name</key>
+          <string>test.pending</string>
+        </dict>
+      </dict>
+      <key>end</key>
+      <string>(\s{4}Given.+|\s{4}When.+|\s{4}Then.+|\s{4}And.+|\s{4}But.+)</string>
+      <key>endCaptures</key>
+      <dict>
+        <key>0</key>
+        <dict>
+          <key>name</key>
+          <string>test.skipped</string>
+        </dict>
+      </dict>
+      <key>patterns</key>
+      <array>
+        <dict>
+          <key>match</key>
+          <string>.+</string>
+          <key>name</key>
+          <string>test.pending</string>
+        </dict>
+      </array>
+    </dict>    
+    <!-- End Pending -->
+    
+    <!-- Error -->
+    <dict>
+      <key>begin</key>
+      <string>expected.+</string>
+      <key>beginCaptures</key>
+      <dict>
+        <key>0</key>
+        <dict>
+          <key>name</key>
+          <string>test.error</string>
+        </dict>
+      </dict>
+      <key>end</key>
+      <!-- <string>(\s{4}Given.+|\s{4}When.+|\s{4}Then.+|\s{4}And.+|\s{4}But.+)</string> -->
+      <string>Failing.+</string>
+      <key>endCaptures</key>
+      <dict>
+        <key>0</key>
+        <dict>
+          <key>name</key>
+          <string>test.error</string>
+        </dict>
+      </dict>
+      <key>patterns</key>
+      <array>
+        <dict>
+          <key>match</key>
+          <string>(\s{6}[^#][^\s]|\s{6})(features.+)</string>
+          <key>name</key>
+          <string>test.error</string>
+        </dict>
+        <dict>
+          <key>match</key>
+          <string>got.+</string>
+          <key>name</key>
+          <string>test.error</string>
+        </dict>
+        <dict>
+          <key>match</key>
+          <string>(\s{4}Given.+|\s{4}When.+|\s{4}Then.+|\s{4}And.+|\s{4}But.+)</string>
+          <key>name</key>
+          <string>test.skipped</string>
+        </dict>
+      </array>
+    </dict>
+    <!-- End Error -->
+
+    <!-- Pass -->
+    <!-- <dict>
+      <key>begin</key>
+      <string>(\s{4}Given.+|\s{4}When.+|\s{4}Then.+|\s{4}And.+|\s{4}But.+)</string>
+      <key>beginCaptures</key>
+      <dict>
+        <key>0</key>
+        <dict>
+          <key>name</key>
+          <string>test.pass</string>
+        </dict>
+      </dict>
+      <key>end</key>
+      <string>expected.+</string>
+      <key>endCaptures</key>
+      <dict>
+        <key>0</key>
+        <dict>
+          <key>name</key>
+          <string>test.error</string>
+        </dict>
+      </dict>
+      <key>patterns</key>
+      <array>
+        <dict>
+          <key>match</key>
+          <string>.+?</string>
+          <key>name</key>
+          <string>test.error</string>
+        </dict>
+      </array>
+    </dict>         -->
+    <!-- End Error first line -->
+    
+
+
+
     <dict>
       <key>skipped</key>
       <string>test cucumber skipped</string>
@@ -52,17 +179,9 @@
       <key>pending</key>
       <string>test cucumber pending</string>
       <key>match</key>
-      <string>\d+ pending</string>
+      <string>(\d+ pending)</string>
       <key>name</key>
       <string>test.pending</string>
-    </dict>
-    <dict>
-      <key>comment</key>
-      <string>test cucumber comment</string>
-      <key>match</key>
-      <string>\s#\s.+</string>
-      <key>name</key>
-      <string>test.comment</string>
     </dict>
     <dict>
       <key>comment</key>

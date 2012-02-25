@@ -71,6 +71,17 @@
       <key>name</key>
       <string>Test</string>
       <key>scope</key>
+      <string>test.cucumber_description</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#86A161</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Test</string>
+      <key>scope</key>
       <string>test.skipped</string>
       <key>settings</key>
       <dict>
