@@ -41,14 +41,6 @@
       <string>test.cucumber</string>
     </dict>
     <dict>
-      <key>comment</key>
-      <string>test cucumber comment</string>
-      <key>match</key>
-      <string>\s#\s{1}.+</string>
-      <key>name</key>
-      <string>test.comment</string>
-    </dict>
-    <dict>
       <key>skipped</key>
       <string>test cucumber skipped</string>
       <key>match</key>
@@ -64,6 +56,41 @@
       <key>name</key>
       <string>test.pending</string>
     </dict>
+    
+    <!-- Matches the Scenario: description line comment and the comment portion of the failing scenarios block of text -->
+    <dict>
+      <key>comment</key>
+      <string>test cucumber comment</string>
+      <key>match</key>
+      <string>\s#\s{1}.+</string>
+      <key>name</key>
+      <string>test.comment</string>
+    </dict>
+    
+
+    <!-- Cuke PASS -->
+    <!-- FIXME matches steps that have failed or are pending -->
+    <dict>
+      <key>comment</key>
+      <string>test cucumber comment</string>
+      <key>match</key>
+      <string>(\s{4}Given.+|\s{4}When.+|\s{4}Then.+|\s{4}And.+|\s{4}But.+)(#.+)</string>
+      <key>captures</key>
+      <dict>
+        <key>1</key>
+        <dict>
+          <key>name</key>
+          <string>test.pass</string>
+        </dict>
+        <key>2</key>
+        <dict>
+          <key>name</key>
+          <string>test.comment</string>
+        </dict>
+      </dict>      
+    </dict>
+    <!-- End broken pass rule -->
+
 
     <!-- Cuke Pending -->
     <dict>
