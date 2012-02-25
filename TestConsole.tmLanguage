@@ -184,6 +184,31 @@
     </dict>    
     <!-- End Cuke Error -->
 
+    <!-- Cuke Undefined section (at bottom) -->
+    <dict>
+      <key>begin</key>
+      <string>^You can implement step definitions.+</string>
+      <key>beginCaptures</key>
+      <dict>
+        <key>0</key>
+        <dict>
+          <key>name</key>
+          <string>test.pending</string>
+        </dict>
+      </dict>
+      <key>end</key>
+      <string>(^\t)</string>
+      <key>patterns</key>
+      <array>
+        <dict>
+          <key>match</key>
+          <string>.*</string>
+          <key>name</key>
+          <string>test.pending</string>
+        </dict>        
+      </array>
+    </dict>    
+    <!-- End Undefined -->
     
     <dict>
       <key>comment</key>
