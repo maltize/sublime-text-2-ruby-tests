@@ -149,14 +149,6 @@
       </dict>
       <key>end</key>
       <string>(^\s+$)</string>
-      <key>endCaptures</key>
-      <dict>
-        <key>0</key>
-        <dict>
-          <key>name</key>
-          <string>test.error</string>
-        </dict>
-      </dict>
       <key>patterns</key>
       <array>
         <dict>
