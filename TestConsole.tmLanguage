@@ -138,7 +138,7 @@
     <!-- Cuke Error -->
     <dict>
       <key>begin</key>
-      <string>expected.+</string>
+      <string>expected.+|.*Error.*|.*error.*</string>
       <key>beginCaptures</key>
       <dict>
         <key>0</key>
