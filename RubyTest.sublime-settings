@@ -1,6 +1,6 @@
 {
   "ruby_unit_exec": "ruby -Itest",
-  "ruby_cucumber_exec": "cucumber --no-color",
+  "ruby_cucumber_exec": "cucumber -f pretty",
   "ruby_rspec_exec": "rspec",
 
   "ruby_unit_folder": "test",

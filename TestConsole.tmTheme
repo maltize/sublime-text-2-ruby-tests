@@ -67,6 +67,39 @@
         <string>#FFcc66</string>
       </dict>
     </dict>
+    <dict>
+      <key>name</key>
+      <string>Test</string>
+      <key>scope</key>
+      <string>test.skipped</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#00B6BB</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Test</string>
+      <key>scope</key>
+      <string>test.pending</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#BABC00</string>
+      </dict>
+    </dict>
+    <dict>
+      <key>name</key>
+      <string>Test</string>
+      <key>scope</key>
+      <string>test.comment</string>
+      <key>settings</key>
+      <dict>
+        <key>foreground</key>
+        <string>#545454</string>
+      </dict>
+    </dict>
   </array>
   <key>uuid</key>
   <string>72174d10-bb12-11e0-962b-112233445577</string>
