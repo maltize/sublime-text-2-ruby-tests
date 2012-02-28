@@ -21,7 +21,24 @@ class AsyncProcess(object):
   def read_stdout(self):
     while True:
       data = os.read(self.proc.stdout.fileno(), 2**15)
+
       if data != "":
+        regex_pend = r'(^\s{4}Given.+?$\n\s{6}TODO.+?$|^\s{4}When.+$\n\s{6}TODO.+?$|^\s{4}Then.+$\n\s{6}TODO.+?$|^\s{4}And.+$\n\s{6}TODO.+?$|^\s{4}But.+$\n\s{6}TODO.+?$)'
+        regex_error = r'(^\s{4}Given.+?$\n\s{6}(expected.+|.+Error.+|.+error.+)?$|^\s{4}When.+$\n\s{6}(expected.+|.+Error.+|.+error.+)?$|^\s{4}Then.+$\n\s{6}(expected.+|.+Error.+|.+error.+)?$|^\s{4}And.+$\n\s{6}(expected.+|.+Error.+|.+error.+)?$|^\s{4}But.+$\n\s{6}(expected.+|.+Error.+|.+error.+)?$)'
+        
+        pend_line_match = re.search(re.compile(regex_pend, re.M), data)
+        error_line_match = re.search(re.compile(regex_error, re.M), data)
+
+        if pend_line_match is not None:
+          line_text = pend_line_match.group(0).split("\n      ")
+        
+          data = re.compile(regex_pend, re.M).sub(line_text[0] + " #PEND" + "\n      " + line_text[1], data)
+
+        if error_line_match is not None:
+          line_text = error_line_match.group(0).split("\n      ")
+        
+          data = re.compile(regex_error, re.M).sub(line_text[0] + " #ERROR" + "\n      " + line_text[1], data)
+        
         sublime.set_timeout(functools.partial(self.listener.append_data, self.proc, data), 0)
       else:
         self.proc.stdout.close()
