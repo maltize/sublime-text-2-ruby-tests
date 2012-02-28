@@ -12,7 +12,7 @@
       <key>comment</key>
       <string>test pass</string>
       <key>match</key>
-      <string>(^|\s)\d+ (tests|assertions|examples?|passed)</string>
+      <string>(^|\s|)\d+ (tests|assertions|examples?|passed)</string>
       <key>name</key>
       <string>test.pass</string>
     </dict>
@@ -20,7 +20,7 @@
       <key>comment</key>
       <string>test error</string>
       <key>match</key>
-      <string>(\d+ errors)|(\d+\) Error:|Failing \w*:|cucumber(\s\S*)|\d failed)</string>
+      <string>(\d+ errors)|(\d+\) Error:|Failing \w*:|cucumber(\s\S*)|\d+ failed)</string>
       <key>name</key>
       <string>test.error</string>
     </dict>
@@ -28,7 +28,7 @@
       <key>comment</key>
       <string>test fail</string>
       <key>match</key>
-      <string>(\d+ failures?)|(\d+\) Failure:)|\d+ undefined</string>
+      <string>(\d+ failures?)|(\d+\) Failure:)</string>
       <key>name</key>
       <string>test.fail</string>
     </dict>
@@ -36,10 +36,182 @@
       <key>comment</key>
       <string>test cucumber</string>
       <key>match</key>
-      <string>Feature|Scenario|Given|And|When|Then|\d+ skipped</string>
+      <string>Given|When|Then|And|But</string>
       <key>name</key>
       <string>test.cucumber</string>
     </dict>
+    <dict>
+      <key>skipped</key>
+      <string>test cucumber skipped</string>
+      <key>match</key>
+      <string>\d+ skipped</string>
+      <key>name</key>
+      <string>test.skipped</string>
+    </dict>
+    <dict>
+      <key>pending</key>
+      <string>test cucumber pending in summary</string>
+      <key>match</key>
+      <string>(\d+ pending|\d+ undefined)</string>
+      <key>name</key>
+      <string>test.pending</string>
+    </dict>
+    
+    <!-- Matches the Scenario: description line comment and the comment portion of the failing scenarios block of text -->
+    <dict>
+      <key>comment</key>
+      <string>test cucumber comment</string>
+      <key>match</key>
+      <string>\s#\s{1}.+</string>
+      <key>name</key>
+      <string>test.comment</string>
+    </dict>
+    
+
+    <!-- Cuke PASS -->
+    <!-- FIXME matches steps that have failed or are pending -->
+    <dict>
+      <key>comment</key>
+      <string>test cucumber comment</string>
+      <key>match</key>
+      <string>(\s{4}Given.+|\s{4}When.+|\s{4}Then.+|\s{4}And.+|\s{4}But.+)(#.+)</string>
+      <key>captures</key>
+      <dict>
+        <key>1</key>
+        <dict>
+          <key>name</key>
+          <string>test.pass</string>
+        </dict>
+        <key>2</key>
+        <dict>
+          <key>name</key>
+          <string>test.comment</string>
+        </dict>
+      </dict>      
+    </dict>
+    <!-- End broken pass rule -->
+
+
+    <!-- Cuke Pending -->
+    <dict>
+      <key>begin</key>
+      <string>TODO\s\(Cucumber::Pending\)</string>
+      <key>beginCaptures</key>
+      <dict>
+        <key>0</key>
+        <dict>
+          <key>name</key>
+          <string>test.pending</string>
+        </dict>
+      </dict>
+      <key>end</key>
+      <string>(^\s+$)</string>
+      <key>patterns</key>
+      <array>
+        <dict>
+          <key>match</key>
+          <string>(\s{6}[^#][^\s]|\s{6})(features.+)</string>
+          <key>name</key>
+          <string>test.pending</string>
+        </dict>        
+        <dict>
+          <key>match</key>
+          <string>(\s{4}Given.+|\s{4}When.+|\s{4}Then.+|\s{4}And.+|\s{4}But.+)(#.+)</string>
+          <key>captures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>test.skipped</string>
+            </dict>
+            <key>2</key>
+            <dict>
+              <key>name</key>
+              <string>test.comment</string>
+            </dict>
+          </dict>
+        </dict>
+      </array>
+    </dict>    
+    <!-- End Cuke Pending -->
+
+    <!-- Cuke Error -->
+    <dict>
+      <key>begin</key>
+      <string>expected.+|.*Error.*|.*error.*</string>
+      <key>beginCaptures</key>
+      <dict>
+        <key>0</key>
+        <dict>
+          <key>name</key>
+          <string>test.error</string>
+        </dict>
+      </dict>
+      <key>end</key>
+      <string>Failing Scenarios:</string>
+      <key>endCaptures</key>
+      <dict>
+        <key>0</key>
+        <dict>
+          <key>name</key>
+          <string>test.error</string>
+        </dict>
+      </dict>
+      <key>patterns</key>
+      <array>
+        <dict>
+          <key>match</key>
+          <string>^\s{6}.*</string>
+          <key>name</key>
+          <string>test.error</string>
+        </dict>        
+        <dict>
+          <key>match</key>
+          <string>(\s{4}Given.+|\s{4}When.+|\s{4}Then.+|\s{4}And.+|\s{4}But.+)(#.+)</string>
+          <key>captures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>test.skipped</string>
+            </dict>
+            <key>2</key>
+            <dict>
+              <key>name</key>
+              <string>test.comment</string>
+            </dict>
+          </dict>
+        </dict>
+      </array>
+    </dict>    
+    <!-- End Cuke Error -->
+
+    <!-- Cuke Undefined section (at bottom) -->
+    <dict>
+      <key>begin</key>
+      <string>^You can implement step definitions.+</string>
+      <key>beginCaptures</key>
+      <dict>
+        <key>0</key>
+        <dict>
+          <key>name</key>
+          <string>test.pending</string>
+        </dict>
+      </dict>
+      <key>end</key>
+      <string>(^\t)</string>
+      <key>patterns</key>
+      <array>
+        <dict>
+          <key>match</key>
+          <string>.*</string>
+          <key>name</key>
+          <string>test.pending</string>
+        </dict>        
+      </array>
+    </dict>    
+    <!-- End Undefined -->
+    
     <dict>
       <key>comment</key>
       <string>dots painting</string>
