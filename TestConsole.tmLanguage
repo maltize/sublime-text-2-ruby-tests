@@ -69,7 +69,6 @@
     
 
     <!-- Cuke PASS -->
-    <!-- FIXME matches steps that have failed or are pending -->
     <dict>
       <key>comment</key>
       <string>test cucumber comment</string>
@@ -89,7 +88,25 @@
         </dict>
       </dict>      
     </dict>
-    <!-- End broken pass rule -->
+    <!-- End Cuke PASS -->
+
+
+    <!-- Print code or other non passing/failing/pending stuff in step -->
+    <dict>
+      <key>comment</key>
+      <string>test cucumber comment</string>
+      <key>match</key>
+      <string>(^\s{6}.+)</string>
+      <key>captures</key>
+      <dict>
+        <key>1</key>
+        <dict>
+          <key>name</key>
+          <string>test.skipped</string>
+        </dict>
+      </dict>      
+    </dict>
+    <!-- End Print code in step -->
 
 
     <!-- Cuke Pending -->
