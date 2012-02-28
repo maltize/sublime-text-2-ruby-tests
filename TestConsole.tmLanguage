@@ -185,13 +185,13 @@
         </dict>
       </dict>
       <key>end</key>
-      <string>Failing Scenarios:</string>
+      <string>(^\s+$|^\s{2}Scenario:|^Failing Scenarios:)</string>
       <key>endCaptures</key>
       <dict>
         <key>0</key>
         <dict>
           <key>name</key>
-          <string>test.error</string>
+          <string>test.plain</string>
         </dict>
       </dict>
       <key>patterns</key>
