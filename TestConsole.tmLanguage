@@ -74,7 +74,7 @@
       <key>comment</key>
       <string>test cucumber comment</string>
       <key>match</key>
-      <string>(\s{4}Given.+|\s{4}When.+|\s{4}Then.+|\s{4}And.+|\s{4}But.+)(#.+)</string>
+      <string>(\s{4}Given.+|\s{4}When.+|\s{4}Then.+|\s{4}And.+|\s{4}But.+)(#\s\S+$)</string>
       <key>captures</key>
       <dict>
         <key>1</key>
@@ -95,7 +95,7 @@
     <!-- Cuke Pending -->
     <dict>
       <key>begin</key>
-      <string>TODO\s\(Cucumber::Pending\)</string>
+      <string>TODO\s\(Cucumber::Pending\)|.*#PEND</string>
       <key>beginCaptures</key>
       <dict>
         <key>0</key>
@@ -110,7 +110,7 @@
       <array>
         <dict>
           <key>match</key>
-          <string>(\s{6}[^#][^\s]|\s{6})(features.+)</string>
+          <string>^\s{6}.*</string>
           <key>name</key>
           <string>test.pending</string>
         </dict>        
@@ -138,7 +138,7 @@
     <!-- Cuke Error -->
     <dict>
       <key>begin</key>
-      <string>expected.+|.*Error.*|.*error.*</string>
+      <string>expected.+|.*Error.*|.*error.*|.*#ERROR</string>
       <key>beginCaptures</key>
       <dict>
         <key>0</key>
