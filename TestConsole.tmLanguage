@@ -33,14 +33,6 @@
       <string>test.fail</string>
     </dict>
     <dict>
-      <key>comment</key>
-      <string>test cucumber</string>
-      <key>match</key>
-      <string>Given|When|Then|And|But</string>
-      <key>name</key>
-      <string>test.cucumber</string>
-    </dict>
-    <dict>
       <key>skipped</key>
       <string>test cucumber skipped</string>
       <key>match</key>
