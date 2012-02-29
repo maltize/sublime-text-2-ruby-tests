@@ -185,7 +185,7 @@
         </dict>
       </dict>
       <key>end</key>
-      <string>(^\s{2}Scenario:\s)|(^Failing Scenarios:\s+$)</string>
+      <string>(^\s{2}Scenario:)|(^Failing Scenarios:)</string>
       <key>endCaptures</key>
       <dict>
         <!-- using the 2nd key allows us to only target the Failing Scenarios: text at the bottom -->
