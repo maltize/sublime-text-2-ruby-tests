@@ -23,8 +23,9 @@ class AsyncProcess(object):
       data = os.read(self.proc.stdout.fileno(), 2**15)
 
       if data != "":
-        regex_pend = r'(^\s{4}Given.+?$\n\s{6}TODO.+?$|^\s{4}When.+$\n\s{6}TODO.+?$|^\s{4}Then.+$\n\s{6}TODO.+?$|^\s{4}And.+$\n\s{6}TODO.+?$|^\s{4}But.+$\n\s{6}TODO.+?$)'
-        regex_error = r'(^\s{4}Given.+?$\n\s{6}(expected.+|.+Error.+|.+error.+)?$|^\s{4}When.+$\n\s{6}(expected.+|.+Error.+|.+error.+)?$|^\s{4}Then.+$\n\s{6}(expected.+|.+Error.+|.+error.+)?$|^\s{4}And.+$\n\s{6}(expected.+|.+Error.+|.+error.+)?$|^\s{4}But.+$\n\s{6}(expected.+|.+Error.+|.+error.+)?$)'
+        # TODO: Could refactor this to utilize metaprogramming but it might make it less readable?
+        regex_pend = r'(^\s{4}(Given|When|Then|And|But).+?$\n\s{6}TODO.+?$)'
+        regex_error = r'(^\s{4}(Given|When|Then|And|But).+?$\n\s{6}(expected.+|.+Error.+|.+error.+)?$)'
         
         pend_line_match = re.search(re.compile(regex_pend, re.M), data)
         error_line_match = re.search(re.compile(regex_error, re.M), data)
