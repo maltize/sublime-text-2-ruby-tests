@@ -25,7 +25,7 @@ class AsyncProcess(object):
       if data != "":
         # TODO: Could refactor this to utilize metaprogramming but it might make it less readable?
         regex_pend = r'(^\s{4}(Given|When|Then|And|But).+?$\n\s{6}TODO.+?$)'
-        regex_error = r'(^\s{4}(Given|When|Then|And|But).+?$\n\s{6}(expected.+|.+Error.+|.+error.+|.+ElementNotFound.+|.*failed.*|.*Invalid.*)?$)'
+        regex_error = r'(^\s{4}(Given|When|Then|And|But).+?$\n\s{6}(expected.+|.*Error.*|.*error.*|.*NotFound.*|.*failed.*|.*Invalid.*)?$)'
         
         pend_line_match = re.search(re.compile(regex_pend, re.M), data)
         error_line_match = re.search(re.compile(regex_error, re.M), data)
