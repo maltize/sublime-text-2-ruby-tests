@@ -16,7 +16,7 @@ Installation
 
 Go to your Sublime Text 2 `Packages` directory
 
- - OS X: `~/Library/Application Support/Sublime Text 2/Packages/`
+ - OS X: `~/Library/Application\ Support/Sublime Text 2/Packages/`
  - Windows: `%APPDATA%/Sublime Text 2/Packages/`
  - Linux: `~/.Sublime Text 2/Packages/`
 
