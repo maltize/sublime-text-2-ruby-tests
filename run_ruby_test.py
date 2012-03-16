@@ -306,9 +306,19 @@ class SwitchBetweenCodeAndTest(BaseRubyTask):
                               "cells": [[0, 0, 1, 1], [1, 0, 2, 1]]
                           })
         self.window().focus_group(1)
-      self.window().open_file(alternates.pop())
+      if len(alternates) == 1:
+        self.window().open_file(alternates.pop())
+      else:
+        callback = functools.partial(self.on_selected, alternates)
+        self.window().show_quick_panel(alternates, callback)
     else:
       sublime.error_message("could not find " + str(possible_alternates))
+
+  def on_selected(self, alternates, index):
+    if index == -1:
+      return
+
+    self.window().open_file(alternates[index])
 
   def walk(self, directory, ignored_directories = []):
     ignored_directories = ['.git', 'vendor']  # Move this into config
