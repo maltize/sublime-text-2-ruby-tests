@@ -31,16 +31,16 @@ Settings
 
 You can specify different binary for each type of test to use.
 
-Make a copy of RubyTest.sublime-settings to Packages/User and make your changes.
+Make a copy of `RubyTest.sublime-settings` file to `~/Library/Application Support/Sublime Text 2/Packages/User/` and make your changes.
 
 Bundler support:
 ------------
-To enable bundler support edit ~/Library/Application Support/Sublime Text 2/Packages/RubyTest/RubyTest.sublime-settings with below code:
+To enable bundler support edit `~/Library/Application Support/Sublime Text 2/Packages/RubyTest/RubyTest.sublime-settings` with below code:
 
-  "erb_exec": "bundle exec erb",
-  "ruby_unit_exec": "bundle exec ruby",
-  "ruby_cucumber_exec": "bundle exec cucumber -f pretty",
-  "ruby_rspec_exec": "bundle exec rspec",
+    "erb_exec": "bundle exec erb",
+    "ruby_unit_exec": "bundle exec ruby",
+    "ruby_cucumber_exec": "bundle exec cucumber -f pretty",
+    "ruby_rspec_exec": "bundle exec rspec",
 
 
 Usage
@@ -69,7 +69,8 @@ We have known colors issue. Please check [this thread](https://github.com/maltiz
 Note
 ----
 Before reporting an issue be sure to :
-- Run Sublime Text 2 from [command line](http://www.sublimetext.com/docs/2/osx_command_line.html)
+
+  - Run Sublime Text 2 from [command line](http://www.sublimetext.com/docs/2/osx_command_line.html)
 
 If this will not help provide to us debug informations using (CTRL + ` )
 
