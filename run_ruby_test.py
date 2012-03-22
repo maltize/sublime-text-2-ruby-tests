@@ -286,6 +286,7 @@ class ShowTestPanel(BaseRubyTask):
 class VerifyRubyFile(BaseRubyTask):
   def is_enabled(self): return 'verify_syntax' in self.file_type().features()
   def run(self, args):
+    self.load_config()
     file = self.file_type()
     command = file.verify_syntax_command()
     if command:
