@@ -1,5 +1,6 @@
 {
-  "ruby_unit_exec": "ruby -Itest",
+  "erb_exec": "erb",
+  "ruby_unit_exec": "ruby",
   "ruby_cucumber_exec": "cucumber -f pretty",
   "ruby_rspec_exec": "rspec",
 

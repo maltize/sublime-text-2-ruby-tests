@@ -111,6 +111,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
   def load_config(self):
     s = sublime.load_settings("RubyTest.sublime-settings")
     global RUBY_UNIT; RUBY_UNIT = s.get("ruby_unit_exec")
+    global ERB_EXEC; ERB_EXEC = s.get("erb_exec")
     global CUCUMBER_UNIT; CUCUMBER_UNIT = s.get("ruby_cucumber_exec")
     global RSPEC_UNIT; RSPEC_UNIT = s.get("ruby_rspec_exec")
     global RUBY_UNIT_FOLDER; RUBY_UNIT_FOLDER = s.get("ruby_unit_folder")
@@ -181,13 +182,13 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       True
 
   class RubyFile(BaseFile):
-    def verify_syntax_command(self): return wrap_in_cd(self.folder_name, "ruby -c " + self.file_name)
+    def verify_syntax_command(self): return wrap_in_cd(self.folder_name, RUBY_UNIT + " -c " + self.file_name)
     def possible_alternate_files(self): return [self.file_name.replace(".rb", "_spec.rb"), self.file_name.replace(".rb", "_test.rb"), self.file_name.replace(".rb", ".feature")]
     def features(self): return ["verify_syntax", "switch_to_test", "rails_generate", "extract_variable"]
 
   class UnitFile(RubyFile):
     def possible_alternate_files(self): return [self.file_name.replace("_test.rb", ".rb")]
-    def run_all_tests_command(self): return self.run_from_project_root(RUBY_UNIT_FOLDER, RUBY_UNIT)
+    def run_all_tests_command(self): return self.run_from_project_root(RUBY_UNIT_FOLDER, RUBY_UNIT + " -Itest")
     def run_single_test_command(self, view):
       region = view.sel()[0]
       line_region = view.line(region)
@@ -198,7 +199,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       if test_name is None:
         sublime.error_message("No test name!")
         return
-      return self.run_from_project_root(RUBY_UNIT_FOLDER, RUBY_UNIT, " -n " + test_name)
+      return self.run_from_project_root(RUBY_UNIT_FOLDER, RUBY_UNIT + " -Itest", " -n " + test_name)
     def features(self): return super(BaseRubyTask.UnitFile, self).features() + ["run_test"]
 
   class CucumberFile(BaseFile):
@@ -214,7 +215,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     def features(self): return super(BaseRubyTask.RSpecFile, self).features() + ["run_test"]
 
   class ErbFile(BaseFile):
-    def verify_syntax_command(self): return wrap_in_cd(self.folder_name, "erb -xT - " + self.file_name + " | ruby -c")
+    def verify_syntax_command(self): return wrap_in_cd(self.folder_name, ERB_EXEC +" -xT - " + self.file_name + " | " + RUBY_UNIT + " -c")
     def can_verify_syntax(self): return True
     def features(self): return ["verify_syntax"]
 
