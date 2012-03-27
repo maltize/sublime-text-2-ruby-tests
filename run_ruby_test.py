@@ -7,6 +7,8 @@ import time
 import sublime
 import sublime_plugin
 
+output_view = None
+
 class AsyncProcess(object):
   def __init__(self, cmd, listener):
     self.cmd = cmd
@@ -129,32 +131,35 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     return self.view.window()
 
   def show_tests_panel(self):
-    if not hasattr(self, 'output_view'):
-      self.output_view = self.window().get_output_panel("tests")
+    global output_view
+    if output_view is None:
+      output_view = self.window().get_output_panel("tests")
     self.clear_test_view()
     self.window().run_command("show_panel", {"panel": "output.tests"})
 
   def clear_test_view(self):
-    self.output_view.set_read_only(False)
-    edit = self.output_view.begin_edit()
-    self.output_view.erase(edit, sublime.Region(0, self.output_view.size()))
-    self.output_view.end_edit(edit)
-    self.output_view.set_read_only(True)
+    global output_view
+    output_view.set_read_only(False)
+    edit = output_view.begin_edit()
+    output_view.erase(edit, sublime.Region(0, output_view.size()))
+    output_view.end_edit(edit)
+    output_view.set_read_only(True)
 
   def append_data(self, proc, data):
+    global output_view
     str = data.decode("utf-8")
     str = str.replace('\r\n', '\n').replace('\r', '\n')
 
-    selection_was_at_end = (len(self.output_view.sel()) == 1
-      and self.output_view.sel()[0]
-        == sublime.Region(self.output_view.size()))
-    self.output_view.set_read_only(False)
-    edit = self.output_view.begin_edit()
-    self.output_view.insert(edit, self.output_view.size(), str)
+    selection_was_at_end = (len(output_view.sel()) == 1
+      and output_view.sel()[0]
+        == sublime.Region(output_view.size()))
+    output_view.set_read_only(False)
+    edit = output_view.begin_edit()
+    output_view.insert(edit, output_view.size(), str)
     if selection_was_at_end:
-      self.output_view.show(self.output_view.size())
-    self.output_view.end_edit(edit)
-    self.output_view.set_read_only(True)
+      output_view.show(output_view.size())
+    output_view.end_edit(edit)
+    output_view.set_read_only(True)
 
   def start_async(self, caption, executable):
     self.is_running = True
@@ -281,7 +286,11 @@ class RunLastRubyTest(BaseRubyTask):
 
 class ShowTestPanel(BaseRubyTask):
   def run(self, args):
+    global output_view
+    if output_view is None:
+      output_view = self.window().get_output_panel("tests")
     self.window().run_command("show_panel", {"panel": "output.tests"})
+    self.window().focus_view(output_view)
 
 class VerifyRubyFile(BaseRubyTask):
   def is_enabled(self): return 'verify_syntax' in self.file_type().features()
