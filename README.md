@@ -35,7 +35,7 @@ Make a copy of `RubyTest.sublime-settings` file to `~/Library/Application Suppor
 
 Bundler support:
 ------------
-To enable bundler support edit `~/Library/Application Support/Sublime Text 2/Packages/RubyTest/RubyTest.sublime-settings` with below code:
+First be sure that you have your copy of `RubyTest.sublime-settings` placed in User folder (refer to Settings above) and fill it  with below code:
 
     "erb_exec": "bundle exec erb",
     "ruby_unit_exec": "bundle exec ruby",
