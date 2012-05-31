@@ -37,11 +37,16 @@ Bundler support:
 ------------
 First be sure that you have your copy of `RubyTest.sublime-settings` placed in User folder (refer to Settings above) and fill it  with below code:
 
+{
     "erb_exec": "bundle exec erb",
     "ruby_unit_exec": "bundle exec ruby",
     "ruby_cucumber_exec": "bundle exec cucumber -f pretty",
     "ruby_rspec_exec": "bundle exec rspec",
 
+    "ruby_unit_folder": "test",
+    "ruby_cucumber_folder": "features",
+    "ruby_rspec_folder": "spec"
+}
 
 Usage
 -----
