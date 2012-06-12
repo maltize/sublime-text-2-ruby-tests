@@ -175,8 +175,8 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     def possible_alternate_files(self): return []
     def run_all_tests_command(self): return None
     def run_from_project_root(self, partition_folder, command, options = ""):
-      folder_name, test_folder, file_name = os.path.join(self.folder_name, self.file_name).partition(partition_folder)
-      return wrap_in_cd(folder_name, command + " " + test_folder + file_name + options)
+      folder_name, test_folder, file_name = os.path.join(self.folder_name, self.file_name).partition("/" + partition_folder)
+      return wrap_in_cd(folder_name, command + " " + partition_folder + file_name + options)
     def get_current_line_number(self, view):
       char_under_cursor = view.sel()[0].a
       return view.rowcol(char_under_cursor)[0] + 1
