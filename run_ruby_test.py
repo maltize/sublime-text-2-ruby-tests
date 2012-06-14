@@ -92,12 +92,15 @@ class TestMethodMatcher(object):
     @staticmethod
     def find_first_match(test_file_content):
       match_obj = re.search('\s?([a-zA-Z_\d]+tset)\s+fed', test_file_content) # 1st search for 'def test_name'
-      if not match_obj:
-        match_obj = re.search('\s?([\"\'][a-zA-Z_\s\d]+[\"\']\s+tset)', test_file_content) # 2nd search for 'test "name"'
-      if not match_obj:
-        return None
-      test_name = match_obj.group(1)[::-1]
-      return test_name.replace("\"", "").replace(" ", "_")
+      if match_obj:
+        return match_obj.group(1)[::-1]
+
+      match_obj = re.search('\s?[\"\']([a-zA-Z_\"\'\s\d]+)[\"\']\s+tset', test_file_content) # 2nd search for 'test "name"'
+      if match_obj:
+        test_name = match_obj.group(1)[::-1]
+        return "test_%s" % test_name.replace("\"", "\\\"").replace(" ", "_").replace("'", "\\'")
+
+      return None
 
   class ShouldaTest(object):
     @staticmethod
