@@ -54,7 +54,7 @@ Usage
  - Run single ruby test: `Command-Shift-R`
  - Run all ruby tests from current file: `Command-Shift-T`
  - Run last ruby test(s): `Command-Shift-E`
- - Show test panel: `Command-Shift-X`
+ - Show test panel: `Command-Shift-X` (when test panel visible hit `esc` to hide it)
  - Check RB, ERB file syntax: `Alt-Shift-V`
  - Switching between code and test:
     - Single View: `Command-`.
