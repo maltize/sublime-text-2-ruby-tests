@@ -122,6 +122,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     global RUBY_UNIT_FOLDER; RUBY_UNIT_FOLDER = s.get("ruby_unit_folder")
     global CUCUMBER_UNIT_FOLDER; CUCUMBER_UNIT_FOLDER = s.get("ruby_cucumber_folder")
     global RSPEC_UNIT_FOLDER; RSPEC_UNIT_FOLDER = s.get("ruby_rspec_folder")
+    global USE_SCRATCH; USE_SCRATCH = s.get("ruby_use_scratch")
 
   def save_test_run(self, ex, file_name):
     s = sublime.load_settings("RubyTest.last-run")
@@ -135,10 +136,18 @@ class BaseRubyTask(sublime_plugin.TextCommand):
 
   def show_tests_panel(self):
     global output_view
-    if output_view is None:
+    if USE_SCRATCH:
+      output_view = self.window().new_file()
+      output_view.set_scratch(True)
+      output_view.set_read_only(True)
+    else:
       output_view = self.window().get_output_panel("tests")
+  
+    
     self.clear_test_view()
-    self.window().run_command("show_panel", {"panel": "output.tests"})
+
+    if not USE_SCRATCH:
+      self.window().run_command("show_panel", {"panel": "output.tests"})
 
   def clear_test_view(self):
     global output_view
@@ -163,6 +172,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       output_view.show(output_view.size())
     output_view.end_edit(edit)
     output_view.set_read_only(True)
+    
 
   def start_async(self, caption, executable):
     self.is_running = True
