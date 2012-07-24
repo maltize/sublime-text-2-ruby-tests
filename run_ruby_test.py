@@ -150,7 +150,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
 
   def append_data(self, proc, data):
     global output_view
-    str = data.decode("utf-8")
+    str = unicode(data, errors = "replace")
     str = str.replace('\r\n', '\n').replace('\r', '\n')
 
     selection_was_at_end = (len(output_view.sel()) == 1
