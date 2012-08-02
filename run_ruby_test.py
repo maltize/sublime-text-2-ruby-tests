@@ -7,7 +7,7 @@ import time
 import sublime
 import sublime_plugin
 
-output_view = None
+test_pannels = {}
 
 class AsyncProcess(object):
   def __init__(self, cmd, listener):
@@ -133,15 +133,20 @@ class BaseRubyTask(sublime_plugin.TextCommand):
   def window(self):
     return self.view.window()
 
+  def get_test_panel(self):
+    global test_pannels
+    window = self.window()
+    if window.id() not in test_pannels:
+      test_pannels[window.id()] = window.get_output_panel("tests")
+      test_pannels[window.id()].set_read_only(True)
+    return test_pannels[window.id()]
+
   def show_tests_panel(self):
-    global output_view
-    if output_view is None:
-      output_view = self.window().get_output_panel("tests")
     self.clear_test_view()
     self.window().run_command("show_panel", {"panel": "output.tests"})
 
   def clear_test_view(self):
-    global output_view
+    output_view = self.get_test_panel()
     output_view.set_read_only(False)
     edit = output_view.begin_edit()
     output_view.erase(edit, sublime.Region(0, output_view.size()))
@@ -149,7 +154,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     output_view.set_read_only(True)
 
   def append_data(self, proc, data):
-    global output_view
+    output_view = self.get_test_panel()
     str = unicode(data, errors = "replace")
     str = str.replace('\r\n', '\n').replace('\r', '\n')
 
@@ -289,9 +294,7 @@ class RunLastRubyTest(BaseRubyTask):
 
 class ShowTestPanel(BaseRubyTask):
   def run(self, args):
-    global output_view
-    if output_view is None:
-      output_view = self.window().get_output_panel("tests")
+    output_view = self.get_test_panel()
     self.window().run_command("show_panel", {"panel": "output.tests"})
     self.window().focus_view(output_view)
 
