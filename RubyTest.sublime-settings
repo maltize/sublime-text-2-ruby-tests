@@ -6,5 +6,7 @@
 
   "ruby_unit_folder": "test",
   "ruby_cucumber_folder": "features",
-  "ruby_rspec_folder": "spec"
+  "ruby_rspec_folder": "spec",
+
+  "save_on_run": false
 }

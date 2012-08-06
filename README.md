@@ -35,7 +35,7 @@ Make a copy of `RubyTest.sublime-settings` file to `~/Library/Application Suppor
 
 Bundler support:
 ------------
-First be sure that you have your copy of `RubyTest.sublime-settings` placed in User folder (refer to Settings above) and fill it  with below code:
+First be sure that you have your copy of `RubyTest.sublime-settings` placed in User folder (refer to Settings above) and fill it with below code:
 
     {
       "erb_exec": "bundle exec erb",
@@ -45,7 +45,9 @@ First be sure that you have your copy of `RubyTest.sublime-settings` placed in U
 
       "ruby_unit_folder": "test",
       "ruby_cucumber_folder": "features",
-      "ruby_rspec_folder": "spec"
+      "ruby_rspec_folder": "spec",
+
+      "save_on_run": false
     }
 
 Usage
