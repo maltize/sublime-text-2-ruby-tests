@@ -122,6 +122,8 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     global RUBY_UNIT_FOLDER; RUBY_UNIT_FOLDER = s.get("ruby_unit_folder")
     global CUCUMBER_UNIT_FOLDER; CUCUMBER_UNIT_FOLDER = s.get("ruby_cucumber_folder")
     global RSPEC_UNIT_FOLDER; RSPEC_UNIT_FOLDER = s.get("ruby_rspec_folder")
+    if s.get("save_on_run"):
+      self.window().run_command("save_all")
 
   def save_test_run(self, ex, file_name):
     s = sublime.load_settings("RubyTest.last-run")
@@ -276,6 +278,7 @@ class RunAllRubyTest(BaseRubyTask):
 
 class RunLastRubyTest(BaseRubyTask):
   def load_last_run(self):
+    self.load_config()
     s = sublime.load_settings("RubyTest.last-run")
     global LAST_TEST_RUN; LAST_TEST_RUN = s.get("last_test_run")
     global LAST_TEST_FILE; LAST_TEST_FILE = s.get("last_test_file")
