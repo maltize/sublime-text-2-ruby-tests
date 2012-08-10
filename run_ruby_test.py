@@ -146,6 +146,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     if not test_pannels:
       test_pannels = self.view.window().new_file()
       test_pannels.set_scratch(True)
+      test_pannels.set_syntax_file('Packages/Rails/Ruby on Rails.tmLanguage')
     return test_pannels
 
   def get_test_panel(self):
