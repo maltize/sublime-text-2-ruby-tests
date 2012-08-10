@@ -28,20 +28,20 @@ class AsyncProcess(object):
         # TODO: Could refactor this to utilize metaprogramming but it might make it less readable?
         regex_pend = r'(^\s{4}(Given|When|Then|And|But).+?$\n\s{6}TODO.+?$)'
         regex_error = r'(^\s{4}(Given|When|Then|And|But).+?$\n\s{6}(expected.+|.*Error.*|.*error.*|.*NotFound.*|.*failed.*|.*Invalid.*)?$)'
-        
+
         pend_line_match = re.search(re.compile(regex_pend, re.M), data)
         error_line_match = re.search(re.compile(regex_error, re.M), data)
 
         if pend_line_match is not None:
           line_text = pend_line_match.group(0).split("\n      ")
-        
+
           data = re.compile(regex_pend, re.M).sub(line_text[0] + " #PEND" + "\n      " + line_text[1], data)
 
         if error_line_match is not None:
           line_text = error_line_match.group(0).split("\n      ")
-        
+
           data = re.compile(regex_error, re.M).sub(line_text[0] + " #ERROR" + "\n      " + line_text[1], data)
-        
+
         sublime.set_timeout(functools.partial(self.listener.append_data, self.proc, data), 0)
       else:
         self.proc.stdout.close()
@@ -156,7 +156,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     output_view.set_read_only(True)
     output_view.settings().set("result_file_regex", "# ([A-Za-z:0-9_./ ]+rb):([0-9]+)")
     output_view.settings().set("result_base_dir", project_root)
-    
+
   def append_data(self, proc, data):
     output_view = self.get_test_panel()
     str = unicode(data, errors = "replace")
@@ -299,6 +299,7 @@ class RunLastRubyTest(BaseRubyTask):
 
   def run(self, args):
     self.load_last_run()
+    file = self.file_type()
     self.show_tests_panel(file.get_project_root())
     self.is_running = True
     self.proc = AsyncProcess(LAST_TEST_RUN, self)
