@@ -33,22 +33,6 @@ You can specify different binary for each type of test to use.
 
 Make a copy of `RubyTest.sublime-settings` file to `~/Library/Application Support/Sublime Text 2/Packages/User/` and make your changes.
 
-Bundler support:
-------------
-First be sure that you have your copy of `RubyTest.sublime-settings` placed in User folder (refer to Settings above) and fill it with below code:
-
-    {
-      "erb_exec": "bundle exec erb",
-      "ruby_unit_exec": "bundle exec ruby",
-      "ruby_cucumber_exec": "bundle exec cucumber -f pretty",
-      "ruby_rspec_exec": "bundle exec rspec",
-
-      "ruby_unit_folder": "test",
-      "ruby_cucumber_folder": "features",
-      "ruby_rspec_folder": "spec",
-
-      "save_on_run": false
-    }
 
 Usage
 -----
@@ -61,13 +45,22 @@ Usage
  - Switching between code and test:
     - Single View: `Command-`.
     - Split View:  `Command+Ctrl+`.
-
 Keys:
  'Command' (OSX)
  'Ctrl' (Linux / Windows)
 
  ![ruby_tests screenshot](https://github.com/maltize/sublime-text-2-ruby-tests/raw/master/ruby_tests.png)
 
+
+Additional Features:
+-------------------
+Below features can be enabled by editing `RubyTest.sublime-settings`
+
+- Save on Run - if enabled then files will be automatically saved when running the test
+  `"save_on_run": true`
+
+- Use Scratch  - test output in new tab
+ `"ruby_use_scratch" : true `
 
 Colors Issue:
 ------------
@@ -82,3 +75,21 @@ Before reporting an issue be sure to :
 If this will not help provide to us debug informations using (CTRL + ` )
 
 Please open an issue at https://github.com/maltize/sublime-text-2-ruby-tests if you discover a problem or would like to see a feature/change implemented.
+
+Bundler support:
+------------
+First be sure that you have your copy of `RubyTest.sublime-settings` placed in User folder (refer to Settings above) and fill it with below code:
+
+    {
+      "erb_exec": "bundle exec erb",
+      "ruby_unit_exec": "bundle exec ruby",
+      "ruby_cucumber_exec": "bundle exec cucumber -f pretty",
+      "ruby_rspec_exec": "bundle exec rspec",
+
+      "ruby_unit_folder": "test",
+      "ruby_cucumber_folder": "features",
+      "ruby_rspec_folder": "spec",
+
+      "ruby_use_scratch" : false,
+      "save_on_run": false
+    }
