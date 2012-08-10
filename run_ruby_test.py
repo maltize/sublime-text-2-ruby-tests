@@ -122,6 +122,8 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     global RUBY_UNIT_FOLDER; RUBY_UNIT_FOLDER = s.get("ruby_unit_folder")
     global CUCUMBER_UNIT_FOLDER; CUCUMBER_UNIT_FOLDER = s.get("ruby_cucumber_folder")
     global RSPEC_UNIT_FOLDER; RSPEC_UNIT_FOLDER = s.get("ruby_rspec_folder")
+    global USE_SCRATCH; USE_SCRATCH = s.get("ruby_use_scratch")
+
     if s.get("save_on_run"):
       self.window().run_command("save_all")
 
@@ -135,19 +137,36 @@ class BaseRubyTask(sublime_plugin.TextCommand):
   def window(self):
     return self.view.window()
 
+  def reset_test_pannels(self):
+    global test_pannels
+    test_pannels = {}
+
+  def new_file_window(self):
+    global test_pannels
+    if not test_pannels:
+      test_pannels = self.view.window().new_file()
+      test_pannels.set_scratch(True)
+    return test_pannels
+
   def get_test_panel(self):
     global test_pannels
-    window = self.window()
-    if window.id() not in test_pannels:
-      test_pannels[window.id()] = window.get_output_panel("tests")
-      test_pannels[window.id()].set_read_only(True)
-    return test_pannels[window.id()]
+    if USE_SCRATCH:
+      return self.new_file_window()
+    else:
+      if window.id() not in test_pannels:
+        test_pannels[window.id()] = window.get_output_panel("tests")
+        test_pannels[window.id()].set_read_only(True)
+      return test_pannels[window.id()]
 
   def show_tests_panel(self, project_root = None):
     self.clear_test_view(project_root)
-    self.window().run_command("show_panel", {"panel": "output.tests"})
+    if not USE_SCRATCH:
+      self.window().run_command("show_panel", {"panel": "output.tests"})
 
   def clear_test_view(self, project_root = None):
+    if USE_SCRATCH:
+      self.reset_test_pannels()
+      return
     output_view = self.get_test_panel()
     output_view.set_read_only(False)
     edit = output_view.begin_edit()
@@ -159,6 +178,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
 
   def append_data(self, proc, data):
     output_view = self.get_test_panel()
+
     str = unicode(data, errors = "replace")
     str = str.replace('\r\n', '\n').replace('\r', '\n')
 
