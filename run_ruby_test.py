@@ -150,6 +150,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
 
   def get_test_panel(self):
     global test_pannels
+    window = self.window()
     if USE_SCRATCH:
       return self.new_file_window()
     else:
