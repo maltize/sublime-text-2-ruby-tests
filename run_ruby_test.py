@@ -2,6 +2,7 @@ import os
 import re
 import functools
 import sublime
+import string
 import sublime_plugin
 
 
@@ -53,9 +54,9 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     if s.get("save_on_run"):
       self.window().run_command("save_all")
 
-  def save_test_run(self, ex, file_name):
+  def save_test_run(self, command, file_name):
     s = sublime.load_settings("RubyTest.last-run")
-    s.set("last_test_run", ex.join(" "))
+    s.set("last_test_run", string.join(command))
     s.set("last_test_file", file_name)
 
     sublime.save_settings("RubyTest.last-run")
@@ -186,10 +187,9 @@ class RunLastRubyTest(BaseRubyTask):
 
   def run(self, args):
     last_command, last_file = self.load_last_run()
-    file = self.file_type(last_file)
     self.view.window().run_command("exec", {
       "cmd": last_command,
-      "working_dir": file.get_project_root(),
+      "working_dir": self.window().folders()[0],
       "file_regex": r"([^ ]*\.rb):?(\d*)"
     })
 
@@ -246,14 +246,6 @@ class SwitchBetweenCodeAndTest(BaseRubyTask):
     return [os.path.join(dirname, file) for directory in directories for dirname, _, files in self.walk(directory) for file in filter(file_matcher, files)]
 
 
-class RubyRunShell(BaseRubyTask):
-  def execute_command(self, command, caption = "Running shell command"):
-    self.window().run_command("exec", {
-        "cmd": command,
-        "working_dir": self.window().folders()[0]
-      })
-
-
 class RubyRailsGenerate(BaseRubyTask):
   def is_enabled(self): return 'rails_generate' in self.file_type().features()
 
@@ -262,7 +254,10 @@ class RubyRailsGenerate(BaseRubyTask):
 
   def generate(self, argument):
     command = ['rails', 'generate'] + argument.split()
-    self.execute_command(command, "Generating" + argument)
+    self.window().run_command("exec", {
+        "cmd": command,
+        "working_dir": self.window().folders()[0]
+      })
 
 class RubyExtractVariable(BaseRubyTask):
   def is_enabled(self): return 'extract_variable' in self.file_type().features()
