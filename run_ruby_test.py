@@ -64,10 +64,6 @@ class BaseRubyTask(sublime_plugin.TextCommand):
   def window(self):
     return self.view.window()
 
-  def show_tests_panel(self, project_root = None):
-    if not USE_SCRATCH:
-      self.window().run_command("show_panel", {"panel": "output.exec"})
-
   class BaseFile(object):
     def __init__(self, file_name): 
       self.folder_name, self.file_name = os.path.split(file_name)
@@ -258,6 +254,10 @@ class RubyRailsGenerate(BaseRubyTask):
         "cmd": command,
         "working_dir": self.window().folders()[0]
       })
+
+class ShowTestPanel(BaseRubyTask):
+  def run(self, args):
+    self.window().run_command("show_panel", {"panel": "output.exec"})
 
 class RubyExtractVariable(BaseRubyTask):
   def is_enabled(self): return 'extract_variable' in self.file_type().features()
