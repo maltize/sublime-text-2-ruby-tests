@@ -1,83 +1,9 @@
 import os
 import re
-import thread
-import subprocess
 import functools
-import time
 import sublime
 import sublime_plugin
 
-test_pannels = {}
-
-class AsyncProcess(object):
-  def __init__(self, cmd, listener):
-    self.cmd = cmd
-    self.listener = listener
-    print "DEBUG_EXEC: " + self.cmd
-    self.proc = subprocess.Popen([self.cmd], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if self.proc.stdout:
-      thread.start_new_thread(self.read_stdout, ())
-    if self.proc.stderr:
-      thread.start_new_thread(self.read_stderr, ())
-
-  def read_stdout(self):
-    while True:
-      data = os.read(self.proc.stdout.fileno(), 2**15)
-
-      if data != "":
-        # TODO: Could refactor this to utilize metaprogramming but it might make it less readable?
-        regex_pend = r'(^\s{4}(Given|When|Then|And|But).+?$\n\s{6}TODO.+?$)'
-        regex_error = r'(^\s{4}(Given|When|Then|And|But).+?$\n\s{6}(expected.+|.*Error.*|.*error.*|.*NotFound.*|.*failed.*|.*Invalid.*)?$)'
-
-        pend_line_match = re.search(re.compile(regex_pend, re.M), data)
-        error_line_match = re.search(re.compile(regex_error, re.M), data)
-
-        if pend_line_match is not None:
-          line_text = pend_line_match.group(0).split("\n      ")
-
-          data = re.compile(regex_pend, re.M).sub(line_text[0] + " #PEND" + "\n      " + line_text[1], data)
-
-        if error_line_match is not None:
-          line_text = error_line_match.group(0).split("\n      ")
-
-          data = re.compile(regex_error, re.M).sub(line_text[0] + " #ERROR" + "\n      " + line_text[1], data)
-
-        sublime.set_timeout(functools.partial(self.listener.append_data, self.proc, data), 0)
-      else:
-        self.proc.stdout.close()
-        self.listener.is_running = False
-        break
-
-  def read_stderr(self):
-    while True:
-      data = os.read(self.proc.stderr.fileno(), 2**15)
-      if data != "":
-        sublime.set_timeout(functools.partial(self.listener.append_data, self.proc, data), 0)
-      else:
-        self.proc.stderr.close()
-        self.listener.is_running = False
-        break
-
-class StatusProcess(object):
-  def __init__(self, msg, listener):
-    self.msg = msg
-    self.listener = listener
-    thread.start_new_thread(self.run_thread, ())
-
-  def run_thread(self):
-    progress = ""
-    while True:
-      if self.listener.is_running:
-        if len(progress) >= 10:
-          progress = ""
-        progress += "."
-        sublime.set_timeout(functools.partial(self.listener.update_status, self.msg, progress), 0)
-        time.sleep(1)
-      else:
-        break
-
-def wrap_in_cd(path, command):
-  return 'cd ' + path.replace(" ", "\ ") + ' && ' + command
 
 class TestMethodMatcher(object):
   def __init__(self):
@@ -129,7 +55,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
 
   def save_test_run(self, ex, file_name):
     s = sublime.load_settings("RubyTest.last-run")
-    s.set("last_test_run", ex)
+    s.set("last_test_run", ex.join(" "))
     s.set("last_test_file", file_name)
 
     sublime.save_settings("RubyTest.last-run")
@@ -137,72 +63,9 @@ class BaseRubyTask(sublime_plugin.TextCommand):
   def window(self):
     return self.view.window()
 
-  def reset_test_pannels(self):
-    global test_pannels
-    test_pannels = {}
-
-  def new_file_window(self):
-    global test_pannels
-    if not test_pannels:
-      test_pannels = self.view.window().new_file()
-      test_pannels.set_name("Test Results")
-      test_pannels.set_scratch(True)
-      test_pannels.set_syntax_file('Packages/Rails/Ruby on Rails.tmLanguage')
-    return test_pannels
-
-  def get_test_panel(self):
-    global test_pannels
-    window = self.window()
-    if USE_SCRATCH:
-      return self.new_file_window()
-    else:
-      if window.id() not in test_pannels:
-        test_pannels[window.id()] = window.get_output_panel("tests")
-        test_pannels[window.id()].set_read_only(True)
-      return test_pannels[window.id()]
-
   def show_tests_panel(self, project_root = None):
-    self.clear_test_view(project_root)
     if not USE_SCRATCH:
-      self.window().run_command("show_panel", {"panel": "output.tests"})
-
-  def clear_test_view(self, project_root = None):
-    if USE_SCRATCH:
-      self.reset_test_pannels()
-      return
-    output_view = self.get_test_panel()
-    output_view.set_read_only(False)
-    edit = output_view.begin_edit()
-    output_view.erase(edit, sublime.Region(0, output_view.size()))
-    output_view.end_edit(edit)
-    output_view.set_read_only(True)
-    output_view.settings().set("result_file_regex", "# ([A-Za-z:0-9_./ ]+rb):([0-9]+)")
-    output_view.settings().set("result_base_dir", project_root)
-
-  def append_data(self, proc, data):
-    output_view = self.get_test_panel()
-
-    str = unicode(data, errors = "replace")
-    str = str.replace('\r\n', '\n').replace('\r', '\n')
-
-    selection_was_at_end = (len(output_view.sel()) == 1
-      and output_view.sel()[0]
-        == sublime.Region(output_view.size()))
-    output_view.set_read_only(False)
-    edit = output_view.begin_edit()
-    output_view.insert(edit, output_view.size(), str)
-    if selection_was_at_end:
-      output_view.show(output_view.size())
-    output_view.end_edit(edit)
-    output_view.set_read_only(True)
-
-  def start_async(self, caption, executable):
-    self.is_running = True
-    self.proc = AsyncProcess(executable, self)
-    StatusProcess(caption, self)
-
-  def update_status(self, msg, progress):
-    sublime.status_message(msg + " " + progress)
+      self.window().run_command("show_panel", {"panel": "output.exec"})
 
   class BaseFile(object):
     def __init__(self, file_name): 
@@ -215,13 +78,9 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     def find_project_root(self, partition_folder):
       project_root, test_folder, file_name = self.absolute_path.partition(partition_folder)
       return project_root
-    def run_from_project_root(self, partition_folder, command, options = ""):
-      folder_name, test_folder, file_name = self.absolute_path.partition(partition_folder)
-      return wrap_in_cd(folder_name, command + " " + partition_folder + file_name + options)
     def relative_file_path(self, partition_folder):
       folder_name, _, file_name = self.absolute_path.partition(partition_folder)
       return partition_folder + file_name
-
     def get_current_line_number(self, view):
       char_under_cursor = view.sel()[0].a
       return view.rowcol(char_under_cursor)[0] + 1
@@ -301,11 +160,6 @@ class RunSingleRubyTest(BaseRubyTask):
         "working_dir": file.get_project_root(),
         "file_regex": r"([^ ]*\.rb):?(\d*)"
       })
-      # self.show_tests_panel(file.get_project_root())
-      # self.is_running = True
-      # print "command: " + command
-      # self.proc = AsyncProcess(command, self)
-      # StatusProcess("Starting tests from file " + file.file_name, self)
 
 class RunAllRubyTest(BaseRubyTask):
   def is_enabled(self): return 'run_test' in self.file_type().features()
@@ -328,14 +182,13 @@ class RunLastRubyTest(BaseRubyTask):
   def load_last_run(self):
     self.load_config()
     s = sublime.load_settings("RubyTest.last-run")
-    global LAST_TEST_RUN; LAST_TEST_RUN = s.get("last_test_run")
-    global LAST_TEST_FILE; LAST_TEST_FILE = s.get("last_test_file")
+    return (s.get("last_test_run").split(), s.get("last_test_file"))
 
   def run(self, args):
-    self.load_last_run()
-    file = self.file_type(LAST_TEST_FILE)
+    last_command, last_file = self.load_last_run()
+    file = self.file_type(last_file)
     self.view.window().run_command("exec", {
-      "cmd": LAST_TEST_RUN,
+      "cmd": last_command,
       "working_dir": file.get_project_root(),
       "file_regex": r"([^ ]*\.rb):?(\d*)"
     })
@@ -392,10 +245,14 @@ class SwitchBetweenCodeAndTest(BaseRubyTask):
     directories = self.window().folders()
     return [os.path.join(dirname, file) for directory in directories for dirname, _, files in self.walk(directory) for file in filter(file_matcher, files)]
 
+
 class RubyRunShell(BaseRubyTask):
-  def run(self, args, command, caption = "Running shell command"):
-    self.show_tests_panel()
-    self.start_async(caption, wrap_in_cd(self.window().folders()[0], command))
+  def execute_command(self, command, caption = "Running shell command"):
+    self.window().run_command("exec", {
+        "cmd": command,
+        "working_dir": self.window().folders()[0]
+      })
+
 
 class RubyRailsGenerate(BaseRubyTask):
   def is_enabled(self): return 'rails_generate' in self.file_type().features()
@@ -404,8 +261,8 @@ class RubyRailsGenerate(BaseRubyTask):
     self.window().show_input_panel("rails generate", type + " ", lambda s: self.generate(s), None, None)
 
   def generate(self, argument):
-    command = "rails generate " + argument
-    self.view.run_command("ruby_run_shell", {"command": command, "caption": "Generating" + argument})
+    command = ['rails', 'generate'] + argument.split()
+    self.execute_command(command, "Generating" + argument)
 
 class RubyExtractVariable(BaseRubyTask):
   def is_enabled(self): return 'extract_variable' in self.file_type().features()
