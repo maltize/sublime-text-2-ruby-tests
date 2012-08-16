@@ -115,10 +115,10 @@ class TestMethodMatcher(object):
 class BaseRubyTask(sublime_plugin.TextCommand):
   def load_config(self):
     s = sublime.load_settings("RubyTest.sublime-settings")
-    global RUBY_UNIT; RUBY_UNIT = s.get("ruby_unit_exec")
-    global ERB_EXEC; ERB_EXEC = s.get("erb_exec")
-    global CUCUMBER_UNIT; CUCUMBER_UNIT = s.get("ruby_cucumber_exec")
-    global RSPEC_UNIT; RSPEC_UNIT = s.get("ruby_rspec_exec")
+    global RUBY_UNIT; RUBY_UNIT = s.get("ruby_unit_exec").split()
+    global ERB_EXEC; ERB_EXEC = s.get("erb_exec").split()
+    global CUCUMBER_UNIT; CUCUMBER_UNIT = s.get("ruby_cucumber_exec").split()
+    global RSPEC_UNIT; RSPEC_UNIT = s.get("ruby_rspec_exec").split()
     global RUBY_UNIT_FOLDER; RUBY_UNIT_FOLDER = s.get("ruby_unit_folder")
     global CUCUMBER_UNIT_FOLDER; CUCUMBER_UNIT_FOLDER = s.get("ruby_cucumber_folder")
     global RSPEC_UNIT_FOLDER; RSPEC_UNIT_FOLDER = s.get("ruby_rspec_folder")
@@ -205,17 +205,23 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     sublime.status_message(msg + " " + progress)
 
   class BaseFile(object):
-    def __init__(self, file_name): self.folder_name, self.file_name = os.path.split(file_name)
+    def __init__(self, file_name): 
+      self.folder_name, self.file_name = os.path.split(file_name)
+      self.absolute_path = file_name
     def verify_syntax_command(self): return None
     def possible_alternate_files(self): return []
     def run_all_tests_command(self): return None
     def get_project_root(self): return None
     def find_project_root(self, partition_folder):
-      project_root, test_folder, file_name = os.path.join(self.folder_name, self.file_name).partition(partition_folder)
+      project_root, test_folder, file_name = self.absolute_path.partition(partition_folder)
       return project_root
     def run_from_project_root(self, partition_folder, command, options = ""):
-      folder_name, test_folder, file_name = os.path.join(self.folder_name, self.file_name).partition(partition_folder)
+      folder_name, test_folder, file_name = self.absolute_path.partition(partition_folder)
       return wrap_in_cd(folder_name, command + " " + partition_folder + file_name + options)
+    def relative_file_path(self, partition_folder):
+      folder_name, _, file_name = self.absolute_path.partition(partition_folder)
+      return partition_folder + file_name
+
     def get_current_line_number(self, view):
       char_under_cursor = view.sel()[0].a
       return view.rowcol(char_under_cursor)[0] + 1
@@ -226,13 +232,13 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       True
 
   class RubyFile(BaseFile):
-    def verify_syntax_command(self): return wrap_in_cd(self.folder_name, RUBY_UNIT + " -c " + self.file_name)
+    def verify_syntax_command(self): return RUBY_UNIT + ["-c", self.absolute_path]
     def possible_alternate_files(self): return [self.file_name.replace(".rb", "_spec.rb"), self.file_name.replace(".rb", "_test.rb"), self.file_name.replace(".rb", ".feature")]
     def features(self): return ["verify_syntax", "switch_to_test", "rails_generate", "extract_variable"]
 
   class UnitFile(RubyFile):
     def possible_alternate_files(self): return [self.file_name.replace("_test.rb", ".rb")]
-    def run_all_tests_command(self): return self.run_from_project_root(RUBY_UNIT_FOLDER, RUBY_UNIT + " -Itest")
+    def run_all_tests_command(self): return RUBY_UNIT + ["-Itest", self.relative_file_path(RUBY_UNIT_FOLDER)]
     def run_single_test_command(self, view):
       region = view.sel()[0]
       line_region = view.line(region)
@@ -243,26 +249,26 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       if test_name is None:
         sublime.error_message("No test name!")
         return
-      return self.run_from_project_root(RUBY_UNIT_FOLDER, RUBY_UNIT + " -Itest", " -n " + test_name)
+      return RUBY_UNIT + ["-Itest", self.relative_file_path(RUBY_UNIT_FOLDER), "-n", test_name]
     def features(self): return super(BaseRubyTask.UnitFile, self).features() + ["run_test"]
     def get_project_root(self): return self.find_project_root(RUBY_UNIT_FOLDER)
 
   class CucumberFile(BaseFile):
     def possible_alternate_files(self): return [self.file_name.replace(".feature", ".rb")]
-    def run_all_tests_command(self): return self.run_from_project_root(CUCUMBER_UNIT_FOLDER, CUCUMBER_UNIT)
-    def run_single_test_command(self, view): return self.run_from_project_root(CUCUMBER_UNIT_FOLDER, CUCUMBER_UNIT, " -l " + str(self.get_current_line_number(view)))
+    def run_all_tests_command(self): return CUCUMBER_UNIT + [self.relative_file_path(CUCUMBER_UNIT_FOLDER)]
+    def run_single_test_command(self, view): return CUCUMBER_UNIT + [self.relative_file_path(CUCUMBER_UNIT_FOLDER), "-l" + str(self.get_current_line_number(view))]
     def features(self): return ["run_test"]
     def get_project_root(self): return self.find_project_root(CUCUMBER_UNIT_FOLDER)
 
   class RSpecFile(RubyFile):
     def possible_alternate_files(self): return [self.file_name.replace("_spec.rb", ".rb")]
-    def run_all_tests_command(self): return self.run_from_project_root(RSPEC_UNIT_FOLDER, RSPEC_UNIT)
-    def run_single_test_command(self, view): return self.run_from_project_root(RSPEC_UNIT_FOLDER, RSPEC_UNIT, " -l " + str(self.get_current_line_number(view)))
+    def run_all_tests_command(self): return RSPEC_UNIT + [self.relative_file_path(RSPEC_UNIT_FOLDER)]
+    def run_single_test_command(self, view): return RSPEC_UNIT + [self.relative_file_path(RSPEC_UNIT_FOLDER), "-l" + str(self.get_current_line_number(view))]
     def features(self): return super(BaseRubyTask.RSpecFile, self).features() + ["run_test"]
     def get_project_root(self): return self.find_project_root(RSPEC_UNIT_FOLDER)
 
   class ErbFile(BaseFile):
-    def verify_syntax_command(self): return wrap_in_cd(self.folder_name, ERB_EXEC +" -xT - " + self.file_name + " | " + RUBY_UNIT + " -c")
+    def verify_syntax_command(self): return ["sh", "-c", ERB_EXEC.join(" ") + " -xT - " + self.file_name + " | " + RUBY_UNIT + " -c"]
     def can_verify_syntax(self): return True
     def features(self): return ["verify_syntax"]
 
@@ -288,14 +294,13 @@ class RunSingleRubyTest(BaseRubyTask):
     self.load_config()
     file = self.file_type()
     command = file.run_single_test_command(self.view)
-    command_without_cd = command.split(" && ", 1)[1].split(" ")
     if command:
+      self.save_test_run(command, file.file_name)
       self.view.window().run_command("exec", {
-        "cmd": command_without_cd,
+        "cmd": command,
         "working_dir": file.get_project_root(),
         "file_regex": r"([^ ]*\.rb):?(\d*)"
       })
-      # self.save_test_run(command, file.file_name)
       # self.show_tests_panel(file.get_project_root())
       # self.is_running = True
       # print "command: " + command
@@ -306,16 +311,15 @@ class RunAllRubyTest(BaseRubyTask):
   def is_enabled(self): return 'run_test' in self.file_type().features()
   def run(self, args):
     self.load_config()
-    view = self.view
-    folder_name, file_name = os.path.split(view.file_name())
-    file = self.file_type(view.file_name())
+    file = self.file_type(self.view.file_name())
     command = file.run_all_tests_command()
     if command:
-      self.show_tests_panel(file.get_project_root())
-      self.save_test_run(command, file_name)
-      self.is_running = True
-      self.proc = AsyncProcess(command, self)
-      StatusProcess("Starting tests from file " + file.file_name, self)
+      self.save_test_run(command, file.file_name)
+      self.view.window().run_command("exec", {
+        "cmd": command,
+        "working_dir": file.get_project_root(),
+        "file_regex": r"([^ ]*\.rb):?(\d*)"
+      })
     else:
       sublime.error_message("Only *_test.rb, *_spec.rb, *.feature files supported!")
 
@@ -329,17 +333,12 @@ class RunLastRubyTest(BaseRubyTask):
 
   def run(self, args):
     self.load_last_run()
-    file = self.file_type()
-    self.show_tests_panel(file.get_project_root())
-    self.is_running = True
-    self.proc = AsyncProcess(LAST_TEST_RUN, self)
-    StatusProcess("Starting tests from file " + LAST_TEST_FILE, self)
-
-class ShowTestPanel(BaseRubyTask):
-  def run(self, args):
-    output_view = self.get_test_panel()
-    self.window().run_command("show_panel", {"panel": "output.tests"})
-    self.window().focus_view(output_view)
+    file = self.file_type(LAST_TEST_FILE)
+    self.view.window().run_command("exec", {
+      "cmd": LAST_TEST_RUN,
+      "working_dir": file.get_project_root(),
+      "file_regex": r"([^ ]*\.rb):?(\d*)"
+    })
 
 class VerifyRubyFile(BaseRubyTask):
   def is_enabled(self): return 'verify_syntax' in self.file_type().features()
@@ -348,8 +347,11 @@ class VerifyRubyFile(BaseRubyTask):
     file = self.file_type()
     command = file.verify_syntax_command()
     if command:
-      self.show_tests_panel()
-      self.start_async("Checking syntax of : " + file.file_name, command)
+      self.view.window().run_command("exec", {
+        "cmd": command,
+        "working_dir": file.get_project_root(),
+        "file_regex": r"([^ ]*\.rb):?(\d*)"
+      })
     else:
       sublime.error_message("Only .rb or .erb files supported!")
 
