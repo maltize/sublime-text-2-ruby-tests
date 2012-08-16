@@ -288,12 +288,19 @@ class RunSingleRubyTest(BaseRubyTask):
     self.load_config()
     file = self.file_type()
     command = file.run_single_test_command(self.view)
+    command_without_cd = command.split(" && ", 1)[1].split(" ")
     if command:
-      self.save_test_run(command, file.file_name)
-      self.show_tests_panel(file.get_project_root())
-      self.is_running = True
-      self.proc = AsyncProcess(command, self)
-      StatusProcess("Starting tests from file " + file.file_name, self)
+      self.view.window().run_command("exec", {
+        "cmd": command_without_cd,
+        "working_dir": file.get_project_root(),
+        "file_regex": r"([^ ]*\.rb):?(\d*)"
+      })
+      # self.save_test_run(command, file.file_name)
+      # self.show_tests_panel(file.get_project_root())
+      # self.is_running = True
+      # print "command: " + command
+      # self.proc = AsyncProcess(command, self)
+      # StatusProcess("Starting tests from file " + file.file_name, self)
 
 class RunAllRubyTest(BaseRubyTask):
   def is_enabled(self): return 'run_test' in self.file_type().features()
