@@ -26,9 +26,11 @@ class ShowInScratch:
     self.view = self.window.new_file()
     self.view.set_scratch(True)
     self.view.set_name("Test Results")
+    self.view.set_read_only(True)
     self.poll_copy()
 
   def poll_copy(self):
+    # FIXME HACK: Stop polling after one minute
     if self.active_for < 60000:
       self.active_for += 50
       sublime.set_timeout(self.copy_stuff, 50)
@@ -38,9 +40,11 @@ class ShowInScratch:
     content = self.panel.substr(sublime.Region(self.copied_until, size))
     if content:
       self.copied_until = size
+      self.view.set_read_only(False)
       edit = self.view.begin_edit()
       self.view.insert(edit, self.view.size(), content)
       self.view.end_edit(edit)
+      self.view.set_read_only(True)
     self.poll_copy()
 
 class TestMethodMatcher(object):
@@ -111,7 +115,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     return True
 
   def display_results(self):
-    display = ShowInScratch(self.window()) if USE_SCRATCH else ShowInPanel(self.window())
+    display = ShowInScratch(self.window()) if USE_SCRATCH else ShowInScratch(self.window())
     display.display_results()
 
   def window(self):
