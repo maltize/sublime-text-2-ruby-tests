@@ -54,12 +54,23 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     if s.get("save_on_run"):
       self.window().run_command("save_all")
 
-  def save_test_run(self, command, file_name):
+  def save_test_run(self, command, working_dir):
     s = sublime.load_settings("RubyTest.last-run")
     s.set("last_test_run", string.join(command))
-    s.set("last_test_file", file_name)
+    s.set("last_test_working_dir", working_dir)
 
     sublime.save_settings("RubyTest.last-run")
+
+  def run_shell_command(self, command, working_dir):
+    if not command:
+      return False
+    self.save_test_run(command, working_dir)
+    self.view.window().run_command("exec", {
+      "cmd": command,
+      "working_dir": working_dir,
+      "file_regex": r"([^ ]*\.rb):?(\d*)"
+    })
+    return True
 
   def window(self):
     return self.view.window()
@@ -182,13 +193,7 @@ class RunSingleRubyTest(BaseRubyTask):
     self.load_config()
     file = self.file_type()
     command = file.run_single_test_command(self.view)
-    if command:
-      self.save_test_run(command, file.file_name)
-      self.view.window().run_command("exec", {
-        "cmd": command,
-        "working_dir": file.get_project_root(),
-        "file_regex": r"([^ ]*\.rb):?(\d*)"
-      })
+    self.run_shell_command(command, file.get_project_root())
 
 
 class RunAllRubyTest(BaseRubyTask):
@@ -197,13 +202,8 @@ class RunAllRubyTest(BaseRubyTask):
     self.load_config()
     file = self.file_type(self.view.file_name())
     command = file.run_all_tests_command()
-    if command:
-      self.save_test_run(command, file.file_name)
-      self.view.window().run_command("exec", {
-        "cmd": command,
-        "working_dir": file.get_project_root(),
-        "file_regex": r"([^ ]*\.rb):?(\d*)"
-      })
+    if self.run_shell_command(command, file.get_project_root()):
+      pass
     else:
       sublime.error_message("Only *_test.rb, *_spec.rb, *.feature files supported!")
 
@@ -212,15 +212,11 @@ class RunLastRubyTest(BaseRubyTask):
   def load_last_run(self):
     self.load_config()
     s = sublime.load_settings("RubyTest.last-run")
-    return (s.get("last_test_run").split(), s.get("last_test_file"))
+    return (s.get("last_test_run").split(), s.get("last_test_working_dir"))
 
   def run(self, args):
-    last_command, last_file = self.load_last_run()
-    self.view.window().run_command("exec", {
-      "cmd": last_command,
-      "working_dir": self.window().folders()[0],
-      "file_regex": r"([^ ]*\.rb):?(\d*)"
-    })
+    last_command, working_dir = self.load_last_run()
+    self.run_shell_command(last_command, working_dir)
 
 class VerifyRubyFile(BaseRubyTask):
   def is_enabled(self): return 'verify_syntax' in self.file_type().features()
@@ -228,12 +224,8 @@ class VerifyRubyFile(BaseRubyTask):
     self.load_config()
     file = self.file_type()
     command = file.verify_syntax_command()
-    if command:
-      self.view.window().run_command("exec", {
-        "cmd": command,
-        "working_dir": file.get_project_root(),
-        "file_regex": r"([^ ]*\.rb):?(\d*)"
-      })
+    if self.run_shell_command(command, file.get_project_root()):
+      pass
     else:
       sublime.error_message("Only .rb or .erb files supported!")
 
@@ -283,10 +275,7 @@ class RubyRailsGenerate(BaseRubyTask):
 
   def generate(self, argument):
     command = ['rails', 'generate'] + argument.split()
-    self.window().run_command("exec", {
-        "cmd": command,
-        "working_dir": self.window().folders()[0]
-      })
+    self.run_shell_command(command, self.window().folders()[0])
 
 class ShowTestPanel(BaseRubyTask):
   def run(self, args):
