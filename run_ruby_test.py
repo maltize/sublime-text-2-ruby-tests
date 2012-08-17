@@ -115,7 +115,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     return True
 
   def display_results(self):
-    display = ShowInScratch(self.window()) if USE_SCRATCH else ShowInScratch(self.window())
+    display = ShowInScratch(self.window()) if USE_SCRATCH else ShowInPanel(self.window())
     display.display_results()
 
   def window(self):
