@@ -11,7 +11,9 @@ class ShowInPanel:
     self.window = window
 
   def display_results(self):
+    self.panel = self.window.get_output_panel("exec")
     self.window.run_command("show_panel", {"panel": "output.exec"})
+    self.panel.settings().set("color_scheme", "Packages/RubyTest/TestConsole.tmTheme")
 
 
 class ShowInScratch:
@@ -26,6 +28,7 @@ class ShowInScratch:
     self.view = self.window.new_file()
     self.view.set_scratch(True)
     self.view.set_name("Test Results")
+    self.view.settings().set("color_scheme", "Packages/RubyTest/TestConsole.tmTheme")
     self.view.set_read_only(True)
     self.poll_copy()
 
