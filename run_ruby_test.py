@@ -146,6 +146,36 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     else:
       return BaseRubyTask.BaseFile(file_name)
 
+class CopyFromPanelToView:
+  def __init__(self, panel, view):
+    self.panel = panel
+    self.view = view    
+    self.active_for = 0
+    self.copied_until = 0
+
+  def set_timeout(self):
+    if self.active_for < 60000:
+      self.active_for += 50
+      sublime.set_timeout(self.copy_stuff, 50)
+
+  def copy_stuff(self):
+    size = self.panel.size()
+    content = self.panel.substr(sublime.Region(self.copied_until, size))
+    if content:
+      self.copied_until = size
+      edit = self.view.begin_edit()
+      self.view.insert(edit, self.view.size(), content)
+      self.view.end_edit(edit)
+    self.set_timeout()
+
+  @staticmethod
+  def copy_to_new_view(panel, view):
+    view.window().run_command("hide_panel")
+    view.set_scratch(True)
+    daemon = CopyFromPanelToView(panel, view)
+    daemon.set_timeout()
+    
+
 class RunSingleRubyTest(BaseRubyTask):
   def is_enabled(self): return 'run_test' in self.file_type().features()
   def run(self, args):
@@ -159,6 +189,7 @@ class RunSingleRubyTest(BaseRubyTask):
         "working_dir": file.get_project_root(),
         "file_regex": r"([^ ]*\.rb):?(\d*)"
       })
+
 
 class RunAllRubyTest(BaseRubyTask):
   def is_enabled(self): return 'run_test' in self.file_type().features()
