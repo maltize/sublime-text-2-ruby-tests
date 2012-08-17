@@ -1,83 +1,54 @@
 import os
 import re
-import thread
-import subprocess
 import functools
-import time
 import sublime
+import string
 import sublime_plugin
 
-test_pannels = {}
 
-class AsyncProcess(object):
-  def __init__(self, cmd, listener):
-    self.cmd = cmd
-    self.listener = listener
-    print "DEBUG_EXEC: " + self.cmd
-    self.proc = subprocess.Popen([self.cmd], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if self.proc.stdout:
-      thread.start_new_thread(self.read_stdout, ())
-    if self.proc.stderr:
-      thread.start_new_thread(self.read_stderr, ())
+class ShowInPanel:
+  def __init__(self, window):
+    self.window = window
 
-  def read_stdout(self):
-    while True:
-      data = os.read(self.proc.stdout.fileno(), 2**15)
+  def display_results(self):
+    self.panel = self.window.get_output_panel("exec")
+    self.window.run_command("show_panel", {"panel": "output.exec"})
+    self.panel.settings().set("color_scheme", "Packages/RubyTest/TestConsole.tmTheme")
 
-      if data != "":
-        # TODO: Could refactor this to utilize metaprogramming but it might make it less readable?
-        regex_pend = r'(^\s{4}(Given|When|Then|And|But).+?$\n\s{6}TODO.+?$)'
-        regex_error = r'(^\s{4}(Given|When|Then|And|But).+?$\n\s{6}(expected.+|.*Error.*|.*error.*|.*NotFound.*|.*failed.*|.*Invalid.*)?$)'
 
-        pend_line_match = re.search(re.compile(regex_pend, re.M), data)
-        error_line_match = re.search(re.compile(regex_error, re.M), data)
+class ShowInScratch:
+  def __init__(self, window):
+    self.window = window    
+    self.active_for = 0
+    self.copied_until = 0
 
-        if pend_line_match is not None:
-          line_text = pend_line_match.group(0).split("\n      ")
+  def display_results(self):
+    self.panel = self.window.get_output_panel("exec")
+    self.window.run_command("hide_panel")
+    self.view = self.window.new_file()
+    self.view.set_scratch(True)
+    self.view.set_name("Test Results")
+    self.view.settings().set("color_scheme", "Packages/RubyTest/TestConsole.tmTheme")
+    self.view.set_read_only(True)
+    self.poll_copy()
 
-          data = re.compile(regex_pend, re.M).sub(line_text[0] + " #PEND" + "\n      " + line_text[1], data)
+  def poll_copy(self):
+    # FIXME HACK: Stop polling after one minute
+    if self.active_for < 60000:
+      self.active_for += 50
+      sublime.set_timeout(self.copy_stuff, 50)
 
-        if error_line_match is not None:
-          line_text = error_line_match.group(0).split("\n      ")
-
-          data = re.compile(regex_error, re.M).sub(line_text[0] + " #ERROR" + "\n      " + line_text[1], data)
-
-        sublime.set_timeout(functools.partial(self.listener.append_data, self.proc, data), 0)
-      else:
-        self.proc.stdout.close()
-        self.listener.is_running = False
-        break
-
-  def read_stderr(self):
-    while True:
-      data = os.read(self.proc.stderr.fileno(), 2**15)
-      if data != "":
-        sublime.set_timeout(functools.partial(self.listener.append_data, self.proc, data), 0)
-      else:
-        self.proc.stderr.close()
-        self.listener.is_running = False
-        break
-
-class StatusProcess(object):
-  def __init__(self, msg, listener):
-    self.msg = msg
-    self.listener = listener
-    thread.start_new_thread(self.run_thread, ())
-
-  def run_thread(self):
-    progress = ""
-    while True:
-      if self.listener.is_running:
-        if len(progress) >= 10:
-          progress = ""
-        progress += "."
-        sublime.set_timeout(functools.partial(self.listener.update_status, self.msg, progress), 0)
-        time.sleep(1)
-      else:
-        break
-
-def wrap_in_cd(path, command):
-  return 'cd ' + path.replace(" ", "\ ") + ' && ' + command
+  def copy_stuff(self):
+    size = self.panel.size()
+    content = self.panel.substr(sublime.Region(self.copied_until, size))
+    if content:
+      self.copied_until = size
+      self.view.set_read_only(False)
+      edit = self.view.begin_edit()
+      self.view.insert(edit, self.view.size(), content)
+      self.view.end_edit(edit)
+      self.view.set_read_only(True)
+    self.poll_copy()
 
 class TestMethodMatcher(object):
   def __init__(self):
@@ -115,10 +86,10 @@ class TestMethodMatcher(object):
 class BaseRubyTask(sublime_plugin.TextCommand):
   def load_config(self):
     s = sublime.load_settings("RubyTest.sublime-settings")
-    global RUBY_UNIT; RUBY_UNIT = s.get("ruby_unit_exec")
-    global ERB_EXEC; ERB_EXEC = s.get("erb_exec")
-    global CUCUMBER_UNIT; CUCUMBER_UNIT = s.get("ruby_cucumber_exec")
-    global RSPEC_UNIT; RSPEC_UNIT = s.get("ruby_rspec_exec")
+    global RUBY_UNIT; RUBY_UNIT = s.get("ruby_unit_exec").split()
+    global ERB_EXEC; ERB_EXEC = s.get("erb_exec").split()
+    global CUCUMBER_UNIT; CUCUMBER_UNIT = s.get("ruby_cucumber_exec").split()
+    global RSPEC_UNIT; RSPEC_UNIT = s.get("ruby_rspec_exec").split()
     global RUBY_UNIT_FOLDER; RUBY_UNIT_FOLDER = s.get("ruby_unit_folder")
     global CUCUMBER_UNIT_FOLDER; CUCUMBER_UNIT_FOLDER = s.get("ruby_cucumber_folder")
     global RSPEC_UNIT_FOLDER; RSPEC_UNIT_FOLDER = s.get("ruby_rspec_folder")
@@ -127,95 +98,48 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     if s.get("save_on_run"):
       self.window().run_command("save_all")
 
-  def save_test_run(self, ex, file_name):
+  def save_test_run(self, command, working_dir):
     s = sublime.load_settings("RubyTest.last-run")
-    s.set("last_test_run", ex)
-    s.set("last_test_file", file_name)
+    s.set("last_test_run", string.join(command))
+    s.set("last_test_working_dir", working_dir)
 
     sublime.save_settings("RubyTest.last-run")
+
+  def run_shell_command(self, command, working_dir):
+    if not command:
+      return False
+    self.save_test_run(command, working_dir)
+    self.view.window().run_command("exec", {
+      "cmd": command,
+      "working_dir": working_dir,
+      "file_regex": r"([^ ]*\.rb):?(\d*)"
+    })
+    self.display_results()
+    return True
+
+  def display_results(self):
+    display = ShowInScratch(self.window()) if USE_SCRATCH else ShowInPanel(self.window())
+    display.display_results()
 
   def window(self):
     return self.view.window()
 
-  def reset_test_pannels(self):
-    global test_pannels
-    test_pannels = {}
-
-  def new_file_window(self):
-    global test_pannels
-    if not test_pannels:
-      test_pannels = self.view.window().new_file()
-      test_pannels.set_name("Test Results")
-      test_pannels.set_scratch(True)
-      test_pannels.set_syntax_file('Packages/Rails/Ruby on Rails.tmLanguage')
-    return test_pannels
-
-  def get_test_panel(self):
-    global test_pannels
-    window = self.window()
-    if USE_SCRATCH:
-      return self.new_file_window()
-    else:
-      if window.id() not in test_pannels:
-        test_pannels[window.id()] = window.get_output_panel("tests")
-        test_pannels[window.id()].set_read_only(True)
-      return test_pannels[window.id()]
-
-  def show_tests_panel(self, project_root = None):
-    self.clear_test_view(project_root)
-    if not USE_SCRATCH:
-      self.window().run_command("show_panel", {"panel": "output.tests"})
-
-  def clear_test_view(self, project_root = None):
-    if USE_SCRATCH:
-      self.reset_test_pannels()
-      return
-    output_view = self.get_test_panel()
-    output_view.set_read_only(False)
-    edit = output_view.begin_edit()
-    output_view.erase(edit, sublime.Region(0, output_view.size()))
-    output_view.end_edit(edit)
-    output_view.set_read_only(True)
-    output_view.settings().set("result_file_regex", "# ([A-Za-z:0-9_./ ]+rb):([0-9]+)")
-    output_view.settings().set("result_base_dir", project_root)
-
-  def append_data(self, proc, data):
-    output_view = self.get_test_panel()
-
-    str = unicode(data, errors = "replace")
-    str = str.replace('\r\n', '\n').replace('\r', '\n')
-
-    selection_was_at_end = (len(output_view.sel()) == 1
-      and output_view.sel()[0]
-        == sublime.Region(output_view.size()))
-    output_view.set_read_only(False)
-    edit = output_view.begin_edit()
-    output_view.insert(edit, output_view.size(), str)
-    if selection_was_at_end:
-      output_view.show(output_view.size())
-    output_view.end_edit(edit)
-    output_view.set_read_only(True)
-
-  def start_async(self, caption, executable):
-    self.is_running = True
-    self.proc = AsyncProcess(executable, self)
-    StatusProcess(caption, self)
-
-  def update_status(self, msg, progress):
-    sublime.status_message(msg + " " + progress)
-
   class BaseFile(object):
-    def __init__(self, file_name): self.folder_name, self.file_name = os.path.split(file_name)
+    def __init__(self, file_name): 
+      self.folder_name, self.file_name = os.path.split(file_name)
+      self.absolute_path = file_name
     def verify_syntax_command(self): return None
     def possible_alternate_files(self): return []
     def run_all_tests_command(self): return None
     def get_project_root(self): return None
     def find_project_root(self, partition_folder):
-      project_root, test_folder, file_name = os.path.join(self.folder_name, self.file_name).partition(partition_folder)
+      to_find = os.sep + partition_folder + os.sep
+      project_root, _, _ = self.absolute_path.partition(to_find)
       return project_root
-    def run_from_project_root(self, partition_folder, command, options = ""):
-      folder_name, test_folder, file_name = os.path.join(self.folder_name, self.file_name).partition(partition_folder)
-      return wrap_in_cd(folder_name, command + " " + partition_folder + file_name + options)
+    def relative_file_path(self, partition_folder):
+      to_find = os.sep + partition_folder + os.sep
+      _, _, relative_path = self.absolute_path.partition(to_find)
+      return partition_folder + os.sep + relative_path
     def get_current_line_number(self, view):
       char_under_cursor = view.sel()[0].a
       return view.rowcol(char_under_cursor)[0] + 1
@@ -226,13 +150,13 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       True
 
   class RubyFile(BaseFile):
-    def verify_syntax_command(self): return wrap_in_cd(self.folder_name, RUBY_UNIT + " -c " + self.file_name)
+    def verify_syntax_command(self): return RUBY_UNIT + ["-c", self.absolute_path]
     def possible_alternate_files(self): return [self.file_name.replace(".rb", "_spec.rb"), self.file_name.replace(".rb", "_test.rb"), self.file_name.replace(".rb", ".feature")]
     def features(self): return ["verify_syntax", "switch_to_test", "rails_generate", "extract_variable"]
 
   class UnitFile(RubyFile):
     def possible_alternate_files(self): return [self.file_name.replace("_test.rb", ".rb")]
-    def run_all_tests_command(self): return self.run_from_project_root(RUBY_UNIT_FOLDER, RUBY_UNIT + " -Itest")
+    def run_all_tests_command(self): return RUBY_UNIT + ["-Itest", self.relative_file_path(RUBY_UNIT_FOLDER)]
     def run_single_test_command(self, view):
       region = view.sel()[0]
       line_region = view.line(region)
@@ -243,26 +167,26 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       if test_name is None:
         sublime.error_message("No test name!")
         return
-      return self.run_from_project_root(RUBY_UNIT_FOLDER, RUBY_UNIT + " -Itest", " -n " + test_name)
+      return RUBY_UNIT + ["-Itest", self.relative_file_path(RUBY_UNIT_FOLDER), "-n", test_name]
     def features(self): return super(BaseRubyTask.UnitFile, self).features() + ["run_test"]
     def get_project_root(self): return self.find_project_root(RUBY_UNIT_FOLDER)
 
   class CucumberFile(BaseFile):
     def possible_alternate_files(self): return [self.file_name.replace(".feature", ".rb")]
-    def run_all_tests_command(self): return self.run_from_project_root(CUCUMBER_UNIT_FOLDER, CUCUMBER_UNIT)
-    def run_single_test_command(self, view): return self.run_from_project_root(CUCUMBER_UNIT_FOLDER, CUCUMBER_UNIT, " -l " + str(self.get_current_line_number(view)))
+    def run_all_tests_command(self): return CUCUMBER_UNIT + [self.relative_file_path(CUCUMBER_UNIT_FOLDER)]
+    def run_single_test_command(self, view): return CUCUMBER_UNIT + [self.relative_file_path(CUCUMBER_UNIT_FOLDER), "-l" + str(self.get_current_line_number(view))]
     def features(self): return ["run_test"]
     def get_project_root(self): return self.find_project_root(CUCUMBER_UNIT_FOLDER)
 
   class RSpecFile(RubyFile):
     def possible_alternate_files(self): return [self.file_name.replace("_spec.rb", ".rb")]
-    def run_all_tests_command(self): return self.run_from_project_root(RSPEC_UNIT_FOLDER, RSPEC_UNIT)
-    def run_single_test_command(self, view): return self.run_from_project_root(RSPEC_UNIT_FOLDER, RSPEC_UNIT, " -l " + str(self.get_current_line_number(view)))
+    def run_all_tests_command(self): return RSPEC_UNIT + [self.relative_file_path(RSPEC_UNIT_FOLDER)]
+    def run_single_test_command(self, view): return RSPEC_UNIT + [self.relative_file_path(RSPEC_UNIT_FOLDER), "-l" + str(self.get_current_line_number(view))]
     def features(self): return super(BaseRubyTask.RSpecFile, self).features() + ["run_test"]
     def get_project_root(self): return self.find_project_root(RSPEC_UNIT_FOLDER)
 
   class ErbFile(BaseFile):
-    def verify_syntax_command(self): return wrap_in_cd(self.folder_name, ERB_EXEC +" -xT - " + self.file_name + " | " + RUBY_UNIT + " -c")
+    def verify_syntax_command(self): return ["sh", "-c", ERB_EXEC.join(" ") + " -xT - " + self.file_name + " | " + RUBY_UNIT + " -c"]
     def can_verify_syntax(self): return True
     def features(self): return ["verify_syntax"]
 
@@ -282,33 +206,24 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     else:
       return BaseRubyTask.BaseFile(file_name)
 
+
 class RunSingleRubyTest(BaseRubyTask):
   def is_enabled(self): return 'run_test' in self.file_type().features()
   def run(self, args):
     self.load_config()
     file = self.file_type()
     command = file.run_single_test_command(self.view)
-    if command:
-      self.save_test_run(command, file.file_name)
-      self.show_tests_panel(file.get_project_root())
-      self.is_running = True
-      self.proc = AsyncProcess(command, self)
-      StatusProcess("Starting tests from file " + file.file_name, self)
+    self.run_shell_command(command, file.get_project_root())
+
 
 class RunAllRubyTest(BaseRubyTask):
   def is_enabled(self): return 'run_test' in self.file_type().features()
   def run(self, args):
     self.load_config()
-    view = self.view
-    folder_name, file_name = os.path.split(view.file_name())
-    file = self.file_type(view.file_name())
+    file = self.file_type(self.view.file_name())
     command = file.run_all_tests_command()
-    if command:
-      self.show_tests_panel(file.get_project_root())
-      self.save_test_run(command, file_name)
-      self.is_running = True
-      self.proc = AsyncProcess(command, self)
-      StatusProcess("Starting tests from file " + file.file_name, self)
+    if self.run_shell_command(command, file.get_project_root()):
+      pass
     else:
       sublime.error_message("Only *_test.rb, *_spec.rb, *.feature files supported!")
 
@@ -317,22 +232,11 @@ class RunLastRubyTest(BaseRubyTask):
   def load_last_run(self):
     self.load_config()
     s = sublime.load_settings("RubyTest.last-run")
-    global LAST_TEST_RUN; LAST_TEST_RUN = s.get("last_test_run")
-    global LAST_TEST_FILE; LAST_TEST_FILE = s.get("last_test_file")
+    return (s.get("last_test_run").split(), s.get("last_test_working_dir"))
 
   def run(self, args):
-    self.load_last_run()
-    file = self.file_type()
-    self.show_tests_panel(file.get_project_root())
-    self.is_running = True
-    self.proc = AsyncProcess(LAST_TEST_RUN, self)
-    StatusProcess("Starting tests from file " + LAST_TEST_FILE, self)
-
-class ShowTestPanel(BaseRubyTask):
-  def run(self, args):
-    output_view = self.get_test_panel()
-    self.window().run_command("show_panel", {"panel": "output.tests"})
-    self.window().focus_view(output_view)
+    last_command, working_dir = self.load_last_run()
+    self.run_shell_command(last_command, working_dir)
 
 class VerifyRubyFile(BaseRubyTask):
   def is_enabled(self): return 'verify_syntax' in self.file_type().features()
@@ -340,9 +244,8 @@ class VerifyRubyFile(BaseRubyTask):
     self.load_config()
     file = self.file_type()
     command = file.verify_syntax_command()
-    if command:
-      self.show_tests_panel()
-      self.start_async("Checking syntax of : " + file.file_name, command)
+    if self.run_shell_command(command, file.get_project_root()):
+      pass
     else:
       sublime.error_message("Only .rb or .erb files supported!")
 
@@ -383,10 +286,6 @@ class SwitchBetweenCodeAndTest(BaseRubyTask):
     directories = self.window().folders()
     return [os.path.join(dirname, file) for directory in directories for dirname, _, files in self.walk(directory) for file in filter(file_matcher, files)]
 
-class RubyRunShell(BaseRubyTask):
-  def run(self, args, command, caption = "Running shell command"):
-    self.show_tests_panel()
-    self.start_async(caption, wrap_in_cd(self.window().folders()[0], command))
 
 class RubyRailsGenerate(BaseRubyTask):
   def is_enabled(self): return 'rails_generate' in self.file_type().features()
@@ -395,8 +294,12 @@ class RubyRailsGenerate(BaseRubyTask):
     self.window().show_input_panel("rails generate", type + " ", lambda s: self.generate(s), None, None)
 
   def generate(self, argument):
-    command = "rails generate " + argument
-    self.view.run_command("ruby_run_shell", {"command": command, "caption": "Generating" + argument})
+    command = ['rails', 'generate'] + argument.split()
+    self.run_shell_command(command, self.window().folders()[0])
+
+class ShowTestPanel(BaseRubyTask):
+  def run(self, args):
+    self.window().run_command("show_panel", {"panel": "output.exec"})
 
 class RubyExtractVariable(BaseRubyTask):
   def is_enabled(self): return 'extract_variable' in self.file_type().features()
