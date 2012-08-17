@@ -6,6 +6,43 @@ import string
 import sublime_plugin
 
 
+class ShowInPanel:
+  def __init__(self, window):
+    self.window = window
+
+  def display_results(self):
+    self.window.run_command("show_panel", {"panel": "output.exec"})
+
+
+class ShowInScratch:
+  def __init__(self, window):
+    self.window = window    
+    self.active_for = 0
+    self.copied_until = 0
+
+  def display_results(self):
+    self.panel = self.window.get_output_panel("exec")
+    self.window.run_command("hide_panel")
+    self.view = self.window.new_file()
+    self.view.set_scratch(True)
+    self.view.set_name("Test Results")
+    self.poll_copy()
+
+  def poll_copy(self):
+    if self.active_for < 60000:
+      self.active_for += 50
+      sublime.set_timeout(self.copy_stuff, 50)
+
+  def copy_stuff(self):
+    size = self.panel.size()
+    content = self.panel.substr(sublime.Region(self.copied_until, size))
+    if content:
+      self.copied_until = size
+      edit = self.view.begin_edit()
+      self.view.insert(edit, self.view.size(), content)
+      self.view.end_edit(edit)
+    self.poll_copy()
+
 class TestMethodMatcher(object):
   def __init__(self):
     self.matchers = [TestMethodMatcher.UnitTest, TestMethodMatcher.ShouldaTest]
@@ -70,7 +107,12 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       "working_dir": working_dir,
       "file_regex": r"([^ ]*\.rb):?(\d*)"
     })
+    self.display_results()
     return True
+
+  def display_results(self):
+    display = ShowInScratch(self.window()) if USE_SCRATCH else ShowInPanel(self.window())
+    display.display_results()
 
   def window(self):
     return self.view.window()
@@ -157,35 +199,6 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     else:
       return BaseRubyTask.BaseFile(file_name)
 
-class CopyFromPanelToView:
-  def __init__(self, panel, view):
-    self.panel = panel
-    self.view = view    
-    self.active_for = 0
-    self.copied_until = 0
-
-  def set_timeout(self):
-    if self.active_for < 60000:
-      self.active_for += 50
-      sublime.set_timeout(self.copy_stuff, 50)
-
-  def copy_stuff(self):
-    size = self.panel.size()
-    content = self.panel.substr(sublime.Region(self.copied_until, size))
-    if content:
-      self.copied_until = size
-      edit = self.view.begin_edit()
-      self.view.insert(edit, self.view.size(), content)
-      self.view.end_edit(edit)
-    self.set_timeout()
-
-  @staticmethod
-  def copy_to_new_view(panel, view):
-    view.window().run_command("hide_panel")
-    view.set_scratch(True)
-    daemon = CopyFromPanelToView(panel, view)
-    daemon.set_timeout()
-    
 
 class RunSingleRubyTest(BaseRubyTask):
   def is_enabled(self): return 'run_test' in self.file_type().features()
