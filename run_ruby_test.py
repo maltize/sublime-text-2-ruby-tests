@@ -73,11 +73,13 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     def run_all_tests_command(self): return None
     def get_project_root(self): return None
     def find_project_root(self, partition_folder):
-      project_root, test_folder, file_name = self.absolute_path.partition(partition_folder)
+      to_find = os.sep + partition_folder + os.sep
+      project_root, _, _ = self.absolute_path.partition(to_find)
       return project_root
     def relative_file_path(self, partition_folder):
-      folder_name, _, file_name = self.absolute_path.partition(partition_folder)
-      return partition_folder + file_name
+      to_find = os.sep + partition_folder + os.sep
+      _, _, relative_path = self.absolute_path.partition(to_find)
+      return partition_folder + os.sep + relative_path
     def get_current_line_number(self, view):
       char_under_cursor = view.sel()[0].a
       return view.rowcol(char_under_cursor)[0] + 1
