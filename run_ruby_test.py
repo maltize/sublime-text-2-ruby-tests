@@ -94,6 +94,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     global CUCUMBER_UNIT_FOLDER; CUCUMBER_UNIT_FOLDER = s.get("ruby_cucumber_folder")
     global RSPEC_UNIT_FOLDER; RSPEC_UNIT_FOLDER = s.get("ruby_rspec_folder")
     global USE_SCRATCH; USE_SCRATCH = s.get("ruby_use_scratch")
+    global IGNORED_DIRECTORIES; IGNORED_DIRECTORIES = s.get("ignored_directories")
 
     if s.get("save_on_run"):
       self.window().run_command("save_all")
@@ -252,6 +253,7 @@ class VerifyRubyFile(BaseRubyTask):
 class SwitchBetweenCodeAndTest(BaseRubyTask):
   def is_enabled(self): return 'switch_to_test' in self.file_type().features()
   def run(self, args, split_view):
+    self.load_config()
     possible_alternates = self.file_type().possible_alternate_files()
     alternates = self.project_files(lambda file: file in possible_alternates)
     if alternates:
@@ -276,10 +278,9 @@ class SwitchBetweenCodeAndTest(BaseRubyTask):
 
     self.window().open_file(alternates[index])
 
-  def walk(self, directory, ignored_directories = []):
-    ignored_directories = ['.git', 'vendor']  # Move this into config
+  def walk(self, directory):
     for dir, dirnames, files in os.walk(directory):
-      dirnames[:] = [dirname for dirname in dirnames if dirname not in ignored_directories]
+      dirnames[:] = [dirname for dirname in dirnames if dirname not in IGNORED_DIRECTORIES]
       yield dir, dirnames, files
 
   def project_files(self, file_matcher):
