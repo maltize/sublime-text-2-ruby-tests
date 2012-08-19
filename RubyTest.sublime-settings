@@ -9,5 +9,6 @@
   "ruby_rspec_folder": "spec",
 
   "ruby_use_scratch" : false,
-  "save_on_run": false
+  "save_on_run": false,
+  "ignored_directories": [".git", "vendor", "tmp"] 
 }
