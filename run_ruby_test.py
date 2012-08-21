@@ -111,7 +111,8 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       return False
     self.save_test_run(command, working_dir)
     self.view.window().run_command("exec", {
-      "cmd": ["sh", "-c", command],
+      "cmd": [command],
+      "shell": True,
       "working_dir": working_dir,
       "file_regex": r"([^ ]*\.rb):?(\d*)"
     })
