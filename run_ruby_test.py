@@ -296,7 +296,7 @@ class RubyRailsGenerate(BaseRubyTask):
     self.window().show_input_panel("rails generate", type + " ", lambda s: self.generate(s), None, None)
 
   def generate(self, argument):
-    command = ['rails', 'generate'] + argument.split()
+    command = 'rails generate {thing}'.format(thing=argument)
     self.run_shell_command(command, self.window().folders()[0])
 
 class ShowTestPanel(BaseRubyTask):
