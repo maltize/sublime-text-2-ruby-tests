@@ -185,13 +185,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
   class RSpecFile(RubyFile):
     def possible_alternate_files(self): return [self.file_name.replace("_spec.rb", ".rb")]
     def run_all_tests_command(self): return "{command} {relative_path}".format(command=SPIN_UNIT if USE_SPIN else RSPEC_UNIT, relative_path=self.relative_file_path(RSPEC_UNIT_FOLDER))
-    def run_single_test_command(self, view): 
-      current_line_number = self.get_current_line_number(view)
-      if USE_SPIN:
-        current_line_number_for_command = "%s%s" % (":", current_line_number)
-      else:
-        current_line_number_for_command = " %s%s" % (" -l", current_line_number)
-      return "{rspec} {relative_path}{line_number}".format(rspec=SPIN_UNIT if USE_SPIN else RSPEC_UNIT, relative_path=self.relative_file_path(RSPEC_UNIT_FOLDER), line_number=current_line_number_for_command)
+    def run_single_test_command(self, view): return "{rspec} {relative_path}{line_number}".format(rspec=SPIN_UNIT if USE_SPIN else RSPEC_UNIT, relative_path=self.relative_file_path(RSPEC_UNIT_FOLDER), line_number="%s%s" % (":" if USE_SPIN else " -l", self.get_current_line_number(view)))
     def features(self): return super(BaseRubyTask.RSpecFile, self).features() + ["run_test"]
     def get_project_root(self): return self.find_project_root(RSPEC_UNIT_FOLDER)
 
