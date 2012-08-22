@@ -10,5 +10,7 @@
 
   "ruby_use_scratch" : false,
   "save_on_run": false,
-  "ignored_directories": [".git", "vendor", "tmp"] 
+  "ignored_directories": [".git", "vendor", "tmp"],
+  "use_spin": false,
+  "spin_exec": "spin push"
 }

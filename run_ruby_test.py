@@ -95,6 +95,8 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     global RSPEC_UNIT_FOLDER; RSPEC_UNIT_FOLDER = s.get("ruby_rspec_folder")
     global USE_SCRATCH; USE_SCRATCH = s.get("ruby_use_scratch")
     global IGNORED_DIRECTORIES; IGNORED_DIRECTORIES = s.get("ignored_directories")
+    global USE_SPIN; USE_SPIN = s.get("use_spin")
+    global SPIN_UNIT; SPIN_UNIT = s.get("spin_exec")
 
     if s.get("save_on_run"):
       self.window().run_command("save_all")
@@ -158,7 +160,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
 
   class UnitFile(RubyFile):
     def possible_alternate_files(self): return [self.file_name.replace("_test.rb", ".rb")]
-    def run_all_tests_command(self): return "{ruby} -Itest {relative_path}".format(ruby=RUBY_UNIT, relative_path=self.relative_file_path(RUBY_UNIT_FOLDER))
+    def run_all_tests_command(self): return "{ruby} -Itest {relative_path}".format(ruby=SPIN_UNIT if USE_SPIN else RUBY_UNIT, relative_path=self.relative_file_path(RUBY_UNIT_FOLDER))
     def run_single_test_command(self, view):
       region = view.sel()[0]
       line_region = view.line(region)
@@ -182,8 +184,14 @@ class BaseRubyTask(sublime_plugin.TextCommand):
 
   class RSpecFile(RubyFile):
     def possible_alternate_files(self): return [self.file_name.replace("_spec.rb", ".rb")]
-    def run_all_tests_command(self): return "{rspec} {relative_path}".format(rspec=RSPEC_UNIT, relative_path=self.relative_file_path(RSPEC_UNIT_FOLDER))
-    def run_single_test_command(self, view): return "{rspec} {relative_path} -l{line_number}".format(rspec=RSPEC_UNIT, relative_path=self.relative_file_path(RSPEC_UNIT_FOLDER), line_number=self.get_current_line_number(view))
+    def run_all_tests_command(self): return "{command} {relative_path}".format(command=SPIN_UNIT if USE_SPIN else RSPEC_UNIT, relative_path=self.relative_file_path(RSPEC_UNIT_FOLDER))
+    def run_single_test_command(self, view): 
+      current_line_number = self.get_current_line_number(view)
+      if USE_SPIN:
+        current_line_number_for_command = "%s%s" % (":", current_line_number)
+      else:
+        current_line_number_for_command = " %s%s" % (" -l", current_line_number)
+      return "{rspec} {relative_path}{line_number}".format(rspec=SPIN_UNIT if USE_SPIN else RSPEC_UNIT, relative_path=self.relative_file_path(RSPEC_UNIT_FOLDER), line_number=current_line_number_for_command)
     def features(self): return super(BaseRubyTask.RSpecFile, self).features() + ["run_test"]
     def get_project_root(self): return self.find_project_root(RSPEC_UNIT_FOLDER)
 
