@@ -9,7 +9,11 @@ Running:
   - cucumber tests (feature / scenario)
   - rspec (full spec, single spec)
 
-Maciej Gajek & Grzegorz Smajdor (https://github.com/gs) project.
+Maintainers:
+------------
+* Maciej Gajek (https://github.com/maltize)
+* Grzegorz Smajdor (https://github.com/gs)
+* Tejas Dinkar (https://github.com/gja)
 
 Installation
 ------------
