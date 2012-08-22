@@ -62,6 +62,9 @@ Below features can be enabled by editing `RubyTest.sublime-settings`
 - Use Scratch  - test output in new tab
  `"ruby_use_scratch" : true `
 
+- Use Spin - use [spin](https://github.com/jstorimer/spin) for tests run
+ `"use_spin" : true `
+
 Colors Issue:
 ------------
 We have known colors issue. Please check [this thread](https://github.com/maltize/sublime-text-2-ruby-tests/issues/33#issuecomment-3553701) for temporary solution.
