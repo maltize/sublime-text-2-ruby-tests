@@ -132,6 +132,9 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     def __init__(self, file_name):
       self.folder_name, self.file_name = os.path.split(file_name)
       self.absolute_path = file_name
+    def parent_dir_name(self):
+      head_dir, tail_dir = os.path.split(self.folder_name)
+      return tail_dir
     def verify_syntax_command(self): return None
     def possible_alternate_files(self): return []
     def run_all_tests_command(self): return None
@@ -183,7 +186,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     def get_project_root(self): return self.find_project_root(CUCUMBER_UNIT_FOLDER)
 
   class RSpecFile(RubyFile):
-    def possible_alternate_files(self): return [self.file_name.replace("_spec.rb", ".rb")]
+    def possible_alternate_files(self): return [self.file_name.replace("_spec.rb", ".rb"), self.file_name.replace("haml_spec.rb", "haml")]
     def run_all_tests_command(self): return "{command} {relative_path}".format(command=SPIN_UNIT if USE_SPIN else RSPEC_UNIT, relative_path=self.relative_file_path(RSPEC_UNIT_FOLDER))
     def run_single_test_command(self, view): 
       current_line_number = self.get_current_line_number(view)
@@ -200,6 +203,10 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     def can_verify_syntax(self): return True
     def features(self): return ["verify_syntax"]
 
+  class HamlFile(BaseFile):
+    def possible_alternate_files(self): return [self.file_name.replace(".haml", ".haml_spec.rb")]
+    def features(self): return ["switch_to_test"]
+
   def file_type(self, file_name = None):
     file_name = file_name or self.view.file_name()
     if not file_name: return BaseRubyTask.AnonymousFile()
@@ -213,6 +220,8 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       return BaseRubyTask.RubyFile(file_name)
     elif re.search('\w+\.erb', file_name):
       return BaseRubyTask.ErbFile(file_name)
+    elif re.search('\w+\.haml', file_name):
+      return BaseRubyTask.HamlFile(file_name)
     else:
       return BaseRubyTask.BaseFile(file_name)
 
@@ -265,6 +274,12 @@ class SwitchBetweenCodeAndTest(BaseRubyTask):
     self.load_config()
     possible_alternates = self.file_type().possible_alternate_files()
     alternates = self.project_files(lambda file: file in possible_alternates)
+
+    for alternate in alternates:
+      if re.search(self.file_type().parent_dir_name(), alternate):
+        alternates = [alternate]
+        break
+
     if alternates:
       if split_view:
         self.window().run_command('set_layout', {
