@@ -13,6 +13,8 @@ class ShowInPanel:
   def display_results(self):
     self.panel = self.window.get_output_panel("exec")
     self.window.run_command("show_panel", {"panel": "output.exec"})
+    if HIDE_PANEL:
+      self.window.run_command("hide_panel")
     self.panel.settings().set("color_scheme", "Packages/RubyTest/TestConsole.tmTheme")
 
 
@@ -101,6 +103,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     global RSPEC_UNIT_FOLDER; RSPEC_UNIT_FOLDER = s.get("ruby_rspec_folder")
     global USE_SCRATCH; USE_SCRATCH = s.get("ruby_use_scratch")
     global IGNORED_DIRECTORIES; IGNORED_DIRECTORIES = s.get("ignored_directories")
+    global HIDE_PANEL; HIDE_PANEL = s.get("hide_panel")
 
     if s.get("save_on_run"):
       self.window().run_command("save_all")
