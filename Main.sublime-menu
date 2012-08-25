@@ -1,23 +1,115 @@
 [
   {
-    "id": "tools",
-    "children":
-      [
-        {
-          "caption": "RubyTest",
-          "children":
-            [
-              { "caption": "Run single test / scenario / spec", "command": "run_single_ruby_test" },
-              { "caption": "Run all tests / feature / full spec", "command": "run_all_ruby_test" },
-              { "caption": "Run last tests / feature / spec", "command": "run_last_ruby_test" },
-              { "caption": "-" },
-              { "caption": "Show test panel", "command": "show_test_panel" },
-              { "caption": "-" },
-              { "caption": "Verify ruby syntax", "command": "verify_ruby_file" },
-              { "caption": "Switch Between Code and Test", "command": "switch_between_code_and_test", "args": {"split_view": false} },
-              { "caption": "-" }
+    "id":"tools",
+    "children":[
+      {
+        "caption":"RubyTest",
+        "children":[
+          {
+            "caption":"Run single test / scenario / spec",
+            "command":"run_single_ruby_test"
+          },
+          {
+            "caption":"Run all tests / feature / full spec",
+            "command":"run_all_ruby_test"
+          },
+          {
+            "caption":"Run last tests / feature / spec",
+            "command":"run_last_ruby_test"
+          },
+          {
+            "caption":"-"
+          },
+          {
+            "caption":"Show test panel",
+            "command":"show_test_panel"
+          },
+          {
+            "caption":"-"
+          },
+          {
+            "caption":"Verify ruby syntax",
+            "command":"verify_ruby_file"
+          },
+          {
+            "caption":"Switch Between Code and Test",
+            "command":"switch_between_code_and_test",
+            "args":{
+              "split_view":false
+            }
+          },
+          {
+            "caption":"-"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "caption":"Preferences",
+    "mnemonic":"n",
+    "id":"preferences",
+    "children":[
+      {
+        "caption":"Package Settings",
+        "mnemonic":"P",
+        "id":"package-settings",
+        "children":[
+          {
+            "caption":"RubyTest",
+            "children":[
+              {
+                "command":"open_file",
+                "args":{
+                  "file":"${packages}/RubyTest/RubyTest.sublime-settings"
+                },
+                "caption":"Settings – Default"
+              },
+              {
+                "command":"open_file",
+                "args":{
+                  "file":"${packages}/User/RubyTest.sublime-settings"
+                },
+                "caption":"Settings – User"
+              },
+              {
+                "caption":"-"
+              },
+              {
+                "command":"open_file",
+                "args":{
+                  "file":"${packages}/RubyTest/Default.sublime-keymap"
+                },
+                "caption":"Key Bindings – Default"
+              },
+              {
+                "command":"open_file",
+                "args":{
+                  "file":"${packages}/RubyTest/Default (Windows).sublime-keymap",
+                  "platform":"Windows"
+                },
+                "caption":"Key Bindings – User"
+              },
+              {
+                "command":"open_file",
+                "args":{
+                  "file":"${packages}/RubyTest/Default (OSX).sublime-keymap",
+                  "platform":"OSX"
+                },
+                "caption":"Key Bindings – User"
+              },
+              {
+                "command":"open_file",
+                "args":{
+                  "file":"${packages}/RubyTest/Default (Linux).sublime-keymap",
+                  "platform":"Linux"
+                },
+                "caption":"Key Bindings – User"
+              }
             ]
-        }
+          }
+        ]
+      }
     ]
   }
 ]
