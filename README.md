@@ -33,7 +33,7 @@ git clone https://github.com/maltize/sublime-text-2-ruby-tests.git RubyTest
 Settings
 --------
 
-You can specify different binary for each type of test to use.
+'Sublime Text 2' -> 'Preferences' -> 'Package Settings' -> 'RubyTest'
 
 Make a copy of `RubyTest.sublime-settings` file to `~/Library/Application Support/Sublime Text 2/Packages/User/` and make your changes.
 
@@ -103,7 +103,7 @@ Settings:
 
       "ruby_use_scratch" : false,
       "save_on_run": false,
-      "ignored_directories": [".git", "vendor", "tmp"] 
+      "ignored_directories": [".git", "vendor", "tmp"]
     }
 
 Bundler support:
@@ -137,5 +137,5 @@ First be sure that you have your copy of `RubyTest.sublime-settings` placed in U
 
       "ruby_use_scratch" : false,
       "save_on_run": false,
-      "ignored_directories": [".git", "vendor", "tmp"] 
+      "ignored_directories": [".git", "vendor", "tmp"]
     }
