@@ -47,8 +47,8 @@ Usage
  - Show test panel: `Command-Shift-X` (when test panel visible hit `esc` to hide it)
  - Check RB, ERB file syntax: `Alt-Shift-V`
  - Switching between code and test:
-    - Single View: `Command-`.
-    - Split View:  `Command+Ctrl+`.
+    - Single View: `Command-.`
+    - Split View:  `Command-Ctrl-.`
 Keys:
  'Command' (OSX)
  'Ctrl' (Linux / Windows)
