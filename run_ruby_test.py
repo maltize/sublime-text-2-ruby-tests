@@ -5,7 +5,6 @@ import sublime
 import string
 import sublime_plugin
 
-
 class ShowInPanel:
   def __init__(self, window):
     self.window = window
@@ -104,6 +103,8 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     global USE_SCRATCH; USE_SCRATCH = s.get("ruby_use_scratch")
     global IGNORED_DIRECTORIES; IGNORED_DIRECTORIES = s.get("ignored_directories")
     global HIDE_PANEL; HIDE_PANEL = s.get("hide_panel")
+    global BEFORE_CALLBACK; BEFORE_CALLBACK = s.get("before_callback")
+    global AFTER_CALLBACK; AFTER_CALLBACK = s.get("after_callback")
 
     if s.get("save_on_run"):
       self.window().run_command("save_all")
@@ -118,6 +119,10 @@ class BaseRubyTask(sublime_plugin.TextCommand):
   def run_shell_command(self, command, working_dir):
     if not command:
       return False
+    if BEFORE_CALLBACK:
+      os.system(BEFORE_CALLBACK)
+    if AFTER_CALLBACK:
+      command += " ; " + AFTER_CALLBACK
     self.save_test_run(command, working_dir)
     self.view.window().run_command("exec", {
       "cmd": [command],
