@@ -129,7 +129,7 @@ First be sure that you have your copy of `RubyTest.sublime-settings` placed in U
       "run_single_cucumber_command": "cucumber {relative_path} -l{line_number}",
 
       "run_rspec_command": "spin push {relative_path}",
-      "run_single_rspec_command": "spin push {relative_path} -l{line_number}",
+      "run_single_rspec_command": "spin push {relative_path}:{line_number}",
 
       "ruby_unit_folder": "test",
       "ruby_cucumber_folder": "features",
