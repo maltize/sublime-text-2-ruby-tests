@@ -81,7 +81,7 @@ class TestMethodMatcher(object):
       if not match_obj:
         return None
       test_name = match_obj.group(1)[::-1]
-      return "%s%s%s" % ("/", test_name.replace("should", "").strip(), "/")
+      return "%s%s%s" % ("/", test_name.replace("should", "").replace("\"", "").strip(), "/")
 
 
 class RubyTestSettings:
