@@ -26,9 +26,15 @@ class ShowInScratch:
   def display_results(self):
     self.panel = self.window.get_output_panel("exec")
     self.window.run_command("hide_panel")
-    self.view = self.window.new_file()
+    self.view = self.window.open_file("Test Results")
     self.view.set_scratch(True)
-    self.view.set_name("Test Results")
+    self.view.set_read_only(False)
+
+    edit = self.view.begin_edit()
+    self.view.erase(edit, sublime.Region(0, self.view.size()))
+    self.view.end_edit(edit)
+
+    self.view.settings().set("syntax", "Packages/RubyTest/TestConsole.tmLanguage")
     self.view.settings().set("color_scheme", "Packages/RubyTest/TestConsole.tmTheme")
     self.view.set_read_only(True)
     self.poll_copy()
