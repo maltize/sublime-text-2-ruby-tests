@@ -30,14 +30,11 @@ class ShowInScratch:
     self.view.set_scratch(True)
     self.view.set_read_only(False)
 
-    edit = self.view.begin_edit()
-    self.view.erase(edit, sublime.Region(0, self.view.size()))
-    self.view.end_edit(edit)
-
     self.view.settings().set("syntax", "Packages/RubyTest/TestConsole.tmLanguage")
     self.view.settings().set("color_scheme", "Packages/RubyTest/TestConsole.tmTheme")
     self.view.set_read_only(True)
     self.poll_copy()
+    self.append('\n\n')
 
   def poll_copy(self):
     # FIXME HACK: Stop polling after one minute
@@ -45,16 +42,20 @@ class ShowInScratch:
       self.active_for += 50
       sublime.set_timeout(self.copy_stuff, 50)
 
+  def append(self, content):
+    self.view.set_read_only(False)
+    edit = self.view.begin_edit()
+    self.view.insert(edit, self.view.size(), content)
+    self.view.end_edit(edit)
+    self.view.set_read_only(True)
+    self.view.set_viewport_position((self.view.size(), self.view.size()), True)
+
   def copy_stuff(self):
     size = self.panel.size()
     content = self.panel.substr(sublime.Region(self.copied_until, size))
     if content:
       self.copied_until = size
-      self.view.set_read_only(False)
-      edit = self.view.begin_edit()
-      self.view.insert(edit, self.view.size(), content)
-      self.view.end_edit(edit)
-      self.view.set_read_only(True)
+      self.append(content)
     self.poll_copy()
 
 class TestMethodMatcher(object):
