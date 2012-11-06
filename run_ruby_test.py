@@ -15,7 +15,11 @@ class ShowInPanel:
     if HIDE_PANEL:
       self.window.run_command("hide_panel")
     self.panel.settings().set("color_scheme", "Packages/RubyTest/TestConsole.tmTheme")
+    self.set_color_scheme
 
+  def set_color_scheme(self):
+    self.panel.settings().set("syntax", "Packages/RubyTest/RubyTestOutput.tmLanguage")
+    self.panel.settings().set("color_scheme", "Packages/RubyTest/RubyTestOutput.tmTheme")
 
 class ShowInScratch:
   def __init__(self, window):

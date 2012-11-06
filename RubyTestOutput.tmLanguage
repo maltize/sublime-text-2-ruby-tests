@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>name</key>
+	<string>GuardOutput</string>
+	<key>patterns</key>
+	<array>
+		<dict>
+			<key>include</key>
+			<string>#failed_examples</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#comments</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>test pass</string>
+			<key>match</key>
+			<string>(^|\s)\d+ (tests|assertions|examples?|passed)|(0 failures)</string>
+			<key>name</key>
+			<string>test.pass</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>test error</string>
+			<key>match</key>
+			<string>(\d+ errors)|(\d+\) Error:|Failing \w*:|cucumber(\s\S*)|\d failed)</string>
+			<key>name</key>
+			<string>test.error</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>test fail</string>
+			<key>match</key>
+			<string>(\d+ failures?)|(\d+\) Failure:)|\d+ undefined</string>
+			<key>name</key>
+			<string>test.fail</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>test cucumber</string>
+			<key>match</key>
+			<string>Feature|Scenario|Given|And|When|Then|\d+ skipped</string>
+			<key>name</key>
+			<string>test.cucumber</string>
+		</dict>
+		<dict>
+			<key>begin</key>
+			<string>Running all specs|Running: .+|Running tests(\s+with\s+args\s+\[.*\]\.*\n)?</string>
+			<key>comment</key>
+			<string>dots painting</string>
+			<key>end</key>
+			<string>Finished|Failures|Pending|Done|backtrace</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>match</key>
+					<string>\.+|passed</string>
+					<key>name</key>
+					<string>test.pass.rspec_output</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>E+</string>
+					<key>name</key>
+					<string>test.error.rspec_output</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>F+</string>
+					<key>name</key>
+					<string>test.fail.rspec_output</string>
+				</dict>
+			</array>
+		</dict>
+		<dict>
+			<key>begin</key>
+			<string>\s+\d+\)\s+[\w+:#\s\-\/\.',?!]+</string>
+			<key>comment</key>
+			<string>failure tracebacks</string>
+			<key>contentName</key>
+			<string>test.fail</string>
+			<key>end</key>
+			<string>[.#]*(#\s+[.\w\/:#\s`\(\)&lt;&gt;]+')</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>0</key>
+				<dict>
+					<key>name</key>
+					<string>test.comment.rspec_output</string>
+				</dict>
+			</dict>
+		</dict>
+	</array>
+	<key>repository</key>
+	<dict>
+		<key>comments</key>
+		<dict>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>comment</key>
+					<string>comment</string>
+					<key>match</key>
+					<string>[.#]*#\s+[.\w\/:#\s`\(\)&lt;&gt;\-\?'=,]+</string>
+					<key>name</key>
+					<string>test.comment.rspec_output</string>
+				</dict>
+			</array>
+		</dict>
+		<key>failed_examples</key>
+		<dict>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>comment</key>
+					<string>test reference</string>
+					<key>match</key>
+					<string>^rspec\s+[.\/\w]+:\d+\b</string>
+					<key>name</key>
+					<string>test.reference.rspec_output</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
+	<key>scopeName</key>
+	<string>rspec_output.test</string>
+	<key>uuid</key>
+	<string>72174d10-bb12-11e0-962b-112233445566</string>
+</dict>
+</plist>

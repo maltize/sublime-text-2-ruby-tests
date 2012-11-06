@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>comment</key>
+	<string>Guard Output Theme</string>
+	<key>name</key>
+	<string>GuardOutput</string>
+	<key>settings</key>
+	<array>
+		<dict>
+			<key>settings</key>
+		     <dict>
+		       <key>background</key>
+		       <string>#000000</string>
+		       <key>caret</key>
+		       <string>#A7A7A7</string>
+		       <key>foreground</key>
+		       <string>#F8F8F8</string>
+		       <key>invisibles</key>
+		       <string>#CAE2FB3D</string>
+		       <key>lineHighlight</key>
+		       <string>#FFFFFF0D</string>
+		       <key>selection</key>
+		       <string>#DDF0FF33</string>
+		     </dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>test pass</string>
+			<key>scope</key>
+			<string>test.pass</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#00FF00</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>test fail</string>
+			<key>scope</key>
+			<string>test.fail</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#F00000</string>
+			</dict>
+		</dict>
+		<dict>
+	      <key>name</key>
+	      <string>Test</string>
+	      <key>scope</key>
+	      <string>test.cucumber</string>
+	      <key>settings</key>
+	      <dict>
+	        <key>foreground</key>
+	        <string>#FFcc66</string>
+	      </dict>
+	    </dict>
+		<dict>
+			<key>name</key>
+			<string>test comment</string>
+			<key>scope</key>
+			<string>test.comment</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#545454</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>test referance</string>
+			<key>scope</key>
+			<string>test.reference</string>
+			<key>settings</key>
+			<dict>
+				<key>foreground</key>
+				<string>#00CCFF</string>
+			</dict>
+		</dict>
+	</array>
+	<key>uuid</key>
+	<string>19907EAE-885C-46C2-BB53-08DD1BDD9AFC</string>
+</dict>
+</plist>
