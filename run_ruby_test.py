@@ -14,7 +14,7 @@ class ShowInPanel:
     self.window.run_command("show_panel", {"panel": "output.exec"})
     if HIDE_PANEL:
       self.window.run_command("hide_panel")
-    self.panel.settings().set("color_scheme", "Packages/RubyTest/TestConsole.tmTheme")
+    self.panel.settings().set("color_scheme", "Packages/RubyTest/TestConsole.hidden-tmTheme")
 
 
 class ShowInScratch:
@@ -31,7 +31,7 @@ class ShowInScratch:
     self.view.set_read_only(False)
 
     self.view.settings().set("syntax", "Packages/RubyTest/TestConsole.tmLanguage")
-    self.view.settings().set("color_scheme", "Packages/RubyTest/TestConsole.tmTheme")
+    self.view.settings().set("color_scheme", "Packages/RubyTest/TestConsole.hidden-tmTheme")
     self.view.set_read_only(True)
     self.poll_copy()
     self.append('\n\n')
