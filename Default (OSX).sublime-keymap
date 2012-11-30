@@ -6,10 +6,6 @@
   { "keys": ["super+shift+x"], "command": "show_test_panel" }, // show test panel
 
   { "keys": ["alt+shift+v"], "command": "verify_ruby_file" }, // verify ruby syntax
-  { "keys": ["super+period"], "command": "switch_between_code_and_test", "args": {"split_view": false}, "context" : [
-    { "key": "selector", "operator": "equal", "operand": "source.ruby", "match_all": true }
-  ]}, // switch between code and test in single mode
-  { "keys": ["super+ctrl+period"], "command": "switch_between_code_and_test", "args": {"split_view": true}, "context" : [
-    { "key": "selector", "operator": "equal", "operand": "source.ruby", "match_all": true }
-  ]} // switch between code and test in split view
+  { "keys": ["super+period"], "command": "switch_between_code_and_test", "args": {"split_view": false} }, // switch between code and test in single mode
+  { "keys": ["super+ctrl+period"], "command": "switch_between_code_and_test", "args": {"split_view": true} } // switch between code and test in split view
 ]
