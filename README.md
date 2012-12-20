@@ -60,7 +60,7 @@ Additional Features:
 -------------------
 Below features can be enabled by editing `RubyTest.sublime-settings`
 
-- Save on Run - if enabled then files will be automatically saved when running the test
+- Save on Run - if enabled then all files will be automatically saved before running the test
   `"save_on_run": true`
 
 - Use Scratch  - test output in new tab
