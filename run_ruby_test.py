@@ -112,9 +112,20 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     global HIDE_PANEL; HIDE_PANEL = s.get("hide_panel")
     global BEFORE_CALLBACK; BEFORE_CALLBACK = s.get("before_callback")
     global AFTER_CALLBACK; AFTER_CALLBACK = s.get("after_callback")
+    global COMMAND_PREFIX; COMMAND_PREFIX = False
+
+    rbenv_cmd = os.path.expanduser('~/.rbenv/bin/rbenv')
+    rvm_cmd = os.path.expanduser('~/.rvm/bin/rvm-auto-ruby')
+    if s.get("check_for_rbenv") and self.is_executable(rbenv_cmd):
+      COMMAND_PREFIX = rbenv_cmd + ' exec'
+    elif s.get("check_for_rvm") and self.is_executable(rvm_cmd):
+      COMMAND_PREFIX = rvm_cmd + ' -S'
 
     if s.get("save_on_run"):
       self.window().run_command("save_all")
+
+  def is_executable(self, path):
+    return os.path.isfile(path) and os.access(path, os.X_OK)
 
   def save_test_run(self, command, working_dir):
     s = sublime.load_settings("RubyTest.last-run")
@@ -126,6 +137,8 @@ class BaseRubyTask(sublime_plugin.TextCommand):
   def run_shell_command(self, command, working_dir):
     if not command:
       return False
+    if COMMAND_PREFIX:
+      command = COMMAND_PREFIX + ' ' + command
     if BEFORE_CALLBACK:
       os.system(BEFORE_CALLBACK)
     if AFTER_CALLBACK:
