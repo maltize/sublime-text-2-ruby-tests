@@ -137,13 +137,13 @@ class BaseRubyTask(sublime_plugin.TextCommand):
   def run_shell_command(self, command, working_dir):
     if not command:
       return False
-    if COMMAND_PREFIX:
-      command = COMMAND_PREFIX + ' ' + command
     if BEFORE_CALLBACK:
       os.system(BEFORE_CALLBACK)
     if AFTER_CALLBACK:
       command += " ; " + AFTER_CALLBACK
     self.save_test_run(command, working_dir)
+    if COMMAND_PREFIX:
+      command = COMMAND_PREFIX + ' ' + command
     self.view.window().run_command("exec", {
       "cmd": [command],
       "shell": True,
