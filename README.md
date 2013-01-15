@@ -143,3 +143,21 @@ First be sure that you have your copy of `RubyTest.sublime-settings` placed in U
       "save_on_run": false,
       "ignored_directories": [".git", "vendor", "tmp"]
     }
+
+Zeus support:
+-------------
+
+This adds support for zeus when running RSpec or Cucumber tests. First be sure that you have your copy of `RubyTest.sublime-settings` placed in User folder (refer to Settings above) and replace the following settings. ex:
+
+    {
+      "run_cucumber_command": "zeus cucumber {relative_path} --no-color",
+      "run_single_cucumber_command": "zeus cucumber {relative_path}:{line_number} --no-color",
+
+      "run_rspec_command": "zeus rspec {relative_path}",
+      "run_single_rspec_command": "zeus rspec {relative_path}:{line_number}",
+    }
+
+If you use RVM/bundler, you will need to also add:
+
+    "check_for_rvm": true
+
