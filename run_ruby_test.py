@@ -320,7 +320,7 @@ class SwitchBetweenCodeAndTest(BaseRubyTask):
         callback = functools.partial(self.on_selected, alternates)
         self.window().show_quick_panel(alternates, callback)
     else:
-      sublime.error_message("could not find " + str(possible_alternates))
+      GenerateTestFile(self.window()).doIt()
 
   def on_selected(self, alternates, index):
     if index == -1:
@@ -368,3 +368,90 @@ class RubyExtractVariable(BaseRubyTask):
       self.view.insert(edit, line.begin(), white_space + name + " = " + extracted + "\n")
     finally:
       self.view.end_edit(edit)
+
+class GenerateTestFile:
+  relative_paths = []
+  full_torelative_paths = {}
+  rel_path_start = 0
+
+  def __init__(self, window):
+    self.window = window
+
+  def doIt(self):
+    self.build_relative_paths()
+    self.window.show_quick_panel(self.relative_paths, self.dir_selected)
+
+  def build_relative_paths(self):
+      folders = self.active_project(self.window.folders())
+      view = self.window.active_view()
+      self.relative_paths = []
+      self.full_torelative_paths = {}
+      for path in folders:
+          rootfolders = os.path.split(path)[-1]
+          self.rel_path_start = len(os.path.split(path)[0]) + 1
+          if self.is_test_path(path):
+            self.full_torelative_paths[rootfolders] = path
+            self.relative_paths.append(rootfolders)
+
+          for base, dirs, files in os.walk(path):
+              for dir in dirs:
+                  relative_path = os.path.join(base, dir)[self.rel_path_start:]
+                  if self.is_test_path(relative_path):
+                    self.full_torelative_paths[relative_path] = os.path.join(base, dir)
+                    self.relative_paths.append(relative_path)
+
+  def active_project(self, folders):
+    current_file = self.window.active_view().file_name()
+    for folder in folders:
+      project_name = os.path.split(folder)[-1]
+      if re.search(project_name, current_file):
+        return [folder]
+    return folders
+
+  def is_test_path(self, path):
+    return re.search(RUBY_UNIT_FOLDER + '|' + RSPEC_UNIT_FOLDER + '|' + CUCUMBER_UNIT_FOLDER, path)
+
+  def dir_selected(self, selected_index):
+      if selected_index != -1:
+          self.selected_dir = self.relative_paths[selected_index]
+          self.selected_dir = self.full_torelative_paths[self.selected_dir]
+          self.window.show_input_panel("Test file", self.suggest_test_file_name(self.selected_dir), self.file_name_input, None, None)
+
+  def suggest_test_file_name(self, path):
+    current_file = self.window.active_view().file_name()
+    current_file = os.path.split(current_file)[-1]
+    test_file = current_file.replace(".rb", self.detect_test_type(path))
+    return test_file
+
+  def detect_test_type(self, path):
+    if re.search(RUBY_UNIT_FOLDER, path):
+      return '_test.rb'
+    if re.search(RSPEC_UNIT_FOLDER, path):
+      return '_spec.rb'
+    if re.search(CUCUMBER_UNIT_FOLDER, path):
+      return '.feature'
+
+  def file_name_input(self, file_name):
+      full_path = os.path.join(self.selected_dir, file_name)
+
+      if os.path.lexists(full_path):
+          sublime.error_message('File already exists:\n%s' % full_path)
+          return
+      else:
+          self.create_and_open_file(full_path)
+
+  def create_and_open_file(self, path):
+      if not os.path.exists(path):
+          self.create(path)
+      self.window.open_file(path)
+
+  def create(self, filename):
+      base, filename = os.path.split(filename)
+      self.create_folder(base)
+
+  def create_folder(self, base):
+      if not os.path.exists(base):
+          parent = os.path.split(base)[0]
+          if not os.path.exists(parent):
+              self.create_folder(parent)
+          os.mkdir(base)
