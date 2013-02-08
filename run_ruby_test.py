@@ -226,11 +226,11 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     def possible_alternate_files(self): return [self.file_name.replace(".feature", ".rb")]
     def run_all_tests_command(self): return RubyTestSettings().run_cucumber_command(relative_path=self.relative_file_path(CUCUMBER_UNIT_FOLDER))
     def run_single_test_command(self, view): return RubyTestSettings().run_single_cucumber_command(relative_path=self.relative_file_path(CUCUMBER_UNIT_FOLDER), line_number=self.get_current_line_number(view))
-    def features(self): return ["run_test"]
+    def features(self): return ["switch_to_test", "run_test"]
     def get_project_root(self): return self.find_project_root(CUCUMBER_UNIT_FOLDER)
 
   class RSpecFile(RubyFile):
-    def possible_alternate_files(self): return [self.file_name.replace("_spec.rb", ".rb"), self.file_name.replace("haml_spec.rb", "haml")]
+    def possible_alternate_files(self): return list( set( [self.file_name.replace("_spec.rb", ".rb"), self.file_name.replace("_haml_spec.rb", ".haml")] ) - set([self.file_name]) )
     def run_all_tests_command(self): return RubyTestSettings().run_rspec_command(relative_path=self.relative_file_path(RSPEC_UNIT_FOLDER))
     def run_single_test_command(self, view): return RubyTestSettings().run_single_rspec_command(relative_path=self.relative_file_path(RSPEC_UNIT_FOLDER), line_number=self.get_current_line_number(view))
     def features(self): return super(BaseRubyTask.RSpecFile, self).features() + ["run_test"]
@@ -397,39 +397,51 @@ class GenerateTestFile:
       for path in folders:
           rootfolders = os.path.split(path)[-1]
           self.rel_path_start = len(os.path.split(path)[0]) + 1
-          if self.is_test_path(path):
+          if self.is_valid_path(path):
             self.full_torelative_paths[rootfolders] = path
             self.relative_paths.append(rootfolders)
 
           for base, dirs, files in os.walk(path):
               for dir in dirs:
                   relative_path = os.path.join(base, dir)[self.rel_path_start:]
-                  if self.is_test_path(relative_path):
+                  if self.is_valid_path(relative_path):
                     self.full_torelative_paths[relative_path] = os.path.join(base, dir)
                     self.relative_paths.append(relative_path)
 
   def active_project(self, folders):
-    current_file = self.window.active_view().file_name()
     for folder in folders:
       project_name = os.path.split(folder)[-1]
-      if re.search(project_name, current_file):
+      if re.search(project_name, self.current_file()):
         return [folder]
     return folders
 
-  def is_test_path(self, path):
-    return re.search(RUBY_UNIT_FOLDER + '|' + RSPEC_UNIT_FOLDER + '|' + CUCUMBER_UNIT_FOLDER, path)
+  def is_valid_path(self, path):
+    if re.search(self.test_path_re(), self.current_file()):
+      return re.search('app(\/|\\\)|(lib|extras)$', path) and not re.search('assets|views|vendor', path)
+    else:
+      return re.search(self.test_path_re(), path)
+
+  def test_path_re(self):
+    return RUBY_UNIT_FOLDER + '|' + RSPEC_UNIT_FOLDER + '|' + CUCUMBER_UNIT_FOLDER
+
+  def current_file(self):
+    return self.window.active_view().file_name()
 
   def dir_selected(self, selected_index):
       if selected_index != -1:
           self.selected_dir = self.relative_paths[selected_index]
           self.selected_dir = self.full_torelative_paths[self.selected_dir]
-          self.window.show_input_panel("Test file", self.suggest_test_file_name(self.selected_dir), self.file_name_input, None, None)
+          self.window.show_input_panel("File name", self.suggest_file_name(self.selected_dir), self.file_name_input, None, None)
 
-  def suggest_test_file_name(self, path):
-    current_file = self.window.active_view().file_name()
-    current_file = os.path.split(current_file)[-1]
-    test_file = current_file.replace(".rb", self.detect_test_type(path))
-    return test_file
+  def suggest_file_name(self, path):
+    current_file = os.path.split(self.current_file())[-1]
+    return self.set_file_name(path, current_file)
+
+  def set_file_name(self, path, current_file):
+    if re.search(self.test_path_re(), self.current_file()):
+      return re.sub('_test.rb|_spec.rb|.feature', '.rb', current_file)
+    else:
+      return current_file.replace('.rb', self.detect_test_type(path))
 
   def detect_test_type(self, path):
     if re.search(RUBY_UNIT_FOLDER, path):
