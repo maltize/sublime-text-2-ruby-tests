@@ -58,6 +58,18 @@ class ShowInScratch:
       self.append(content)
     self.poll_copy()
 
+class ShowPanels:
+  def __init__(self, window):
+    self.window = window
+
+  def split(self):
+    self.window.run_command('set_layout', {
+                          "cols": [0.0, 0.5, 1.0],
+                          "rows": [0.0, 1.0],
+                          "cells": [[0, 0, 1, 1], [1, 0, 2, 1]]
+                      })
+    self.window.focus_group(1)
+
 class TestMethodMatcher(object):
   def __init__(self):
     self.matchers = [TestMethodMatcher.UnitTest, TestMethodMatcher.ShouldaTest]
@@ -308,19 +320,14 @@ class SwitchBetweenCodeAndTest(BaseRubyTask):
 
     if alternates:
       if split_view:
-        self.window().run_command('set_layout', {
-                              "cols": [0.0, 0.5, 1.0],
-                              "rows": [0.0, 1.0],
-                              "cells": [[0, 0, 1, 1], [1, 0, 2, 1]]
-                          })
-        self.window().focus_group(1)
+        ShowPanels(self.window()).split()
       if len(alternates) == 1:
         self.window().open_file(alternates.pop())
       else:
         callback = functools.partial(self.on_selected, alternates)
         self.window().show_quick_panel(alternates, callback)
     else:
-      GenerateTestFile(self.window()).doIt()
+      GenerateTestFile(self.window(), split_view).doIt()
 
   def on_selected(self, alternates, index):
     if index == -1:
@@ -374,8 +381,9 @@ class GenerateTestFile:
   full_torelative_paths = {}
   rel_path_start = 0
 
-  def __init__(self, window):
+  def __init__(self, window, split_view):
     self.window = window
+    self.split_view = split_view
 
   def doIt(self):
     self.build_relative_paths()
@@ -443,6 +451,10 @@ class GenerateTestFile:
   def create_and_open_file(self, path):
       if not os.path.exists(path):
           self.create(path)
+
+      if self.split_view:
+        ShowPanels(self.window).split()
+
       self.window.open_file(path)
 
   def create(self, filename):
