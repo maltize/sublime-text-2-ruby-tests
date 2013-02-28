@@ -35,7 +35,7 @@ Settings
 
 'Sublime Text 2' -> 'Preferences' -> 'Package Settings' -> 'RubyTest'
 
-Make a copy of `RubyTest.sublime-settings` file to `~/Library/Application Support/Sublime Text 2/Packages/User/` and make your changes.
+Make a copy of `RubyTest.sublime-settings` file to `~/Library/Application\ Support/Sublime\ Text\ 2/Packages/User/` and make your changes.
 
 
 Usage
