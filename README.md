@@ -46,9 +46,10 @@ Usage
  - Run last ruby test(s): `Command-Shift-E`
  - Show test panel: `Command-Shift-X` (when test panel visible hit `esc` to hide it)
  - Check RB, ERB file syntax: `Alt-Shift-V`
- - Switching between code and test:
+ - Switching between code and test (create a file if not found):
     - Single View: `Command-.`
     - Split View:  `Command-Ctrl-.`
+ - Easy file creation: `Command-Shift-C`
 Keys:
  'Command' (OSX)
  'Ctrl' (Linux / Windows)

@@ -11,5 +11,6 @@
   ]}, // switch between code and test in single view
   { "keys": ["ctrl+shift+period"], "command": "switch_between_code_and_test",  "args": {"split_view": true}, "context" : [
     { "key": "selector", "operator": "equal", "operand": "source.ruby", "match_all": true }
-  ]} // switch between code and test in split view
+  ]}, // switch between code and test in split view
+  { "keys": ["ctrl+shift+c"], "command": "generate_file" } // create new file
 ]

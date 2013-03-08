@@ -376,6 +376,21 @@ class RubyExtractVariable(BaseRubyTask):
     finally:
       self.view.end_edit(edit)
 
+class GenerateFile(BaseRubyTask):
+  def run(self, args):
+    GenerateNewFile(self.window()).doIt()
+
+class GenerateNewFile(GenerateTestFile):
+  def __init__(self, window):
+    self.window = window
+    self.split_view = False
+
+  def is_valid_path(self, path):
+    return not re.search('\.\w+', path)
+
+  def suggest_file_name(self, path):
+    return ""
+
 class GenerateTestFile:
   relative_paths = []
   full_torelative_paths = {}
