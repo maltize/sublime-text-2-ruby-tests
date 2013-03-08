@@ -480,14 +480,17 @@ class GenerateTestFile:
               self.create_folder(parent)
           os.mkdir(base)
 
-class GenerateFile(BaseRubyTask):
-  def run(self, args):
-    GenerateNewFile(self.window()).doIt()
+class GenerateFile(sublime_plugin.WindowCommand):
+  def run(self):
+    GenerateNewFile(self.window).doIt()
 
 class GenerateNewFile(GenerateTestFile):
   def __init__(self, window):
     self.window = window
     self.split_view = False
+
+  def active_project(self, folders):
+    return folders
 
   def is_valid_path(self, path):
     return not re.search('\.\w+', path)
