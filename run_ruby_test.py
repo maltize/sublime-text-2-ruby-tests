@@ -126,15 +126,19 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     global AFTER_CALLBACK; AFTER_CALLBACK = s.get("after_callback")
     global COMMAND_PREFIX; COMMAND_PREFIX = False
 
-    rbenv_cmd = os.path.expanduser('~/.rbenv/bin/rbenv')
-    rvm_cmd = os.path.expanduser('~/.rvm/bin/rvm-auto-ruby')
+    self.rvm_or_rbenv(s)
+
+    if s.get("save_on_run"):
+      self.window().run_command("save_all")
+
+  def rvm_or_rbenv(self, s):
+    rbenv_cmd = os.popen('which rbenv').read() or os.path.expanduser('~/.rbenv/bin/rbenv')
+    rvm_cmd = os.popen('which rvm-auto-ruby').read() or os.path.expanduser('~/.rvm/bin/rvm-auto-ruby')
+
     if s.get("check_for_rbenv") and self.is_executable(rbenv_cmd):
       COMMAND_PREFIX = rbenv_cmd + ' exec'
     elif s.get("check_for_rvm") and self.is_executable(rvm_cmd):
       COMMAND_PREFIX = rvm_cmd + ' -S'
-
-    if s.get("save_on_run"):
-      self.window().run_command("save_all")
 
   def is_executable(self, path):
     return os.path.isfile(path) and os.access(path, os.X_OK)
