@@ -173,8 +173,9 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     return self.view.window()
 
   class BaseFile(object):
-    def __init__(self, file_name):
+    def __init__(self, file_name, partition_folder=""):
       self.folder_name, self.file_name = os.path.split(file_name)
+      self.partition_folder = partition_folder
       self.absolute_path = file_name
     def parent_dir_name(self):
       head_dir, tail_dir = os.path.split(self.folder_name)
@@ -183,14 +184,14 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     def possible_alternate_files(self): return []
     def run_all_tests_command(self): return None
     def get_project_root(self): return self.folder_name
-    def find_project_root(self, partition_folder):
-      to_find = os.sep + partition_folder + os.sep
+    def find_project_root(self):
+      to_find = os.sep + self.partition_folder + os.sep
       project_root, _, _ = self.absolute_path.partition(to_find)
       return project_root
-    def relative_file_path(self, partition_folder):
-      to_find = os.sep + partition_folder + os.sep
+    def relative_file_path(self):
+      to_find = os.sep + self.partition_folder + os.sep
       _, _, relative_path = self.absolute_path.partition(to_find)
-      return partition_folder + os.sep + relative_path
+      return self.partition_folder + os.sep + relative_path
     def get_current_line_number(self, view):
       char_under_cursor = view.sel()[0].a
       return view.rowcol(char_under_cursor)[0] + 1
@@ -207,7 +208,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
 
   class UnitFile(RubyFile):
     def possible_alternate_files(self): return [self.file_name.replace("_test.rb", ".rb")]
-    def run_all_tests_command(self): return RubyTestSettings().run_ruby_unit_command(relative_path=self.relative_file_path(RUBY_UNIT_FOLDER))
+    def run_all_tests_command(self): return RubyTestSettings().run_ruby_unit_command(relative_path=self.relative_file_path())
     def run_single_test_command(self, view):
       region = view.sel()[0]
       line_region = view.line(region)
@@ -218,23 +219,23 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       if test_name is None:
         sublime.error_message("No test name!")
         return None
-      return RubyTestSettings().run_single_ruby_unit_command(relative_path=self.relative_file_path(RUBY_UNIT_FOLDER), test_name=test_name)
+      return RubyTestSettings().run_single_ruby_unit_command(relative_path=self.relative_file_path(), test_name=test_name)
     def features(self): return super(BaseRubyTask.UnitFile, self).features() + ["run_test"]
-    def get_project_root(self): return self.find_project_root(RUBY_UNIT_FOLDER)
+    def get_project_root(self): return self.find_project_root()
 
   class CucumberFile(BaseFile):
     def possible_alternate_files(self): return [self.file_name.replace(".feature", ".rb")]
-    def run_all_tests_command(self): return RubyTestSettings().run_cucumber_command(relative_path=self.relative_file_path(CUCUMBER_UNIT_FOLDER))
-    def run_single_test_command(self, view): return RubyTestSettings().run_single_cucumber_command(relative_path=self.relative_file_path(CUCUMBER_UNIT_FOLDER), line_number=self.get_current_line_number(view))
+    def run_all_tests_command(self): return RubyTestSettings().run_cucumber_command(relative_path=self.relative_file_path())
+    def run_single_test_command(self, view): return RubyTestSettings().run_single_cucumber_command(relative_path=self.relative_file_path(), line_number=self.get_current_line_number(view))
     def features(self): return ["switch_to_test", "run_test"]
-    def get_project_root(self): return self.find_project_root(CUCUMBER_UNIT_FOLDER)
+    def get_project_root(self): return self.find_project_root()
 
   class RSpecFile(RubyFile):
     def possible_alternate_files(self): return list( set( [self.file_name.replace("_spec.rb", ".rb"), self.file_name.replace("_haml_spec.rb", ".haml")] ) - set([self.file_name]) )
-    def run_all_tests_command(self): return RubyTestSettings().run_rspec_command(relative_path=self.relative_file_path(RSPEC_UNIT_FOLDER))
-    def run_single_test_command(self, view): return RubyTestSettings().run_single_rspec_command(relative_path=self.relative_file_path(RSPEC_UNIT_FOLDER), line_number=self.get_current_line_number(view))
+    def run_all_tests_command(self): return RubyTestSettings().run_rspec_command(relative_path=self.relative_file_path())
+    def run_single_test_command(self, view): return RubyTestSettings().run_single_rspec_command(relative_path=self.relative_file_path(), line_number=self.get_current_line_number(view))
     def features(self): return super(BaseRubyTask.RSpecFile, self).features() + ["run_test"]
-    def get_project_root(self): return self.find_project_root(RSPEC_UNIT_FOLDER)
+    def get_project_root(self): return self.find_project_root()
 
   class ErbFile(BaseFile):
     def verify_syntax_command(self): return RubyTestSettings().erb_verify_command(file_name=self.file_name)
@@ -245,15 +246,25 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     def possible_alternate_files(self): return [self.file_name.replace(".haml", ".haml_spec.rb")]
     def features(self): return ["switch_to_test"]
 
+  def find_partition_folder(self, file_name, default_partition_folder):
+    folders = self.view.window().folders()
+    for folder in folders:
+      if re.search(folder, file_name):
+        return re.sub(os.sep + '.+', "", file_name.replace(folder,"")[1:])
+    return default_partition_folder
+
   def file_type(self, file_name = None):
     file_name = file_name or self.view.file_name()
     if not file_name: return BaseRubyTask.AnonymousFile()
     if re.search('\w+\_test.rb', file_name):
-      return BaseRubyTask.UnitFile(file_name)
+      partition_folder = self.find_partition_folder(file_name, RUBY_UNIT_FOLDER)
+      return BaseRubyTask.UnitFile(file_name, partition_folder)
     elif re.search('\w+\_spec.rb', file_name):
-      return BaseRubyTask.RSpecFile(file_name)
+      partition_folder = self.find_partition_folder(file_name, RSPEC_UNIT_FOLDER)
+      return BaseRubyTask.RSpecFile(file_name, partition_folder)
     elif re.search('\w+\.feature', file_name):
-      return BaseRubyTask.CucumberFile(file_name)
+      partition_folder = self.find_partition_folder(file_name, CUCUMBER_UNIT_FOLDER)
+      return BaseRubyTask.CucumberFile(file_name, partition_folder)
     elif re.search('\w+\.rb', file_name):
       return BaseRubyTask.RubyFile(file_name)
     elif re.search('\w+\.erb', file_name):
