@@ -254,6 +254,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     return default_partition_folder
 
   def file_type(self, file_name = None):
+    self.load_config()
     file_name = file_name or self.view.file_name()
     if not file_name: return BaseRubyTask.AnonymousFile()
     if re.search('\w+\_test.rb', file_name):
