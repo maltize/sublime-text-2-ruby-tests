@@ -224,7 +224,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     def get_project_root(self): return self.find_project_root()
 
   class CucumberFile(BaseFile):
-    def possible_alternate_files(self): return [self.file_name.replace(".feature", ".rb")]
+    def possible_alternate_files(self): return list( set( [self.file_name.replace(".feature", ".rb"), self.file_name.replace(".feature", "_steps.rb")] ) )
     def run_all_tests_command(self): return RubyTestSettings().run_cucumber_command(relative_path=self.relative_file_path())
     def run_single_test_command(self, view): return RubyTestSettings().run_single_cucumber_command(relative_path=self.relative_file_path(), line_number=self.get_current_line_number(view))
     def features(self): return ["switch_to_test", "run_test"]
