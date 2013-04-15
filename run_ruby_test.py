@@ -246,6 +246,10 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     def possible_alternate_files(self): return [self.file_name.replace(".haml", ".haml_spec.rb")]
     def features(self): return ["switch_to_test"]
 
+  class CucumberStepsFile(BaseFile):
+    def possible_alternate_files(self): return [self.file_name.replace("_steps.rb", ".feature")]
+    def features(self): return ["switch_to_test"]
+
   def find_partition_folder(self, file_name, default_partition_folder):
     folders = self.view.window().folders()
     for folder in folders:
@@ -266,6 +270,8 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     elif re.search('\w+\.feature', file_name):
       partition_folder = self.find_partition_folder(file_name, CUCUMBER_UNIT_FOLDER)
       return BaseRubyTask.CucumberFile(file_name, partition_folder)
+    elif re.search('\w+\_steps.rb', file_name):
+      return BaseRubyTask.CucumberStepsFile(file_name)
     elif re.search('\w+\.rb', file_name):
       return BaseRubyTask.RubyFile(file_name)
     elif re.search('\w+\.erb', file_name):
