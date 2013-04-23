@@ -108,7 +108,12 @@ Settings:
 
       "ruby_use_scratch" : false,
       "save_on_run": false,
-      "ignored_directories": [".git", "vendor", "tmp"]
+      "ignored_directories": [".git", "vendor", "tmp"],
+
+      "hide_panel": false,
+
+      "before_callback": "",
+      "after_callback": ""
     }
 
 Bundler support:
