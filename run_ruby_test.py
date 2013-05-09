@@ -135,7 +135,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       COMMAND_PREFIX = rvm_cmd + ' -S'
 
   def save_all(self):
-    if SAVE_ON_RUN
+    if SAVE_ON_RUN:
       self.window().run_command("save_all")
 
   def is_executable(self, path):
