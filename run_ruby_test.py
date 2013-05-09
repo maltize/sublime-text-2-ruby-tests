@@ -125,6 +125,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     global BEFORE_CALLBACK; BEFORE_CALLBACK = s.get("before_callback")
     global AFTER_CALLBACK; AFTER_CALLBACK = s.get("after_callback")
     global COMMAND_PREFIX; COMMAND_PREFIX = False
+    global SAVE_ON_RUN; SAVE_ON_RUN = s.get("save_on_run")
 
     rbenv_cmd = os.path.expanduser('~/.rbenv/bin/rbenv')
     rvm_cmd = os.path.expanduser('~/.rvm/bin/rvm-auto-ruby')
@@ -133,7 +134,8 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     elif s.get("check_for_rvm") and self.is_executable(rvm_cmd):
       COMMAND_PREFIX = rvm_cmd + ' -S'
 
-    if s.get("save_on_run"):
+  def save_all(self):
+    if SAVE_ON_RUN:
       self.window().run_command("save_all")
 
   def is_executable(self, path):
@@ -286,6 +288,7 @@ class RunSingleRubyTest(BaseRubyTask):
   def is_enabled(self): return 'run_test' in self.file_type().features()
   def run(self, args):
     self.load_config()
+    self.save_all()
     file = self.file_type()
     command = file.run_single_test_command(self.view)
     self.run_shell_command(command, file.get_project_root())
@@ -295,6 +298,7 @@ class RunAllRubyTest(BaseRubyTask):
   def is_enabled(self): return 'run_test' in self.file_type().features()
   def run(self, args):
     self.load_config()
+    self.save_all()
     file = self.file_type(self.view.file_name())
     command = file.run_all_tests_command()
     if self.run_shell_command(command, file.get_project_root()):
@@ -306,6 +310,7 @@ class RunAllRubyTest(BaseRubyTask):
 class RunLastRubyTest(BaseRubyTask):
   def load_last_run(self):
     self.load_config()
+    self.save_all()
     s = sublime.load_settings("RubyTest.last-run")
     return (s.get("last_test_run"), s.get("last_test_working_dir"))
 
