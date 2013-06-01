@@ -27,16 +27,18 @@ class ShowInScratch:
     self.panel = self.window.get_output_panel("exec")
     self.window.run_command("hide_panel")
     
+    self.view_window = self.window
     test_filename = 'Test Results %s' % self.window.id()
     for swindow in sublime.windows():
       for sview in swindow.views():
-        base = os.path.basename(sview.file_name())
+        sview_name = sview.file_name() or sview.name()
+        base = os.path.basename(sview_name)
+        sublime.error_message('b %s' % base)
         if base == test_filename:
-          self.view = swindow.open_file(test_filename)
+          self.view_window = swindow
           break
 
-    if self.view is None:
-      self.view = self.window.open_file(test_filename)
+    self.view = self.view_window.open_file(test_filename)
     
     self.view.set_scratch(True)
     self.view.set_read_only(False)
