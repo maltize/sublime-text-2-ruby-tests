@@ -243,7 +243,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     def verify_syntax_command(self): return RubyTestSettings().erb_verify_command(file_name=self.file_name)
     def can_verify_syntax(self): return True
     def possible_alternate_files(self): return [self.file_name.replace(".erb", ".erb_spec.rb")]
-    def features(self): return ["verify_syntax","switch_to_test"]
+    def features(self): return ["verify_syntax", "switch_to_test"]
 
   class HamlFile(BaseFile):
     def possible_alternate_files(self): return [self.file_name.replace(".haml", ".haml_spec.rb")]
