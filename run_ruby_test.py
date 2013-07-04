@@ -233,7 +233,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     def get_project_root(self): return self.find_project_root()
 
   class RSpecFile(RubyFile):
-    def possible_alternate_files(self): return list( set( [self.file_name.replace("_spec.rb", ".rb"), self.file_name.replace("_haml_spec.rb", ".haml")] ) - set([self.file_name]) )
+    def possible_alternate_files(self): return list( set( [self.file_name.replace("_spec.rb", ".rb"), self.file_name.replace(".haml_spec.rb", ".haml"), self.file_name.replace(".erb_spec.rb", ".erb")] ) - set([self.file_name]) )
     def run_all_tests_command(self): return RubyTestSettings().run_rspec_command(relative_path=self.relative_file_path())
     def run_single_test_command(self, view): return RubyTestSettings().run_single_rspec_command(relative_path=self.relative_file_path(), line_number=self.get_current_line_number(view))
     def features(self): return super(BaseRubyTask.RSpecFile, self).features() + ["run_test"]
@@ -242,7 +242,8 @@ class BaseRubyTask(sublime_plugin.TextCommand):
   class ErbFile(BaseFile):
     def verify_syntax_command(self): return RubyTestSettings().erb_verify_command(file_name=self.file_name)
     def can_verify_syntax(self): return True
-    def features(self): return ["verify_syntax"]
+    def possible_alternate_files(self): return [self.file_name.replace(".erb", ".erb_spec.rb")]
+    def features(self): return ["verify_syntax", "switch_to_test"]
 
   class HamlFile(BaseFile):
     def possible_alternate_files(self): return [self.file_name.replace(".haml", ".haml_spec.rb")]
