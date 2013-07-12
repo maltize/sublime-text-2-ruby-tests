@@ -14,7 +14,7 @@ class ShowInPanel:
     self.window.run_command("show_panel", {"panel": "output.exec"})
     if HIDE_PANEL:
       self.window.run_command("hide_panel")
-    self.panel.settings().set("color_scheme", "Packages/RubyTest/TestConsole.hidden-tmTheme")
+    self.panel.settings().set("color_scheme", THEME)
 
 
 class ShowInScratch:
@@ -30,8 +30,8 @@ class ShowInScratch:
     self.view.set_scratch(True)
     self.view.set_read_only(False)
 
-    self.view.settings().set("syntax", "Packages/RubyTest/TestConsole.tmLanguage")
-    self.view.settings().set("color_scheme", "Packages/RubyTest/TestConsole.hidden-tmTheme")
+    self.view.settings().set("syntax", SYNTAX)
+    self.view.settings().set("color_scheme", THEME)
     self.view.set_read_only(True)
     self.poll_copy()
     self.append('\n\n')
@@ -126,6 +126,8 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     global AFTER_CALLBACK; AFTER_CALLBACK = s.get("after_callback")
     global COMMAND_PREFIX; COMMAND_PREFIX = False
     global SAVE_ON_RUN; SAVE_ON_RUN = s.get("save_on_run")
+    global SYNTAX; SYNTAX = s.get('syntax')
+    global THEME; THEME = s.get('theme')
 
     rbenv_cmd = os.path.expanduser('~/.rbenv/bin/rbenv')
     rvm_cmd = os.path.expanduser('~/.rvm/bin/rvm-auto-ruby')
