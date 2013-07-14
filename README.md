@@ -147,7 +147,15 @@ First be sure that you have your copy of `RubyTest.sublime-settings` placed in U
 
       "ruby_use_scratch" : false,
       "save_on_run": false,
-      "ignored_directories": [".git", "vendor", "tmp"]
+      "ignored_directories": [".git", "vendor", "tmp"],
+
+      "hide_panel": false,
+
+      "before_callback": "",
+      "after_callback": "",
+
+      "theme": "Packages/RubyTest/TestConsole.hidden-tmTheme",
+      "syntax": "Packages/RubyTest/TestConsole.tmLanguage"
     }
 
 Zeus support:
