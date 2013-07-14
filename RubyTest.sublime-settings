@@ -25,5 +25,9 @@
   "hide_panel": false,
 
   "before_callback": "",
-  "after_callback": ""
+  "after_callback": "",
+
+  "theme": "Packages/RubyTest/TestConsole.hidden-tmTheme",
+  "syntax": "Packages/RubyTest/TestConsole.tmLanguage"
+
 }
