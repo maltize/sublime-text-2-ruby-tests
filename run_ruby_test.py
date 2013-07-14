@@ -131,11 +131,23 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     global SYNTAX; SYNTAX = s.get('syntax')
     global THEME; THEME = s.get('theme')
 
+
+    rbenv = s.get("check_for_rbenv")
+    rvm = s.get("check_for_rvm")
+    if rbenv or rvm: self.rbenv_or_rvm(s, rbenv, rvm)
+
+  def rbenv_or_rvm(self, s, rbenv, rvm):
+    which = os.popen('which rbenv').read().split('\n')[0]
+    brew = '/usr/local/bin/rbenv'
     rbenv_cmd = os.path.expanduser('~/.rbenv/bin/rbenv')
     rvm_cmd = os.path.expanduser('~/.rvm/bin/rvm-auto-ruby')
-    if s.get("check_for_rbenv") and self.is_executable(rbenv_cmd):
+
+    if os.path.isfile(brew): rbenv_cmd = brew
+    elif os.path.isfile(which): rbenv_cmd = which
+
+    if rbenv and self.is_executable(rbenv_cmd):
       COMMAND_PREFIX = rbenv_cmd + ' exec'
-    elif s.get("check_for_rvm") and self.is_executable(rvm_cmd):
+    elif rvm and self.is_executable(rvm_cmd):
       COMMAND_PREFIX = rvm_cmd + ' -S'
 
   def save_all(self):
