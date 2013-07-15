@@ -12,7 +12,7 @@
       <key>comment</key>
       <string>test pass</string>
       <key>match</key>
-      <string>(^|\s)\d+ (tests|assertions|examples?|passed)</string>
+      <string>(^|\s)\d+ (tests|assertions|examples?|passed)|(0 failures|0 errors)</string>
       <key>name</key>
       <string>test.pass</string>
     </dict>
@@ -20,7 +20,7 @@
       <key>comment</key>
       <string>test error</string>
       <key>match</key>
-      <string>(\d+ errors)|(\d+\) Error:|Failing \w*:|cucumber(\s\S*)|\d+ failed)</string>
+      <string>([1-9]\d* errors)|(\d+\) Error:|Failing \w*:|cucumber(\s\S*)|[1-9]\d* failed)</string>
       <key>name</key>
       <string>test.error</string>
     </dict>
