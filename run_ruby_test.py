@@ -145,6 +145,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     if os.path.isfile(brew): rbenv_cmd = brew
     elif os.path.isfile(which): rbenv_cmd = which
 
+    global COMMAND_PREFIX
     if rbenv and self.is_executable(rbenv_cmd):
       COMMAND_PREFIX = rbenv_cmd + ' exec'
     elif rvm and self.is_executable(rvm_cmd):
