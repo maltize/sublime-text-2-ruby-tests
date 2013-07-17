@@ -20,7 +20,7 @@
       <key>comment</key>
       <string>test error</string>
       <key>match</key>
-      <string>([1-9]\d* errors)|(\d+\) Error:|Failing \w*:|cucumber(\s\S*)|[1-9]\d* failed)</string>
+      <string>(E{1})\b|([1-9]\d* errors)|(\d+\) Error:|Failing \w*:|cucumber(\s\S*)|[1-9]\d* failed)|test_(\w*\S)*:</string>
       <key>name</key>
       <string>test.error</string>
     </dict>
@@ -28,7 +28,7 @@
       <key>comment</key>
       <string>test fail</string>
       <key>match</key>
-      <string>F{1}\b|(\d+ failures?)|(\d+\) Failure:)|test_\w*</string>
+      <string>[F]{1}\b|(\d+ failures?)|(\d+\) Failure:)|test_(\w*\()</string>
       <key>name</key>
       <string>test.fail</string>
     </dict>
