@@ -134,7 +134,9 @@ class BaseRubyTask(sublime_plugin.TextCommand):
 
     rbenv = s.get("check_for_rbenv")
     rvm = s.get("check_for_rvm")
+    bundler = s.get("check_for_bundler")
     if rbenv or rvm: self.rbenv_or_rvm(s, rbenv, rvm)
+    if bundler: self.bundler_support()
 
   def rbenv_or_rvm(self, s, rbenv, rvm):
     which = os.popen('which rbenv').read().split('\n')[0]
@@ -150,6 +152,21 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       COMMAND_PREFIX = rbenv_cmd + ' exec'
     elif rvm and self.is_executable(rvm_cmd):
       COMMAND_PREFIX = rvm_cmd + ' -S'
+
+  def bundler_support(self):
+    project_root = self.file_type(None, False).find_project_root()
+    if not os.path.isdir(project_root):
+      s = sublime.load_settings("RubyTest.last-run")
+      project_root = s.get("last_test_working_dir")
+
+    gemfile_path = project_root + '/Gemfile'
+
+    global COMMAND_PREFIX
+    if not COMMAND_PREFIX:
+      COMMAND_PREFIX = ""
+
+    if os.path.isfile(gemfile_path):
+      COMMAND_PREFIX =  COMMAND_PREFIX + " bundle exec "
 
   def save_all(self):
     if SAVE_ON_RUN:
@@ -277,8 +294,9 @@ class BaseRubyTask(sublime_plugin.TextCommand):
         return re.sub(os.sep + '.+', "", file_name.replace(folder,"")[1:])
     return default_partition_folder
 
-  def file_type(self, file_name = None):
-    self.load_config()
+  def file_type(self, file_name = None, load_config = True):
+    if load_config:
+      self.load_config()
     file_name = file_name or self.view.file_name()
     if not file_name: return BaseRubyTask.AnonymousFile()
     if re.search('\w+\_test.rb', file_name):
