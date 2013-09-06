@@ -15,6 +15,13 @@ Maintainers:
 * Grzegorz Smajdor (https://github.com/gs)
 * Tejas Dinkar (https://github.com/gja)
 
+Donate - support us!
+--------------------
+
+Bitcoin: 1KBqcRsfmdh8rGV9Mx6sJmYuB6y517BZHy
+
+PayPal: [![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=TSRXZ54B8WDEN&lc=US&item_name=Sublime%20Text%202%20Ruby%20Tests%20Plugin&item_number=RubyTest%20Plugin&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted)
+
 Installation
 ------------
 
@@ -173,3 +180,12 @@ If you use RVM/bundler, you will need to also add:
 
     "check_for_rvm": true
 
+Note
+----
+Before reporting an issue be sure to :
+
+  - Run Sublime Text 2 from [command line](http://www.sublimetext.com/docs/2/osx_command_line.html)
+
+If this will not help provide to us debug informations using (CTRL + ` )
+
+Please open an issue at https://github.com/maltize/sublime-text-2-ruby-tests if you discover a problem or would like to see a feature/change implemented.
