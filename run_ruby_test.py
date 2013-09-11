@@ -289,7 +289,9 @@ class BaseRubyTask(sublime_plugin.TextCommand):
 
   def find_partition_folder(self, file_name, default_partition_folder):
     folders = self.view.window().folders()
+    file_name = file_name.replace("\\","\\\\")
     for folder in folders:
+      folder = folder.replace("\\","\\\\")
       if re.search(folder, file_name):
         return re.sub(os.sep + '.+', "", file_name.replace(folder,"")[1:])
     return default_partition_folder
