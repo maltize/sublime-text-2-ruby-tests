@@ -18,6 +18,7 @@
   "check_for_rbenv": false,
   "check_for_rvm": false,
   "check_for_bundler": false,
+  "check_for_spring": false,
 
   "ruby_use_scratch" : false,
   "save_on_run": false,
