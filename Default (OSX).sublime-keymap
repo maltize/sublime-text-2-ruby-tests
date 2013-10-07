@@ -16,7 +16,7 @@
   { "keys": ["super+shift+e"], "command": "run_last_ruby_test",
     "context": [ { "key": "selector", "operator": "equal",
 		   "operand": "source.ruby, source.rspec, text.gherkin.feature"
-               } ], // test last test file
+               } ] // test last test file
   },
 
   { "keys": ["super+shift+x"], "command": "show_test_panel" }, // show test panel
