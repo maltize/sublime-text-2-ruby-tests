@@ -1,16 +1,47 @@
 [
-  { "keys": ["ctrl+shift+r"], "command": "run_single_ruby_test" }, // single test
-  { "keys": ["ctrl+shift+t"], "command": "run_all_ruby_test" }, // test file
-  { "keys": ["ctrl+shift+e"], "command": "run_last_ruby_test" }, // test file
+  { "keys": ["ctrl+shift+r"], "command": "run_single_ruby_test",
+    "context": [ { "key": "selector", "operator": "equal",
+                   "operand": "source.ruby, source.rspec, text.gherkin.feature"
+               } ]
+  }, // single test
+
+
+  { "keys": ["ctrl+shift+t"], "command": "run_all_ruby_test",
+      "context": [ { "key": "selector", "operator": "equal",
+		     "operand": "source.ruby, source.rspec, text.gherkin.feature"
+                } ]
+  }, // test file
+
+
+  { "keys": ["ctrl+shift+e"], "command": "run_last_ruby_test",
+    "context": [ { "key": "selector", "operator": "equal",
+		   "operand": "source.ruby, source.rspec, text.gherkin.feature"
+               } ], // test last test file
+  },
 
   { "keys": ["ctrl+shift+x"], "command": "show_test_panel" }, // show test panel
 
-  { "keys": ["alt+shift+v"], "command": "verify_ruby_file" }, // verify ruby syntax
-  { "keys": ["ctrl+period"], "command": "switch_between_code_and_test",  "args": {"split_view": false}, "context" : [
-    { "key": "selector", "operator": "equal", "operand": "source.ruby", "match_all": true }
-  ]}, // switch between code and test in single view
-  { "keys": ["ctrl+shift+period"], "command": "switch_between_code_and_test",  "args": {"split_view": true}, "context" : [
-    { "key": "selector", "operator": "equal", "operand": "source.ruby", "match_all": true }
-  ]}, // switch between code and test in split view
+  { "keys": ["alt+shift+v"], "command": "verify_ruby_file",
+    "context": [ { "key": "selector", "operator": "equal",
+                   "operand": "source.ruby"
+               } ]
+  }, // verify ruby syntax
+
+  { "keys": ["ctrl+period"],
+      "command": "switch_between_code_and_test",
+      "args": {"split_view": false},
+      "context": [ { "key": "selector", "operator": "equal",
+                   "operand": "source.ruby, source.rspec, text.gherkin.feature"
+               } ]
+  }, // switch between code and test in single mode
+
+  { "keys": ["ctrl+ctrl+period"],
+      "command": "switch_between_code_and_test",
+      "args": {"split_view": true},
+      "context": [ { "key": "selector", "operator": "equal",
+                   "operand": "source.ruby, source.rspec, text.gherkin.feature"
+               } ]
+  }, // switch between code and test in split view
+
   { "keys": ["ctrl+shift+c"], "command": "generate_file" } // create new file
 ]
