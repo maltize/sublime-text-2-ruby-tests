@@ -78,9 +78,9 @@ Below features can be enabled by editing `RubyTest.sublime-settings`
 - Use Scratch  - test output in new tab
  `"ruby_use_scratch" : true `
 
-Colors Issue:
-------------
-We have known colors issue. Please check [this thread](https://github.com/maltize/sublime-text-2-ruby-tests/issues/33#issuecomment-3553701) for temporary solution.
+Run tests when Sublime Text is NOT opened from the command line on OSX:
+-----------------------------------------------------------------------
+There is an issue running the tests if the sublime is not started in command line. However @MattDMo has solved it. If you faced this issue please refer to [fix](https://github.com/maltize/sublime-text-2-ruby-tests/issues/194)
 
 Note
 ----
