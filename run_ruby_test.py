@@ -88,7 +88,7 @@ class TestMethodMatcher(object):
       if match_obj:
         return match_obj.group(1)[::-1]
 
-      match_obj = re.search('\s?[\"\']([a-zA-Z_\"\'\s\d\-\.#=?!]+)[\"\']\s+tset', test_file_content) # 2nd search for 'test "name"'
+      match_obj = re.search('\s?[\"\']([a-zA-Z_\"\'\s\d\-\.#=?!:]+)[\"\']\s+tset', test_file_content) # 2nd search for 'test "name"'
       if match_obj:
         test_name = match_obj.group(1)[::-1]
         return "test_%s" % test_name.replace("\"", "\\\"").replace(" ", "_").replace("'", "\\'")
@@ -139,7 +139,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     if rbenv or rvm: self.rbenv_or_rvm(s, rbenv, rvm)
     if spring: self.spring_support()
     if bundler: self.bundler_support()
-    
+
   def spring_support(self):
     global COMMAND_PREFIX
     COMMAND_PREFIX = COMMAND_PREFIX + " spring "
