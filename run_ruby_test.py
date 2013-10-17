@@ -245,11 +245,11 @@ class BaseRubyTask(sublime_plugin.TextCommand):
 
   class RubyFile(BaseFile):
     def verify_syntax_command(self): return RubyTestSettings().ruby_verify_command(file_name=self.file_name)
-    def possible_alternate_files(self): return [self.file_name.replace(".rb", "_spec.rb"), self.file_name.replace(".rb", "_test.rb"), self.file_name.replace(".rb", ".feature")]
+    def possible_alternate_files(self): return [self.file_name.replace(".rb", "_spec.rb"), self.file_name.replace(".rb", "_test.rb"), "test_" + self.file_name, self.file_name.replace(".rb", ".feature")]
     def features(self): return ["verify_syntax", "switch_to_test", "rails_generate", "extract_variable"]
 
   class UnitFile(RubyFile):
-    def possible_alternate_files(self): return [self.file_name.replace("_test.rb", ".rb")]
+    def possible_alternate_files(self): return [self.file_name.replace("_test.rb", ".rb").replace("test_", "")]
     def run_all_tests_command(self): return RubyTestSettings().run_ruby_unit_command(relative_path=self.relative_file_path())
     def run_single_test_command(self, view):
       region = view.sel()[0]
@@ -310,6 +310,9 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     if re.search('\w+\_test.rb', file_name):
       partition_folder = self.find_partition_folder(file_name, RUBY_UNIT_FOLDER)
       return BaseRubyTask.UnitFile(file_name, partition_folder)
+    elif re.search('test\_\w+\.rb', file_name):
+      partition_folder = self.find_partition_folder(file_name, RUBY_UNIT_FOLDER)
+      return BaseRubyTask.UnitFile(file_name, partition_folder)
     elif re.search('\w+\_spec.rb', file_name):
       partition_folder = self.find_partition_folder(file_name, RSPEC_UNIT_FOLDER)
       return BaseRubyTask.RSpecFile(file_name, partition_folder)
@@ -348,7 +351,7 @@ class RunAllRubyTest(BaseRubyTask):
     if self.run_shell_command(command, file.get_project_root()):
       pass
     else:
-      sublime.error_message("Only *_test.rb, *_spec.rb, *.feature files supported!")
+      sublime.error_message("Only *_test.rb, test_*.rb, *_spec.rb, *.feature files supported!")
 
 
 class RunLastRubyTest(BaseRubyTask):
