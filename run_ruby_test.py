@@ -88,7 +88,7 @@ class TestMethodMatcher(object):
       if match_obj:
         return match_obj.group(1)[::-1]
 
-      match_obj = re.search('\s?[\"\']([a-zA-Z_\"\'\s\d\-\.#=?!:]+)[\"\']\s+tset', test_file_content) # 2nd search for 'test "name"'
+      match_obj = re.search('\s?[\"\']([a-zA-Z_\"\'\s\d\-\.#=?!:\/]+)[\"\']\s+tset', test_file_content) # 2nd search for 'test "name"'
       if match_obj:
         test_name = match_obj.group(1)[::-1]
         return "test_%s" % test_name.replace("\"", "\\\"").replace(" ", "_").replace("'", "\\'")
