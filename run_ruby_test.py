@@ -84,16 +84,33 @@ class TestMethodMatcher(object):
   class UnitTest(object):
     @staticmethod
     def find_first_match(test_file_content):
-      match_obj = re.search('\s?([a-zA-Z_\d]+tset)\s+fed', test_file_content) # 1st search for 'def test_name'
-      if match_obj:
-        return match_obj.group(1)[::-1]
+      # 1st search for old style 'def test_name'
+      def_match_obj = re.search('\s?([a-zA-Z_\d]+tset)\s+fed', test_file_content)
+      if def_match_obj:
+        def_test_name = def_match_obj.group(1)[::-1]
 
-      match_obj = re.search('\s?[\"\']([a-zA-Z_\"\'\s\d\-\.#=?!:\/]+)[\"\']\s+tset', test_file_content) # 2nd search for 'test "name"'
-      if match_obj:
-        test_name = match_obj.group(1)[::-1]
-        return "test_%s" % test_name.replace("\"", "\\\"").replace(" ", "_").replace("'", "\\'")
+      # 2nd search for new style 'test "name" do'
+      test_match_obj = re.search('\s?[\"\']([a-zA-Z_\"\'\s\d\-\.#=?!:\/\[\]\+]+)[\"\']\s+tset', test_file_content)
+      if test_match_obj:
+        test_test_name = test_match_obj.group(1)[::-1]
+        # here the test name needs to have special characters escaped so we can use it
+        # on the command line
+        test_test_name = "test_%s" % test_test_name.replace("\"", "\\\"").replace(" ", "_").replace("'", "\\'")
 
-      return None
+      if def_match_obj and test_match_obj:
+        # if we found both matches in the same file, use the match closest to
+        # our current position. since the regexes are matching backwards we use
+        # the match object with the smallest start index
+        if def_match_obj.start(1) > test_match_obj.start(1):
+          return test_test_name
+        else:
+          return def_test_name
+      elif def_match_obj:
+        return def_test_name
+      elif test_match_obj:
+        return test_test_name
+      else:
+        return None
 
   class ShouldaTest(object):
     @staticmethod
