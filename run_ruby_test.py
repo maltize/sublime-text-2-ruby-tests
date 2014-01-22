@@ -131,11 +131,12 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     global SYNTAX; SYNTAX = s.get('syntax')
     global THEME; THEME = s.get('theme')
 
-
-    rbenv   = s.get("check_for_rbenv")
-    rvm     = s.get("check_for_rvm")
-    bundler = s.get("check_for_bundler")
-    spring  = s.get("check_for_spring")
+    chruby         = s.get("check_for_chruby")
+    rbenv          = s.get("check_for_rbenv")
+    rvm            = s.get("check_for_rvm")
+    bundler        = s.get("check_for_bundler")
+    spring         = s.get("check_for_spring")
+    if chruby: self.chruby()
     if rbenv or rvm: self.rbenv_or_rvm(s, rbenv, rvm)
     if spring: self.spring_support()
     if bundler: self.bundler_support()
@@ -143,6 +144,10 @@ class BaseRubyTask(sublime_plugin.TextCommand):
   def spring_support(self):
     global COMMAND_PREFIX
     COMMAND_PREFIX = COMMAND_PREFIX + " spring "
+
+  def chruby(self):
+    global COMMAND_PREFIX
+    COMMAND_PREFIX = 'source /usr/local/opt/chruby/share/chruby/chruby.sh && chruby `[ -f .ruby-version ] && cat .ruby-version || ruby` &&'
 
   def rbenv_or_rvm(self, s, rbenv, rvm):
     which = os.popen('which rbenv').read().split('\n')[0]
