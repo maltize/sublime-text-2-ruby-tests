@@ -145,14 +145,16 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     COMMAND_PREFIX = COMMAND_PREFIX + " spring "
 
   def chruby_rbenv_or_rvm(self, s, chruby, rbenv, rvm):
-    which = os.popen('which rbenv').read().split('\n')[0]
-    brew = '/usr/local/bin/rbenv'
     chruby_cmd = os.path.expanduser('source /usr/local/opt/chruby/share/chruby/chruby.sh && chruby')
+
+    which_rbenv = os.popen('which rbenv').read().split('\n')[0]
+    brew_rbenv = '/usr/local/bin/rbenv'
     rbenv_cmd = os.path.expanduser('~/.rbenv/bin/rbenv')
+
     rvm_cmd = os.path.expanduser('~/.rvm/bin/rvm-auto-ruby')
 
-    if os.path.isfile(brew): rbenv_cmd = brew
-    elif os.path.isfile(which): rbenv_cmd = which
+    if os.path.isfile(brew_rbenv): rbenv_cmd = brew_rbenv
+    elif os.path.isfile(which_rbenv): rbenv_cmd = which_rbenv
 
     global COMMAND_PREFIX
     if chruby and self.is_executable(chruby_cmd):
