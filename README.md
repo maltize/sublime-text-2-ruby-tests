@@ -110,6 +110,7 @@ Settings:
       "ruby_cucumber_folder": "features",
       "ruby_rspec_folder": "spec",
 
+      "check_for_chruby": false,
       "check_for_rbenv": false,
       "check_for_rvm": false,
       "check_for_bundler": false,
