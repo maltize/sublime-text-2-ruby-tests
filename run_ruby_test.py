@@ -219,6 +219,8 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       self.folder_name, self.file_name = os.path.split(file_name)
       self.partition_folder = partition_folder
       self.absolute_path = file_name
+    def is_anonymous(self):
+      return False
     def parent_dir_name(self):
       head_dir, tail_dir = os.path.split(self.folder_name)
       return tail_dir
@@ -227,8 +229,11 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     def run_all_tests_command(self): return None
     def get_project_root(self): return self.folder_name
     def find_project_root(self):
-      to_find = os.sep + self.partition_folder + os.sep
-      project_root, _, _ = self.absolute_path.partition(to_find)
+      if self.is_anonymous:
+        project_root = '/a/dummy/project/path'
+      else:
+        to_find = os.sep + self.partition_folder + os.sep
+        project_root, _, _ = self.absolute_path.partition(to_find)
       return project_root
     def relative_file_path(self):
       to_find = os.sep + self.partition_folder + os.sep
@@ -242,6 +247,8 @@ class BaseRubyTask(sublime_plugin.TextCommand):
   class AnonymousFile(BaseFile):
     def __init__(self):
       True
+    def is_anonymous(self):
+      return True
 
   class RubyFile(BaseFile):
     def verify_syntax_command(self): return RubyTestSettings().ruby_verify_command(file_name=self.file_name)
