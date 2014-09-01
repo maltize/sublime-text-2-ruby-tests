@@ -25,6 +25,7 @@
 
   { "keys": ["super+period"],
       "command": "switch_between_code_and_test",
+      "args": {"split_view": false},
       "context": [ { "key": "selector", "operator": "equal",
                    "operand": "source.ruby, source.rspec, text.gherkin.feature"
                } ]
@@ -32,6 +33,7 @@
 
   { "keys": ["super+ctrl+period"],
       "command": "switch_between_code_and_test",
+      "args": {"split_view": true},
       "context": [ { "key": "selector", "operator": "equal",
                    "operand": "source.ruby, source.rspec, text.gherkin.feature"
                } ]
