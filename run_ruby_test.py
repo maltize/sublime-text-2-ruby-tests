@@ -130,6 +130,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     global SAVE_ON_RUN; SAVE_ON_RUN = s.get("save_on_run")
     global SYNTAX; SYNTAX = s.get('syntax')
     global THEME; THEME = s.get('theme')
+    global TERMINAL_ENCODING; TERMINAL_ENCODING = s.get('terminal_encoding')
 
 
     rbenv   = s.get("check_for_rbenv")
@@ -202,7 +203,8 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       "cmd": [command],
       "shell": True,
       "working_dir": working_dir,
-      "file_regex": r"([^ ]*\.rb):?(\d*)"
+      "file_regex": r"([^ ]*\.rb):?(\d*)",
+      "encoding": TERMINAL_ENCODING
     })
     self.display_results()
     return True
