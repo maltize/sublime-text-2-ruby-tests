@@ -202,8 +202,10 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     self.save_test_run(command, working_dir)
     if COMMAND_PREFIX:
       command = COMMAND_PREFIX + ' ' + command
+    if int(sublime.version().split('.')[0]) <= 2:
+      command = [command]
     self.view.window().run_command("exec", {
-      "cmd": [command],
+      "cmd": command,
       "shell": True,
       "working_dir": working_dir,
       "file_regex": r"([^ ]*\.rb):?(\d*)",
