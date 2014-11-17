@@ -112,7 +112,7 @@ class RubyTestSettings:
   def __getattr__(self, name):
     if not self.settings.has(name):
       raise AttributeError(name)
-    value = sublime.active_window().active_view().settings().get(name)
+    value = sublime.active_window().active_view().settings().get("RubyTest", {}).get(name)
     if value:
       return lambda **kwargs: value.format(**kwargs)
     return lambda **kwargs: self.settings.get(name).format(**kwargs)
@@ -120,27 +120,30 @@ class RubyTestSettings:
 
 class BaseRubyTask(sublime_plugin.TextCommand):
   def load_config(self):
-    s = sublime.load_settings("RubyTest.sublime-settings")
-    global RUBY_UNIT_FOLDER; RUBY_UNIT_FOLDER = s.get("ruby_unit_folder")
-    global CUCUMBER_UNIT_FOLDER; CUCUMBER_UNIT_FOLDER = s.get("ruby_cucumber_folder")
-    global RSPEC_UNIT_FOLDER; RSPEC_UNIT_FOLDER = s.get("ruby_rspec_folder")
-    global USE_SCRATCH; USE_SCRATCH = s.get("ruby_use_scratch")
-    global IGNORED_DIRECTORIES; IGNORED_DIRECTORIES = s.get("ignored_directories")
-    global HIDE_PANEL; HIDE_PANEL = s.get("hide_panel")
-    global BEFORE_CALLBACK; BEFORE_CALLBACK = s.get("before_callback")
-    global AFTER_CALLBACK; AFTER_CALLBACK = s.get("after_callback")
+    project_overrides = sublime.active_window().active_view().settings().get("RubyTest", {})
+    settings = sublime.load_settings("RubyTest.sublime-settings")
+    def effective_setting(name):
+      return project_overrides.get(name, settings.get(name))
+
+    global RUBY_UNIT_FOLDER; RUBY_UNIT_FOLDER = effective_setting("ruby_unit_folder")
+    global CUCUMBER_UNIT_FOLDER; CUCUMBER_UNIT_FOLDER = effective_setting("ruby_cucumber_folder")
+    global RSPEC_UNIT_FOLDER; RSPEC_UNIT_FOLDER = effective_setting("ruby_rspec_folder")
+    global USE_SCRATCH; USE_SCRATCH = effective_setting("ruby_use_scratch")
+    global IGNORED_DIRECTORIES; IGNORED_DIRECTORIES = effective_setting("ignored_directories")
+    global HIDE_PANEL; HIDE_PANEL = effective_setting("hide_panel")
+    global BEFORE_CALLBACK; BEFORE_CALLBACK = effective_setting("before_callback")
+    global AFTER_CALLBACK; AFTER_CALLBACK = effective_setting("after_callback")
     global COMMAND_PREFIX; COMMAND_PREFIX = False
-    global SAVE_ON_RUN; SAVE_ON_RUN = s.get("save_on_run")
-    global SYNTAX; SYNTAX = s.get('syntax')
-    global THEME; THEME = s.get('theme')
-    global TERMINAL_ENCODING; TERMINAL_ENCODING = s.get('terminal_encoding')
+    global SAVE_ON_RUN; SAVE_ON_RUN = effective_setting("save_on_run")
+    global SYNTAX; SYNTAX = effective_setting('syntax')
+    global THEME; THEME = effective_setting('theme')
+    global TERMINAL_ENCODING; TERMINAL_ENCODING = effective_setting('terminal_encoding')
 
-
-    rbenv   = s.get("check_for_rbenv")
-    rvm     = s.get("check_for_rvm")
-    bundler = s.get("check_for_bundler")
-    spring  = s.get("check_for_spring")
-    if rbenv or rvm: self.rbenv_or_rvm(s, rbenv, rvm)
+    rbenv   = effective_setting("check_for_rbenv")
+    rvm     = effective_setting("check_for_rvm")
+    bundler = effective_setting("check_for_bundler")
+    spring  = effective_setting("check_for_spring")
+    if rbenv or rvm: self.rbenv_or_rvm(settings, rbenv, rvm)
     if spring: self.spring_support()
     if bundler: self.bundler_support()
 
