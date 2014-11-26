@@ -78,6 +78,10 @@ Below features can be enabled by editing `RubyTest.sublime-settings`
 - Use Scratch  - test output in new tab
  `"ruby_use_scratch" : true `
 
+- Change default terminal encoding: if you get [Decode error - output not utf-8], change `terminal_encoding` (default terminal encoding in Windows operating systems could be found by running `chcp` command in terminal; if you don't use Windows, you probably don't need this option anyway)
+  `"terminal_encoding": "cp866" // Russian users`
+  `"terminal_encoding": "cp936" // Chinese users`
+
 Note
 ----
 Before reporting an issue be sure to :
@@ -95,34 +99,34 @@ Settings:
     {
       "erb_verify_command": "erb -xT - {file_name} | ruby -c",
       "ruby_verify_command": "ruby -c {file_name}",
-  
+
       "run_ruby_unit_command": "ruby -Itest {relative_path}",
       "run_single_ruby_unit_command": "ruby -Itest {relative_path} -n '{test_name}'",
-  
+
       "run_cucumber_command": "cucumber {relative_path}",
       "run_single_cucumber_command": "cucumber {relative_path} -l{line_number}",
-  
+
       "run_rspec_command": "rspec {relative_path}",
       "run_single_rspec_command": "rspec {relative_path} -l{line_number}",
-  
+
       "ruby_unit_folder": "test",
       "ruby_cucumber_folder": "features",
       "ruby_rspec_folder": "spec",
-  
+
       "check_for_rbenv": false,
       "check_for_rvm": false,
       "check_for_bundler": false,
       "check_for_spring": false,
-  
+
       "ruby_use_scratch" : false,
       "save_on_run": false,
       "ignored_directories": [".git", "vendor", "tmp"],
-  
+
       "hide_panel": false,
-  
+
       "before_callback": "",
       "after_callback": "",
-  
+
       "theme": "Packages/RubyTest/TestConsole.hidden-tmTheme",
       "syntax": "Packages/RubyTest/TestConsole.tmLanguage"
     }

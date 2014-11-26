@@ -30,6 +30,8 @@
   "after_callback": "",
 
   "theme": "Packages/RubyTest/TestConsole.hidden-tmTheme",
-  "syntax": "Packages/RubyTest/TestConsole.tmLanguage"
+  "syntax": "Packages/RubyTest/TestConsole.tmLanguage",
+
+  "terminal_encoding": "utf-8"
 
 }
