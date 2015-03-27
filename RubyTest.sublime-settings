@@ -15,10 +15,15 @@
   "ruby_cucumber_folder": "features",
   "ruby_rspec_folder": "spec",
 
+  "rspec_command_env": "",
+
   "check_for_rbenv": false,
   "check_for_rvm": false,
   "check_for_bundler": false,
   "check_for_spring": false,
+
+  // use spring even if it's not in Gemfile
+  "force_spring": false,
 
   "ruby_use_scratch" : false,
   "save_on_run": false,

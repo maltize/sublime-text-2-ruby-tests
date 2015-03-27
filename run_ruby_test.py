@@ -130,23 +130,50 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     global BEFORE_CALLBACK; BEFORE_CALLBACK = s.get("before_callback")
     global AFTER_CALLBACK; AFTER_CALLBACK = s.get("after_callback")
     global COMMAND_PREFIX; COMMAND_PREFIX = False
+    global COMMAND_ENV; COMMAND_ENV = s.get("rspec_command_env")
     global SAVE_ON_RUN; SAVE_ON_RUN = s.get("save_on_run")
     global SYNTAX; SYNTAX = s.get('syntax')
     global THEME; THEME = s.get('theme')
     global TERMINAL_ENCODING; TERMINAL_ENCODING = s.get('terminal_encoding')
 
-
     rbenv   = s.get("check_for_rbenv")
     rvm     = s.get("check_for_rvm")
     bundler = s.get("check_for_bundler")
-    spring  = s.get("check_for_spring")
+
+    check_spring = s.get("check_for_spring")
+    force_spring = s.get("force_spring")
+
+    gemfile = self.gemfile_path()
+    gemfile_has_spring = self.has_gemfile_spring(gemfile)
+    spring = (check_spring and gemfile_has_spring) or force_spring
+
     if rbenv or rvm: self.rbenv_or_rvm(s, rbenv, rvm)
+    if bundler: self.bundler_support(gemfile)
     if spring: self.spring_support()
-    if bundler: self.bundler_support()
+
+  def gemfile_path(self):
+    project_root = self.window().project_data()['folders'][0]['path']
+    if not os.path.isdir(project_root):
+      s = sublime.load_settings("RubyTest.last-run")
+      project_root = s.get("last_test_working_dir")
+
+    return project_root + '/Gemfile'
+
+  def has_gemfile_spring(self, gemfile):
+    if gemfile:
+      return open(gemfile, 'r').read().find('spring') > 0
 
   def spring_support(self):
     global COMMAND_PREFIX
-    COMMAND_PREFIX = COMMAND_PREFIX + " spring "
+    COMMAND_PREFIX = COMMAND_PREFIX + " spring"
+
+  def bundler_support(self, gemfile):
+    global COMMAND_PREFIX
+    if not COMMAND_PREFIX:
+      COMMAND_PREFIX = ""
+
+    if gemfile and os.path.isfile(gemfile):
+      COMMAND_PREFIX =  COMMAND_PREFIX + " bundle exec"
 
   def rbenv_or_rvm(self, s, rbenv, rvm):
     which = os.popen('which rbenv').read().split('\n')[0]
@@ -163,20 +190,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     elif rvm and self.is_executable(rvm_cmd):
       COMMAND_PREFIX = rvm_cmd + ' -S'
 
-  def bundler_support(self):
-    project_root = self.file_type(None, False).find_project_root()
-    if not os.path.isdir(project_root):
-      s = sublime.load_settings("RubyTest.last-run")
-      project_root = s.get("last_test_working_dir")
-
-    gemfile_path = project_root + '/Gemfile'
-
-    global COMMAND_PREFIX
-    if not COMMAND_PREFIX:
-      COMMAND_PREFIX = ""
-
-    if os.path.isfile(gemfile_path):
-      COMMAND_PREFIX =  COMMAND_PREFIX + " bundle exec "
+    COMMAND_PREFIX = ' '.join([COMMAND_ENV, COMMAND_PREFIX])
 
   def save_all(self):
     if SAVE_ON_RUN:
@@ -248,6 +262,8 @@ class BaseRubyTask(sublime_plugin.TextCommand):
 
   class AnonymousFile(BaseFile):
     def __init__(self):
+      self.partition_folder = ""
+      self.absolute_path = ""
       True
 
   class RubyFile(BaseFile):

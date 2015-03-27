@@ -113,10 +113,15 @@ Settings:
       "ruby_cucumber_folder": "features",
       "ruby_rspec_folder": "spec",
 
+      "rspec_command_env": "",
+
       "check_for_rbenv": false,
       "check_for_rvm": false,
       "check_for_bundler": false,
       "check_for_spring": false,
+
+      // use spring even if it's not in Gemfile
+      "force_spring": false,
 
       "ruby_use_scratch" : false,
       "save_on_run": false,
@@ -135,6 +140,13 @@ Bundler support:
 ----------------
 
 There is a bundler autodetect feature - based on presence of `Gemfile` in projects root directory. Use `"check_for_bundler": true` settings for it.
+
+Spring support:
+----------------
+
+There is a spring autodetect feature - based on presence of spring gem in `Gemfile` of projects root directory. Use `"check_for_spring": true` settings for it.
+
+If you have installed spring globally you can force that with `"force_spring": true`.
 
 Spin support:
 -------------
