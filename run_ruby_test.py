@@ -314,19 +314,19 @@ class BaseRubyTask(sublime_plugin.TextCommand):
       self.load_config()
     file_name = file_name or self.view.file_name()
     if not file_name: return BaseRubyTask.AnonymousFile()
-    if re.search('\w+\_test.rb', file_name):
+    if re.search('\w+\_test\.rb', file_name):
       partition_folder = self.find_partition_folder(file_name, RUBY_UNIT_FOLDER)
       return BaseRubyTask.UnitFile(file_name, partition_folder)
     elif re.search('test\_\w+\.rb', file_name):
       partition_folder = self.find_partition_folder(file_name, RUBY_UNIT_FOLDER)
       return BaseRubyTask.UnitFile(file_name, partition_folder)
-    elif re.search('\w+\_spec.rb', file_name):
+    elif re.search('\w+\_spec\.rb', file_name):
       partition_folder = self.find_partition_folder(file_name, RSPEC_UNIT_FOLDER)
       return BaseRubyTask.RSpecFile(file_name, partition_folder)
     elif re.search('\w+\.feature', file_name):
       partition_folder = self.find_partition_folder(file_name, CUCUMBER_UNIT_FOLDER)
       return BaseRubyTask.CucumberFile(file_name, partition_folder)
-    elif re.search('\w+\_steps.rb', file_name):
+    elif re.search('\w+\_steps\.rb', file_name):
       return BaseRubyTask.CucumberStepsFile(file_name)
     elif re.search('\w+\.rb', file_name):
       return BaseRubyTask.RubyFile(file_name)
