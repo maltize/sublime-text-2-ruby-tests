@@ -68,7 +68,7 @@ Additional Features:
 -------------------
 Below features can be enabled by editing `RubyTest.sublime-settings`
 
-- RVM / RBENV auto detect (thx to @bronson) - feature is disabled by default, but if you enable it then be sure that your settings file is configure to use `bundle exec` (refer to https://github.com/maltize/sublime-text-2-ruby-tests#bundler-support)
+- CHRUBY / RVM / RBENV auto detect (thx to @bronson) - feature is disabled by default, but if you enable it then be sure that your settings file is configure to use `bundle exec` (refer to https://github.com/maltize/sublime-text-2-ruby-tests#bundler-support)
   `"check_for_rbenv": true`
   `"check_for_rvm": true`
 
@@ -113,6 +113,7 @@ Settings:
       "ruby_cucumber_folder": "features",
       "ruby_rspec_folder": "spec",
 
+      "check_for_chruby": false,
       "check_for_rbenv": false,
       "check_for_rvm": false,
       "check_for_bundler": false,
