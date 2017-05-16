@@ -517,8 +517,10 @@ class GenerateTestFile:
   def set_file_name(self, path, current_file):
     if re.search(self.test_path_re(), self.current_file()):
       return re.sub('_test.rb|_spec.rb|.feature', '.rb', current_file)
-    else:
+    elif current_file.endswith('.rb'):
       return current_file.replace('.rb', self.detect_test_type(path))
+    else:
+     return current_file+self.detect_test_type(path)
 
   def detect_test_type(self, path):
     if re.search(RUBY_UNIT_FOLDER, path):
