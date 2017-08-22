@@ -136,11 +136,12 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     global TERMINAL_ENCODING; TERMINAL_ENCODING = s.get('terminal_encoding')
 
 
+    chruby  = s.get("check_for_chruby")
     rbenv   = s.get("check_for_rbenv")
     rvm     = s.get("check_for_rvm")
     bundler = s.get("check_for_bundler")
     spring  = s.get("check_for_spring")
-    if rbenv or rvm: self.rbenv_or_rvm(s, rbenv, rvm)
+    if chruby or rbenv or rvm: self.chruby_or_rbenv_or_rvm(s, chruby, rbenv, rvm)
     if spring: self.spring_support()
     if bundler: self.bundler_support()
 
@@ -148,17 +149,22 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     global COMMAND_PREFIX
     COMMAND_PREFIX = COMMAND_PREFIX + " spring "
 
-  def rbenv_or_rvm(self, s, rbenv, rvm):
-    which = os.popen('which rbenv').read().split('\n')[0]
-    brew = '/usr/local/bin/rbenv'
+  def chruby_or_rbenv_or_rvm(self, s, chruby, rbenv, rvm):
+    chruby_sh = os.path.expanduser('/usr/local/opt/chruby/share/chruby/chruby.sh')
+
+    which_rbenv = os.popen('which rbenv').read().split('\n')[0]
+    brew_rbenv = '/usr/local/bin/rbenv'
     rbenv_cmd = os.path.expanduser('~/.rbenv/bin/rbenv')
+
     rvm_cmd = os.path.expanduser('~/.rvm/bin/rvm-auto-ruby')
 
-    if os.path.isfile(brew): rbenv_cmd = brew
-    elif os.path.isfile(which): rbenv_cmd = which
+    if os.path.isfile(brew_rbenv): rbenv_cmd = brew_rbenv
+    elif os.path.isfile(which_rbenv): rbenv_cmd = which_rbenv
 
     global COMMAND_PREFIX
-    if rbenv and self.is_executable(rbenv_cmd):
+    if chruby and os.path.isfile(chruby_sh):
+      COMMAND_PREFIX = 'source ' + chruby_sh + ' && chruby `[ -f .ruby-version ] && cat .ruby-version || ruby` && '
+    elif rbenv and self.is_executable(rbenv_cmd):
       COMMAND_PREFIX = rbenv_cmd + ' exec'
     elif rvm and self.is_executable(rvm_cmd):
       COMMAND_PREFIX = rvm_cmd + ' -S'
