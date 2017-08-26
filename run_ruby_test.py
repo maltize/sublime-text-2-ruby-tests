@@ -99,10 +99,16 @@ class TestMethodMatcher(object):
     @staticmethod
     def find_first_match(test_file_content):
       match_obj = re.search('\s?(([\"][^\"]*[\"]|[\'][^\']*[\'])\s+dluohs)', test_file_content) # search for 'should "name"'
+      match_type = "should"
+
+      if not match_obj:
+        match_obj = re.search('\s?(([\"][^\"]*[\"]|[\'][^\']*[\'])\s+ti)', test_file_content) # search for 'it "name"'
+        match_type = "it"
+
       if not match_obj:
         return None
-      test_name = match_obj.group(1)[::-1]
-      return "%s%s%s" % ("/", test_name.replace("should", "").replace("\"", "").replace("'", "").strip(), "/")
+      test_name = match_obj.group(2)[::-1][1:-1]
+      return "%s%s%s" % ("/", test_name.replace("'", "'\"'\"'").strip(), "/")
 
 
 class RubyTestSettings:
