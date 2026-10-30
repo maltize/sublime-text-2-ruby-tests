@@ -1,0 +1,66 @@
+{
+  "sublime_build": "4215",
+  "results": [
+    {
+      "name": "nested test syntax",
+      "passed": true,
+      "output": "Syntax OK\n[Finished in 160ms]"
+    },
+    {
+      "name": "single test with > in its name",
+      "passed": true,
+      "output": "Run options: -n \"test_sum_>_0\" --seed 33399\n\n# Running:\n\n.\n\nFinished in 0.000299s, 3344.4848 runs/s, 6688.9696 assertions/s.\n\n1 runs, 2 assertions, 0 failures, 0 errors, 0 skips\n[Finished in 209ms]"
+    },
+    {
+      "name": "all tests in nested file",
+      "passed": true,
+      "output": "Run options: --seed 20221\n\n# Running:\n\n..\n\nFinished in 0.000436s, 4587.1553 runs/s, 6880.7330 assertions/s.\n\n2 runs, 3 assertions, 0 failures, 0 errors, 0 skips\n[Finished in 221ms]"
+    },
+    {
+      "name": "standalone test at project root",
+      "passed": true,
+      "output": "Run options: -n test_add --seed 20392\n\n# Running:\n\n.\n\nFinished in 0.000358s, 2793.2966 runs/s, 2793.2966 assertions/s.\n\n1 runs, 1 assertions, 0 failures, 0 errors, 0 skips\n[Finished in 208ms]"
+    },
+    {
+      "name": "rerun from unsaved tab with bundler enabled",
+      "passed": true,
+      "output": "Run options: -n test_add --seed 8871\n\n# Running:\n\n.\n\nFinished in 0.000321s, 3115.2659 runs/s, 3115.2659 assertions/s.\n\n1 runs, 1 assertions, 0 failures, 0 errors, 0 skips\n[Finished in 229ms]"
+    },
+    {
+      "name": "scratch output",
+      "passed": true,
+      "output": "Run options: --seed 15755\n\n# Running:\n\n..\n\nFinished in 0.000459s, 4357.2985 runs/s, 6535.9477 assertions/s.\n\n2 runs, 3 assertions, 0 failures, 0 errors, 0 skips\n[Finished in 215ms]"
+    },
+    {
+      "name": "extract variable through editor edit token",
+      "passed": true
+    },
+    {
+      "name": "code/test switching both directions",
+      "passed": true
+    },
+    {
+      "name": "horizontal split and existing layout preserved",
+      "passed": true
+    },
+    {
+      "name": "panel toggle and scroll to top",
+      "passed": true
+    },
+    {
+      "name": "default Rake project suite from source",
+      "passed": true,
+      "output": "Run options: --seed 46230\n\n# Running:\n\n..\n\nFinished in 0.000322s, 6211.1777 runs/s, 9316.7666 assertions/s.\n\n2 runs, 3 assertions, 0 failures, 0 errors, 0 skips\n[Finished in 356ms]"
+    },
+    {
+      "name": "explicit environment reaches Ruby",
+      "passed": true,
+      "output": "available\n[Finished in 165ms]"
+    },
+    {
+      "name": "project suite command and process cancellation",
+      "passed": true,
+      "output": "rubytest_started\n\n[Cancelled]"
+    }
+  ]
+}

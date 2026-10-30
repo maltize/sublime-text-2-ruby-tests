@@ -21,7 +21,15 @@
             "caption":"-"
           },
           {
-            "caption":"Show test panel",
+            "caption":"Run project test suite",
+            "command":"run_ruby_test_suite"
+          },
+          {
+            "caption":"Cancel running tests",
+            "command":"cancel_ruby_test"
+          },
+          {
+            "caption":"Toggle test panel",
             "command":"show_test_panel"
           },
           {
@@ -78,14 +86,14 @@
               {
                 "command":"open_file",
                 "args":{
-                  "file":"${packages}/RubyTest/Default.sublime-keymap"
+                  "file":"${packages}/RubyTest/Default ($platform).sublime-keymap"
                 },
                 "caption":"Key Bindings – Default"
               },
               {
                 "command":"open_file",
                 "args":{
-                  "file":"${packages}/RubyTest/Default (Windows).sublime-keymap",
+                  "file":"${packages}/User/Default (Windows).sublime-keymap",
                   "platform":"Windows"
                 },
                 "caption":"Key Bindings – User"
@@ -93,7 +101,7 @@
               {
                 "command":"open_file",
                 "args":{
-                  "file":"${packages}/RubyTest/Default (OSX).sublime-keymap",
+                  "file":"${packages}/User/Default (OSX).sublime-keymap",
                   "platform":"OSX"
                 },
                 "caption":"Key Bindings – User"
@@ -101,7 +109,7 @@
               {
                 "command":"open_file",
                 "args":{
-                  "file":"${packages}/RubyTest/Default (Linux).sublime-keymap",
+                  "file":"${packages}/User/Default (Linux).sublime-keymap",
                   "platform":"Linux"
                 },
                 "caption":"Key Bindings – User"

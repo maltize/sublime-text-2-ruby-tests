@@ -8,5 +8,9 @@
   { "caption": "RubyTest: Generate Rails Model", "command": "ruby_rails_generate", "args" : {"type" : "model"} },
   { "caption": "RubyTest: Generate Rails Controller", "command": "ruby_rails_generate", "args" : {"type" : "controller"} },
   { "caption": "RubyTest: Extract Local Variable", "command": "ruby_extract_variable" },
-  { "caption": "RubyTest: Switch between code and test", "command": "switch_between_code_and_test", "args": {"split_view": false} }
+  { "caption": "RubyTest: Switch between code and test", "command": "switch_between_code_and_test", "args": {"split_view": false} },
+  { "caption": "RubyTest: Run Project Test Suite", "command": "run_ruby_test_suite" },
+  { "caption": "RubyTest: Cancel Running Tests", "command": "cancel_ruby_test" },
+  { "caption": "RubyTest: Scroll Output to Top", "command": "scroll_ruby_test_output_to_top" },
+  { "caption": "RubyTest: Switch between code and test in split view", "command": "switch_between_code_and_test", "args": {"split_view": true} }
 ]
