@@ -11,13 +11,15 @@ import sublime_plugin
 
 
 class EditorSmoke:
-    def __init__(self, root):
+    def __init__(self, root, use_rvm=False):
         self.root = root
         self.window = sublime.active_window()
         self.settings = sublime.load_settings('RubyTest.sublime-settings')
         with open(os.path.join(root, 'RubyTest.sublime-settings')) as source:
             self.defaults = json.load(source)
         self.backup = {key: self.settings.get(key) for key in self.defaults if self.settings.has(key)}
+        self.use_rvm = use_rvm
+        self.defaults['check_for_rvm'] = use_rvm
         self.results = []
         self.result_path = os.path.join(tempfile.gettempdir(), 'rubytest-editor-results.json')
         self.window.set_project_data({'folders': [{'path': os.path.join(root, 'examples')}]})
@@ -200,13 +202,13 @@ class EditorSmoke:
         sublime.save_settings('RubyTest.last-run')
         self.window.set_layout(self.original_layout)
         with open(self.result_path, 'w') as output:
-            json.dump({'sublime_build': sublime.version(), 'results': self.results}, output, indent=2)
+            json.dump({'sublime_build': sublime.version(), 'check_for_rvm': self.use_rvm, 'results': self.results}, output, indent=2)
         print('RubyTest editor results: ' + self.result_path)
 
 
-def run(root):
+def run(root, use_rvm=False):
     global smoke
     sublime_plugin.reload_plugin('RubyTest.run_ruby_test')
-    smoke = EditorSmoke(root)
+    smoke = EditorSmoke(root, use_rvm=use_rvm)
     # Command registration is delivered after reload_plugin returns to the loop.
     sublime.set_timeout(smoke.next, 250)

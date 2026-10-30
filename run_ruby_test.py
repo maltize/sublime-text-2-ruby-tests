@@ -157,6 +157,7 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     s = sublime.load_settings("RubyTest.sublime-settings")
     global COMMAND_PREFIX
     COMMAND_PREFIX = ""
+    self.rvm_auto_ruby = None
     chruby  = s.get("check_for_chruby")
     rbenv   = s.get("check_for_rbenv")
     rvm     = s.get("check_for_rvm")
@@ -188,7 +189,8 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     elif rbenv and self.is_executable(rbenv_cmd):
       COMMAND_PREFIX = rbenv_cmd + ' exec'
     elif rvm and self.is_executable(rvm_cmd):
-      COMMAND_PREFIX = rvm_cmd + ' -S'
+      self.rvm_auto_ruby = rvm_cmd
+      COMMAND_PREFIX = quote_argument(rvm_cmd) + ' -S'
 
   def bundler_support(self, project_root):
     gemfile_path = os.path.join(project_root, 'Gemfile')
@@ -227,7 +229,14 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     if AFTER_CALLBACK:
       command += " ; " + AFTER_CALLBACK
     if COMMAND_PREFIX:
-      command = COMMAND_PREFIX + ' ' + command
+      ruby_command = re.match(r'^\s*ruby(?=\s|$)', command)
+      if (self.rvm_auto_ruby and ruby_command and
+          COMMAND_PREFIX == quote_argument(self.rvm_auto_ruby) + ' -S'):
+        # rvm-auto-ruby already execs Ruby. "-S ruby" would make Ruby parse
+        # its own native executable as a Ruby script.
+        command = quote_argument(self.rvm_auto_ruby) + command[ruby_command.end():]
+      else:
+        command = COMMAND_PREFIX + ' ' + command
     options = {
       "working_dir": working_dir,
       "file_regex": r"([^ ]*\.rb):?(\d*)",

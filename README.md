@@ -1,9 +1,10 @@
 # RubyTest for Sublime Text
 
 Run Ruby Test::Unit/Minitest tests, RSpec examples, and Cucumber scenarios from
-Sublime Text, and switch between source and test files. Works with Sublime Text
-3 and 4; the legacy Sublime Text 2 execution path is retained but is not tested
-in the editor. See [validation](docs/validation.md) for the tested versions.
+Sublime Text, and switch between source and test files. Targets Sublime Text
+3 and 4. Editor validation currently covers Sublime Text 4; the legacy Sublime
+Text 2 execution path is retained. See [validation](docs/validation.md) for
+tested versions and limitations.
 
 ## Installation and development
 
@@ -150,6 +151,24 @@ Bundler checks the working directory's Gemfile. Do not also put `bundle exec`
 in templates when automatic Bundler support is enabled. Ruby managers can also
 be initialized through your shell's PATH; detection is optional.
 
+For RVM, enable `"check_for_rvm": true` and leave the command templates starting
+with `ruby`, `rspec`, or `cucumber`. RubyTest adds the RVM wrapper automatically.
+For example:
+
+```json
+{
+  "check_for_rvm": true,
+  "check_for_bundler": true
+}
+```
+
+An error pointing at `.../bin/ruby:1` with bytes such as `0xCF`, `0xFA`, `0xED`,
+and `0xFE` means Ruby was asked to parse its own native executable. Older
+RubyTest versions constructed `rvm-auto-ruby -S ruby ...` for unit tests and
+syntax checks. The plugin now calls `rvm-auto-ruby ...` directly for those
+commands, while keeping `-S` for Ruby scripts such as `rspec`, `rake`, or `bundle`.
+Do not add an RVM wrapper to custom templates as well as enabling auto-detection.
+
 For Zeus, start `zeus start` in a terminal, then use:
 
 ```json
@@ -195,6 +214,21 @@ normal RubyTest output panel does not provide terminal input.
 
 Install Minitest and Rake if your Ruby does not already provide them, then open
 [examples/demo.sublime-project](examples/demo.sublime-project) in Sublime.
+
+From the repository root, first check that the selected Ruby can run the demo:
+
+```sh
+ruby --version
+gem install minitest rake --no-document
+cd examples
+ruby -Itest standalone_test.rb -n test_add
+rake test
+```
+
+The standalone command should report one passing test; Rake should report two.
+If these terminal commands fail, check your selected Ruby and gems before
+running them in the editor. With RVM, select your project Ruby using `rvm use`
+before installing the gems.
 
 1. Open `examples/calculator.rb` and switch to its test with Command/Ctrl+period.
 2. Put the caret in `test 'sum > 0'` and run **RubyTest: Run Single Test**: one test passes.

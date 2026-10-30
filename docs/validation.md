@@ -11,9 +11,12 @@ Ruby 4.0.5 and Minitest 6.0.6 ran the demo tests.
 python3 -W error -m unittest discover -s tests -v
 ```
 
-44 checks cover detection, standalone and nested paths, Windows separators and
+48 checks cover detection, standalone and nested paths, Windows separators and
 drives, literal folder names, duplicate filenames, test selection, command
 routing, Bundler reruns, panels, splits, scratch buffers, and editor edit tokens.
+RVM regressions cover direct Ruby commands, syntax flags, RSpec script lookup,
+and Bundler commands. They check the generated command without requiring RVM
+on the CI runner.
 Four checks run generated commands through the real shell and Ruby, including
 paths containing spaces, `test_helper` loading, and a test name containing `>`.
 Ruby and Minitest are required for those four; install Minitest if necessary.
@@ -61,6 +64,21 @@ Results are written to `rubytest-editor-results.json` in Python's temporary
 directory. [Recorded results](editor-results.json) are included. The script uses
 explicit exceptions because Sublime's optimized Python host can disable `assert`
 statements.
+
+The original run used the repository defaults, including `check_for_rvm: false`.
+After a user reported that `rvm-auto-ruby -S ruby ...` parsed the Ruby binary,
+the failure was reproduced with the local RVM installation and fixed. Repeat
+the same editor checks with RVM enabled using:
+
+```python
+smoke['run']('/absolute/path/to/RubyTest', use_rvm=True)
+```
+
+This requires an executable `~/.rvm/bin/rvm-auto-ruby` and the demo gems in the
+Ruby environment it selects. All 13 checks passed in this RVM run;
+[recorded RVM results](editor-rvm-results.json) are included. The same standalone
+test also passed with the existing User settings unchanged. The settings are
+restored afterward.
 
 The editor checks ran on macOS. Windows command quoting is exercised in CI;
 Windows editor cancellation delegates to Sublime's native process-tree handling

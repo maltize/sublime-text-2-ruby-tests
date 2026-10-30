@@ -235,6 +235,35 @@ class PluginTests(unittest.TestCase):
         self.task.command_prefix(str(ROOT))
         self.assertEqual(plugin.COMMAND_PREFIX.strip(), 'spring')
 
+    def rvm_command(self, command, bundled=False):
+        self.settings['check_for_rvm'] = True
+        self.settings['check_for_bundler'] = bundled
+        self.task.load_config()
+        self.task.display_results = Mock()
+        with patch.object(self.task, 'is_executable', return_value=True), \
+                patch.object(plugin.os, 'popen') as popen, \
+                patch.object(plugin.os.path, 'isfile', side_effect=lambda path: bundled and path.endswith('Gemfile')):
+            popen.return_value.read.return_value = ''
+            self.task.run_shell_command(command, str(ROOT))
+        return self.window.run_command.call_args.args[1]['shell_cmd']
+
+    def test_rvm_direct_ruby_does_not_parse_the_ruby_executable(self):
+        command = self.rvm_command("ruby -Itest standalone_test.rb -n 'test_add'")
+        self.assertEqual(command, plugin.quote_argument(os.path.expanduser('~/.rvm/bin/rvm-auto-ruby')) + " -Itest standalone_test.rb -n 'test_add'")
+
+    def test_rvm_syntax_check_keeps_interpreter_flags(self):
+        command = self.rvm_command('  ruby -c "test/calculator_test.rb"')
+        self.assertTrue(command.endswith(' -c "test/calculator_test.rb"'))
+        self.assertNotIn(' -S ruby', command)
+
+    def test_rvm_uses_script_search_for_rspec(self):
+        command = self.rvm_command('rspec "spec/item_spec.rb"')
+        self.assertTrue(command.endswith(' -S rspec "spec/item_spec.rb"'))
+
+    def test_rvm_bundler_keeps_ruby_as_bundles_command(self):
+        command = self.rvm_command('ruby -Itest test/item_test.rb', bundled=True)
+        self.assertTrue(command.endswith(' -S bundle exec  ruby -Itest test/item_test.rb'))
+
     def test_cancel_uses_editor_process_tree_cancellation(self):
         plugin.CancelRubyTest(self.view).run(None)
         self.window.run_command.assert_called_once_with('exec', {'kill': True})
