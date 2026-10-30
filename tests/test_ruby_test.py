@@ -240,10 +240,9 @@ class PluginTests(unittest.TestCase):
         self.settings['check_for_bundler'] = bundled
         self.task.load_config()
         self.task.display_results = Mock()
-        with patch.object(self.task, 'is_executable', return_value=True), \
-                patch.object(plugin.os, 'popen') as popen, \
+        rvm = os.path.expanduser('~/.rvm/bin/rvm-auto-ruby')
+        with patch.object(self.task, 'is_executable', side_effect=lambda path: path == rvm), \
                 patch.object(plugin.os.path, 'isfile', side_effect=lambda path: bundled and path.endswith('Gemfile')):
-            popen.return_value.read.return_value = ''
             self.task.run_shell_command(command, str(ROOT))
         return self.window.run_command.call_args.args[1]['shell_cmd']
 
@@ -263,6 +262,60 @@ class PluginTests(unittest.TestCase):
     def test_rvm_bundler_keeps_ruby_as_bundles_command(self):
         command = self.rvm_command('ruby -Itest test/item_test.rb', bundled=True)
         self.assertTrue(command.endswith(' -S bundle exec  ruby -Itest test/item_test.rb'))
+
+    def test_bundler_precedes_spring(self):
+        self.settings['check_for_spring'] = True
+        command = self.rvm_command('rspec spec/item_spec.rb', bundled=True)
+        self.assertTrue(command.endswith(' -S bundle exec  spring  rspec spec/item_spec.rb'))
+
+    def test_executable_resolution_prefers_path_and_skips_nonexecutables(self):
+        with tempfile.TemporaryDirectory() as root:
+            first = Path(root, 'first')
+            second = Path(root, 'second')
+            first.mkdir()
+            second.mkdir()
+            (first / 'rbenv').write_text('not executable')
+            executable = second / 'rbenv'
+            executable.write_text('#!/bin/sh\n')
+            executable.chmod(0o755)
+            with patch.dict(plugin.os.environ, {'PATH': str(first) + os.pathsep + str(second)}):
+                self.assertEqual(self.task.find_executable('rbenv', ['/unrelated/rbenv']), str(executable))
+
+    def test_system_wide_rvm_fallback(self):
+        self.settings['check_for_rvm'] = True
+        with patch.dict(plugin.os.environ, {'PATH': '', 'rvm_path': ''}), \
+                patch.object(self.task, 'is_executable', side_effect=lambda path: path == '/usr/local/rvm/bin/rvm-auto-ruby'):
+            self.task.command_prefix(str(ROOT))
+        self.assertEqual(self.task.rvm_auto_ruby, '/usr/local/rvm/bin/rvm-auto-ruby')
+
+    def test_rvm_custom_install_root(self):
+        self.settings['check_for_rvm'] = True
+        with patch.dict(plugin.os.environ, {'PATH': '', 'rvm_path': '/custom rvm'}), \
+                patch.object(self.task, 'is_executable', side_effect=lambda path: path == '/custom rvm/bin/rvm-auto-ruby'):
+            self.task.command_prefix(str(ROOT))
+        self.assertEqual(plugin.COMMAND_PREFIX, "'/custom rvm/bin/rvm-auto-ruby' -S")
+
+    def test_homebrew_rbenv_without_shell_lookup(self):
+        self.settings['check_for_rbenv'] = True
+        with patch.dict(plugin.os.environ, {'PATH': ''}), \
+                patch.object(self.task, 'is_executable', side_effect=lambda path: path == '/opt/homebrew/bin/rbenv'), \
+                patch.object(plugin.os, 'popen') as popen:
+            self.task.command_prefix(str(ROOT))
+            popen.assert_not_called()
+        self.assertEqual(plugin.COMMAND_PREFIX, "'/opt/homebrew/bin/rbenv' exec")
+
+    def test_chruby_script_locations_include_both_homebrew_prefixes(self):
+        for location in ('/opt/homebrew/opt/chruby/share/chruby/chruby.sh',
+                         '/usr/local/opt/chruby/share/chruby/chruby.sh'):
+            with patch.object(plugin.os.path, 'isfile', side_effect=lambda path: path == location):
+                self.assertEqual(self.task.chruby_script(), location)
+
+    def test_monorepo_spec_uses_component_root_without_command_rewriting(self):
+        self.window.folders.return_value = ['/workspace']
+        self.settings['check_for_bundler'] = True
+        file = self.task.file_type('/workspace/analyzer/spec/lib/item_spec.rb')
+        self.assertEqual(file.get_project_root(), '/workspace/analyzer')
+        self.assertEqual(file.run_all_tests_command(), 'rspec "spec/lib/item_spec.rb"')
 
     def test_cancel_uses_editor_process_tree_cancellation(self):
         plugin.CancelRubyTest(self.view).run(None)

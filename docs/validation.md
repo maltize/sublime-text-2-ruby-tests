@@ -11,16 +11,21 @@ Ruby 4.0.5 and Minitest 6.0.6 ran the demo tests.
 python3 -W error -m unittest discover -s tests -v
 ```
 
-48 checks cover detection, standalone and nested paths, Windows separators and
+59 checks cover detection, standalone and nested paths, Windows separators and
 drives, literal folder names, duplicate filenames, test selection, command
 routing, Bundler reruns, panels, splits, scratch buffers, and editor edit tokens.
 RVM regressions cover direct Ruby commands, syntax flags, RSpec script lookup,
 and Bundler commands. They check the generated command without requiring RVM
-on the CI runner.
+on the CI runner. Further checks cover executable discovery, Homebrew/system
+install locations, monorepo spec roots, and Bundler/Spring ordering.
 Four checks run generated commands through the real shell and Ruby, including
 paths containing spaces, `test_helper` loading, and a test name containing `>`.
 Ruby and Minitest are required for those four; install Minitest if necessary.
-They are skipped only when the Ruby executable is absent.
+They are skipped only when the Ruby executable is absent. Four additional
+Unix/Bash integration checks use executable stand-ins to exercise the full
+RVM → Bundler → Spring chain and chruby version selection. These verify command
+composition; they do not substitute for running a real Rails/Spring server or
+every supported manager installation.
 
 The source-compilation test reads and compiles `run_ruby_test.py` directly under
 `warnings.simplefilter('error')`, so `.pyc` files cannot hide invalid escapes.

@@ -1,5 +1,10 @@
 # Maintenance review — 2026-10-30
 
+This is the original issue-review snapshot. The follow-up review adopted the
+[support policy](support.md), reviewed the [four remaining PRs](pull-request-review.md),
+and closed the remaining historical reports and declined feature requests with
+individual explanations. See [the follow-up](maintenance-followup.md).
+
 Reviewed all 55 open issues and their discussions. The changes focus on
 reproducible plugin defects and concrete usage gaps. Original environments
 that are unavailable are not treated as validated fixes.

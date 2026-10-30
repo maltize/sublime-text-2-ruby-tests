@@ -164,33 +164,54 @@ class BaseRubyTask(sublime_plugin.TextCommand):
     bundler = s.get("check_for_bundler")
     spring  = s.get("check_for_spring")
     if chruby or rbenv or rvm: self.chruby_or_rbenv_or_rvm(s, chruby, rbenv, rvm)
-    if spring: self.spring_support()
     if bundler: self.bundler_support(working_dir)
+    if spring: self.spring_support()
 
   def spring_support(self):
     global COMMAND_PREFIX
     COMMAND_PREFIX = COMMAND_PREFIX + " spring "
 
   def chruby_or_rbenv_or_rvm(self, s, chruby, rbenv, rvm):
-    chruby_sh = os.path.expanduser('/usr/local/opt/chruby/share/chruby/chruby.sh')
-
-    which_rbenv = os.popen('which rbenv').read().split('\n')[0]
-    brew_rbenv = '/usr/local/bin/rbenv'
-    rbenv_cmd = os.path.expanduser('~/.rbenv/bin/rbenv')
-
-    rvm_cmd = os.path.expanduser('~/.rvm/bin/rvm-auto-ruby')
-
-    if os.path.isfile(brew_rbenv): rbenv_cmd = brew_rbenv
-    elif os.path.isfile(which_rbenv): rbenv_cmd = which_rbenv
-
     global COMMAND_PREFIX
-    if chruby and os.path.isfile(chruby_sh):
-      COMMAND_PREFIX = 'source ' + chruby_sh + ' && chruby `[ -f .ruby-version ] && cat .ruby-version || ruby` && '
-    elif rbenv and self.is_executable(rbenv_cmd):
-      COMMAND_PREFIX = rbenv_cmd + ' exec'
-    elif rvm and self.is_executable(rvm_cmd):
-      self.rvm_auto_ruby = rvm_cmd
-      COMMAND_PREFIX = quote_argument(rvm_cmd) + ' -S'
+    if chruby:
+      script = self.chruby_script()
+      if script:
+        COMMAND_PREFIX = ('source ' + quote_argument(script) +
+                          ' && { if [ -f .ruby-version ]; then chruby "$(cat .ruby-version)"; fi; } && ')
+        return
+    if rbenv:
+      executable = self.find_executable('rbenv', ('~/.rbenv/bin/rbenv',
+                                       '/opt/homebrew/bin/rbenv', '/usr/local/bin/rbenv'))
+      if executable:
+        COMMAND_PREFIX = quote_argument(executable) + ' exec'
+        return
+    if rvm:
+      candidates = ['~/.rvm/bin/rvm-auto-ruby', '/usr/local/rvm/bin/rvm-auto-ruby',
+                    '/usr/share/rvm/bin/rvm-auto-ruby']
+      if os.environ.get('rvm_path'):
+        candidates.insert(0, os.path.join(os.environ['rvm_path'], 'bin', 'rvm-auto-ruby'))
+      executable = self.find_executable('rvm-auto-ruby', candidates)
+      if executable:
+        self.rvm_auto_ruby = executable
+        COMMAND_PREFIX = quote_argument(executable) + ' -S'
+
+  def chruby_script(self):
+    for script in ('/opt/homebrew/opt/chruby/share/chruby/chruby.sh',
+                   '/usr/local/opt/chruby/share/chruby/chruby.sh',
+                   '/usr/local/share/chruby/chruby.sh', '/usr/share/chruby/chruby.sh'):
+      if os.path.isfile(script):
+        return script
+    return None
+
+  def find_executable(self, name, fallback_paths):
+    # Resolve literal executable paths without starting a shell or accepting
+    # a shell function printed by `which`. PATH takes precedence over fallbacks.
+    paths = [os.path.join(folder, name) for folder in os.environ.get('PATH', '').split(os.pathsep) if folder]
+    for path in paths + list(fallback_paths):
+      path = os.path.expanduser(path)
+      if self.is_executable(path):
+        return path
+    return None
 
   def bundler_support(self, project_root):
     gemfile_path = os.path.join(project_root, 'Gemfile')

@@ -2,9 +2,9 @@
 
 Run Ruby Test::Unit/Minitest tests, RSpec examples, and Cucumber scenarios from
 Sublime Text, and switch between source and test files. Targets Sublime Text
-3 and 4. Editor validation currently covers Sublime Text 4; the legacy Sublime
-Text 2 execution path is retained. See [validation](docs/validation.md) for
-tested versions and limitations.
+3 and 4. Editor validation currently covers Sublime Text 4. Sublime Text 2 and
+historical Ruby 1.8/1.9 configurations are no longer supported. See the
+[support policy](docs/support.md) and [validation](docs/validation.md).
 
 ## Installation and development
 
@@ -55,7 +55,7 @@ process. **Scroll Output to Top** returns to the start of the output without a m
 
 Single-test detection supports `def test_name`, Rails-style `test "name" do`, and
 Shoulda `should "name" do`. Put the caret on the declaration or inside its body.
-Minitest::Spec's `it` blocks are not yet supported for single-test selection.
+Minitest::Spec's `it` blocks are not supported for single-test selection.
 RSpec and Cucumber use the caret's line number. Save changes before running, or
 enable `"save_on_run": true`; syntax verification checks the saved file.
 
@@ -151,6 +151,19 @@ Bundler checks the working directory's Gemfile. Do not also put `bundle exec`
 in templates when automatic Bundler support is enabled. Ruby managers can also
 be initialized through your shell's PATH; detection is optional.
 
+Executable discovery checks `PATH` first, then conventional install locations.
+RVM supports per-user installs, `rvm_path`, and system installs under
+`/usr/local/rvm` or `/usr/share/rvm`. rbenv includes Intel and Apple Silicon
+Homebrew locations. chruby sources its initialization script and reads
+`.ruby-version` from the command's working directory; without that file, it
+keeps the current Ruby. A requested but unavailable chruby version stops the
+command instead of silently running a different Ruby.
+
+When Bundler and Spring are both enabled, the order is the Ruby manager,
+`bundle exec`, `spring`, then your command. For example, `bundle exec spring
+rspec "spec/item_spec.rb"`. The project's bundle must provide the selected
+runner and any Spring command extensions it needs.
+
 For RVM, enable `"check_for_rvm": true` and leave the command templates starting
 with `ruby`, `rspec`, or `cucumber`. RubyTest adds the RVM wrapper automatically.
 For example:
@@ -169,7 +182,9 @@ syntax checks. The plugin now calls `rvm-auto-ruby ...` directly for those
 commands, while keeping `-S` for Ruby scripts such as `rspec`, `rake`, or `bundle`.
 Do not add an RVM wrapper to custom templates as well as enabling auto-detection.
 
-For Zeus, start `zeus start` in a terminal, then use:
+Custom runners can be selected through command templates. The following Zeus
+example is retained for existing users; historical Zeus/Spork installations
+are outside the maintained support scope. Start `zeus start` separately, then use:
 
 ```json
 {
@@ -209,6 +224,34 @@ The TestConsole syntax colors plain test output; it does not interpret terminal
 ANSI sequences. Prefer `--no-color` in RSpec/Cucumber commands and disable color
 in other reporters. Interactive debuggers such as Pry require a terminal; the
 normal RubyTest output panel does not provide terminal input.
+
+Additional output such as `[Finished]`, command/PATH diagnostics, and RSpec's
+failed-example summary comes from Sublime's build runner or the test framework.
+RubyTest does not filter it. HTML reports, terminal/Pry integration, ANSI
+rendering, and coloring arbitrary log files are outside the project's scope.
+
+### Helper files and nested projects
+
+For `cannot load such file -- test_helper`, verify that the test runs from the
+directory containing `test/`. The default `ruby -Itest` adds that directory to
+Ruby's load path. For RSpec, use the `rspec` runner from the intended bundle;
+`spec_helper` must exist under `spec/`. Check the output panel's `[dir: ...]`
+when a command fails. In a monorepo, `analyzer/spec/item_spec.rb` runs from
+`analyzer`, even when the outer repository is open. No `internal_dir` setting
+or `cd` callback is needed.
+
+If a Cucumber feature in a subfolder cannot find shared step definitions, make
+the load directory explicit in both command templates:
+
+```json
+{
+  "run_cucumber_command": "cucumber \"{relative_path}\" --require features",
+  "run_single_cucumber_command": "cucumber \"{relative_path}:{line_number}\" --require features"
+}
+```
+
+Adjust `features` to your actual step-definition root. `before_callback` runs
+in a separate shell, so a `cd` there does not set the test's working directory.
 
 ## Try the demo
 
